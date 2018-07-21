@@ -305,33 +305,6 @@ public class GuavaTest {
         boolean contains = Ints.contains(array, a);
     }
 
-//    @Test
-//    public void commonTest1() {
-//        long st = System.currentTimeMillis();
-//        for (int j = 0; j < 4; j++) {
-//            System.out.println(System.currentTimeMillis() - st); // 1217
-//            for (int i = 0; i < 100000000; i++) {
-//                HashMap<String, String> map = new HashMap<String, String>() {{
-//                    put("Name", "June");
-//                    put("QQ", "2572073701");
-//                }};
-//            }
-//            System.out.println(System.currentTimeMillis() - st); // 1064
-//        }
-//    }
-//    @Test
-//    public void commonTest2() {
-//        long st = System.currentTimeMillis();
-//        for (int j = 0; j < 4; j++) {
-//            System.out.println(System.currentTimeMillis() - st); // 1217
-//            for (int i = 0; i < 100000000; i++) {
-//                HashMap<String, String> map = new HashMap<String, String>();
-//                map.put("Name", "June");
-//                map.put("QQ", "2572073701");
-//            }
-//            System.out.println(System.currentTimeMillis() - st); // 1064
-//        }
-//    }
 
 
 }
