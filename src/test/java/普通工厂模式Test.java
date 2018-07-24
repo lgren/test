@@ -2,6 +2,7 @@ import com.google.common.base.Optional;
 import com.lgren.简单工厂模式.a_普通.SendFactory;
 import com.lgren.简单工厂模式.a_普通.Sender;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 
@@ -46,6 +47,20 @@ public class 普通工厂模式Test {
 
     }
 
+    @Test
+    public void timeTest() {
+        Date date = new Date();
+//        date = DateUtils.setYears(date,2018);
+//        date = DateUtils.setMonths(date,6);
+//        date = DateUtils.setDays(date,21);
+//        date = DateUtils.setHours(date,10);
+//        date = DateUtils.setMinutes(date,31);
+        date = DateUtils.addMinutes(date,-30);
+//        date = DateUtils.addSeconds(date,-1);
+        System.out.println(getInterval(date,"跟进"));
+        System.out.println(DateFormatUtils.format(date,"yyyy-MM-dd HH:mm:ss"));
+        System.out.println(DateFormatUtils.format(new Date(),"yyyy-MM-dd HH:mm:ss"));
+    }
 
     public static String getInterval(Date date, String type) {
         if (date == null) {
@@ -61,10 +76,12 @@ public class 普通工厂模式Test {
         if (second <= 0) {
             second = 0;
         }
-        if (second >= 0 && second <= 30 * 60) {//大于0分钟 小于30分钟
+        if (second >= 0 && second <= 5 * 60) {//大于0分钟 小于5分钟
+            interval = "刚刚";
+        } else if (second > 5 * 60 && second <= 30 * 60) {//大于5分钟 小于30分钟
             long minute = second / 60;
             interval = minute + "分钟前";
-        } else if (second > 30 * 60 && second <= 60 * 60) {//大于30分钟 小于1小时
+        }else if (second > 30 * 60 && second <= 60 * 60) {//大于30分钟 小于1小时
             interval = 30 + "分钟前";
         } else if (second > 60 * 60 && second <= 60 * 60 * 24) {//大于1小时 小于24小时
             long hour = (second / 60) / 60;

@@ -5,6 +5,7 @@ import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.google.common.primitives.Ints;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.Test;
 import pojo.Person;
 
@@ -12,12 +13,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GuavaTest {
-
     /**
      * @Description guava List的测试 Set可以是一模一样的步骤
      * @Author Lgren
@@ -26,19 +25,22 @@ public class GuavaTest {
     @Test
     public void getListTest() {
         //最初始的方式
-        List list = new ArrayList();
+        List<Boolean> list = new ArrayList<>();
         list.add(true);
         list.add(false);
         list.add(false);
+        System.out.println(list);
         //[true, false, false]
 
         //使用集合工具类赋值
-        List list1 = new ArrayList();
-        Collections.addAll(list1, new String[]{"desa", "dsad", "dsas"});
+        List<String> list1 = new ArrayList<>();
+        Collections.addAll(list1, "desa", "dsad", "dsas");
+        System.out.println(list1);
         //[desa, dsad, dsas]
 
         //使用guava的方式
         List<Integer> list2 = Lists.newArrayList(1, 2, 321, 4);
+        System.out.println(list2);
         //[1, 2, 321, 4]
     }
 
@@ -49,7 +51,7 @@ public class GuavaTest {
      *///Set或者List转换成 Map
     @Test
     public void setOrListToMapTest() {
-        Set set = Sets.newHashSet(1, 2, 3, 4);
+        Set<Integer> set = Sets.newHashSet(1, 2, 3, 4);
         Map<Integer, String> get = new HashMap<Integer, String>() {{
             put(1, "one");
             put(2, "two");
@@ -69,12 +71,15 @@ public class GuavaTest {
                 return get.get(integer);
             }
         });
+        System.out.println(map);
 
         //guava方式+java8方式
-        Map map1 = Maps.asMap(set, s -> get.get(s));
+        Map map1 = Maps.asMap(set, get::get);
+        System.out.println(map1);
 
         //java8方式 可以同时编辑key和value命名
-        Map map2 = (Map) set.stream().collect(Collectors.toMap(s -> s, s -> get.get(s)));
+        Map map2 = set.stream().collect(Collectors.toMap(s -> s, get::get));
+        System.out.println(map2);
     }
 
     /**
@@ -85,23 +90,27 @@ public class GuavaTest {
     @Test
     public void getMapTest() {
         //传统普通方式
-        Map map = new HashMap();
+        Map<String, Integer> map = new HashMap<>();
         map.put("key1", 1);
         map.put("key2", 2);
         map.put("key3", 3);
+        System.out.println(map);
 
         //传统略升级版本
-        Map map1 = new HashMap() {{
+        Map<String, Integer> map1 = new HashMap<String, Integer>() {{
             put("key1", 1);
             put("key2", 2);
             put("key3", 3);
         }};
+        System.out.println(map1);
 
         //guava版(最多5对数据)
         Map<String, Integer> map2 = ImmutableMap.of("key1", 1, "key2", 2, "key3", 3);
+        System.out.println(map2);
 
         //guava变版
         Map<String, Integer> map3 = new ImmutableMap.Builder<String, Integer>().put("key1", 1).put("key2", 2).put("key3", 3).build();
+        System.out.println(map3);
     }
 
     /**
@@ -130,6 +139,7 @@ public class GuavaTest {
         map.put("stringListOne", stringListOne);
         map.put("stringListTwo", stringListTwo);
         stringListOne.add("five");//有效的添加
+        System.out.println(map);
         //{stringListOne=[one, two, tree, four, five], stringListTwo=[1, 2, 3, 4]}
     }
 
@@ -143,9 +153,9 @@ public class GuavaTest {
         List<String> list = Lists.newArrayList("aa", "bb", "cc", null);
 
         //传统方式
-        String str = "";
-        for (int i = 0; i < list.size(); i++) {
-            str = str + "-" + list.get(i);
+        StringBuilder str = new StringBuilder("");
+        for (String aList : list) {
+            str.append("-").append(aList);
         }
         System.out.println(str);
         //-aa-bb-cc-null
@@ -171,19 +181,21 @@ public class GuavaTest {
         String str = " 1-2 -3-4  -  - 5-6 ";
 
         //传统方式
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         String[] strList = str.split("-");
-        for (int i = 0; i < strList.length; i++) {
-            String strVar = strList[i].replaceAll(" ", "");
+        for (String aStrList : strList) {
+            String strVar = aStrList.replaceAll(" ", "");
             if (strVar.equals("")) {
                 continue;
             }
             list.add(strVar);
         }
+        System.out.println(list);
         //[1, 2, 3, 4, 5, 6]
 
         //guava方式 omitEmptyStrings:去掉中间为空的部分  "" trimResults:去掉中间空格  " "
         List<String> list1 = Splitter.on("-").omitEmptyStrings().trimResults().splitToList(str);
+        System.out.println(list1);
         //[1, 2, 3, 4, 5, 6]
     }
 
@@ -195,12 +207,13 @@ public class GuavaTest {
     @Test
     public void mapToString() {
         //使用guava方式
-        Map map = new HashMap() {{
+        Map<String, Integer> map = new HashMap<String, Integer>() {{
             put("one", 1);
             put("two", 2);
             put("tree", 3);
         }};
         String resultStr = Joiner.on(",").withKeyValueSeparator("->").join(map);
+        System.out.println(resultStr);
         //one->1,tree->3,two->2
     }
 
@@ -248,6 +261,7 @@ public class GuavaTest {
         Files.write(str.getBytes(), file);//写文件
 
         List<String> stringList = Files.readLines(file, Charsets.UTF_8);//读取文件
+        System.out.println(stringList);
 
         File file1 = new File("D:/test1.txt");
         Files.copy(file, file1);//复制文件
@@ -261,12 +275,13 @@ public class GuavaTest {
     @Test
     public void checkNotNull() {
         Person person = new Person();
-        Person person1 = person == null ? new Person() : person;
+        Person person1 = person;
         //guava方式
         person1 = Preconditions.checkNotNull(person, new Person());//如果person为空则空指针异常
 
         //java8 方式
         person1 = Objects.requireNonNull(person, "person为空");
+
     }
 
     /**
@@ -300,12 +315,32 @@ public class GuavaTest {
                 hasA = true;
             }
         }
+        System.out.println(hasA);
 
         //guava方式
         boolean contains = Ints.contains(array, a);
+        System.out.println(contains);
     }
 
+    @Test
+    public void commonTest() {
+        Optional<Person> person = Optional.ofNullable(getPerson(true));
+//        System.out.println(person.orElse(new Person("Two",new Date())));
 
+//        Optional<String> x =  person.map(p -> p.getRealName());
+//        Optional<String> x1 =  person.flatMap(p -> Optional.ofNullable(p.getRealName()));
+        if (!person.isPresent()) {
+            System.out.println("对象不存在");
+        }
+//        person.orElse("");
+        person.map(Person::getRealName).orElse("名字不能为空");
+        person.map(Person::getRealName);
+
+    }
+
+    private Person getPerson(boolean type) {
+        return type ? new Person("One",new Date()) : null;
+    }
 
 }
 
