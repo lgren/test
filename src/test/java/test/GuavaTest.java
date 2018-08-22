@@ -8,49 +8,51 @@ import com.google.common.primitives.Ints;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.Test;
 import pojo.Person;
+import sun.misc.BASE64Encoder;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
+
 public class GuavaTest {
-    /**
-     * @Description guava List的测试 Set可以是一模一样的步骤
-     * @Author Lgren
-     * @Date 2018/7/20 14:18
-     *///guava List的测试 Set可以是一模一样的步骤
+    private Date nowDate = new Date();
+
     @Test
-    public void getListTest() {
-        //最初始的方式
+    public void guavaList的添加元素测试() {
+        //region 最初始的方式
         List<Boolean> list = new ArrayList<>();
         list.add(true);
         list.add(false);
         list.add(false);
-        System.out.println(list);
-        //[true, false, false]
+        System.out.println(list);//endregion [true, false, false]
 
-        //使用集合工具类赋值
+        //region 使用集合工具类赋值
         List<String> list1 = new ArrayList<>();
         Collections.addAll(list1, "desa", "dsad", "dsas");
-        System.out.println(list1);
-        //[desa, dsad, dsas]
+        System.out.println(list1);//endregion [desa, dsad, dsas]
 
-        //使用guava的方式
+        //region 使用guava的方式
         List<Integer> list2 = Lists.newArrayList(1, 2, 321, 4);
-        System.out.println(list2);
-        //[1, 2, 321, 4]
+        System.out.println(list2);//endregion [1, 2, 321, 4]
+
     }
 
-    /**
-     * @Description Set或者List转换成 Map
-     * @Author Lgren
-     * @Date 2018/7/20 14:58
-     *///Set或者List转换成 Map
     @Test
-    public void setOrListToMapTest() {
+    public void Set或者List转换成Map() {
         Set<Integer> set = Sets.newHashSet(1, 2, 3, 4);
         Map<Integer, String> get = new HashMap<Integer, String>() {{
             put(1, "one");
@@ -59,68 +61,55 @@ public class GuavaTest {
             put(4, "four");
         }};
         //传统方式 --- 太麻烦 跳过
-//        for (Object o : set) {
-//            map = new HashMap();
-//            map.put(o,)
-//        }
 
-        //guava方式
-        Map map = Maps.asMap(set, new Function<Integer, String>() {
+        //region guava方式
+        Map<Integer, String> map = Maps.asMap(set, new Function<Integer, String>() {
             @Override
             public String apply(Integer integer) {
                 return get.get(integer);
             }
         });
-        System.out.println(map);
+        System.out.println(map);//endregion
 
-        //guava方式+java8方式
-        Map map1 = Maps.asMap(set, get::get);
-        System.out.println(map1);
+        //region guava方式+java8方式
+        Map<Integer, Object> map1 = Maps.asMap(set, get::get);
+        System.out.println(map1);//endregion
 
-        //java8方式 可以同时编辑key和value命名
+        //region java8方式 可以同时编辑key和value命名
         Map map2 = set.stream().collect(Collectors.toMap(s -> s, get::get));
-        System.out.println(map2);
+        System.out.println(map2);//endregion
     }
 
-    /**
-     * @Description Map 的创建
-     * @Author Lgren
-     * @Date 2018/7/20 15:44
-     *///Map 的创建
     @Test
-    public void getMapTest() {
-        //传统普通方式
+    public void Map的创建() {
+        //region 传统普通方式 推荐!!!
         Map<String, Integer> map = new HashMap<>();
         map.put("key1", 1);
         map.put("key2", 2);
         map.put("key3", 3);
-        System.out.println(map);
+        System.out.println(map);//endregion
 
-        //传统略升级版本
+        //region传统略升级版本
         Map<String, Integer> map1 = new HashMap<String, Integer>() {{
             put("key1", 1);
             put("key2", 2);
             put("key3", 3);
         }};
-        System.out.println(map1);
+        System.out.println(map1);//endregion
 
-        //guava版(最多5对数据)
+        //region guava版(最多5对数据)
         Map<String, Integer> map2 = ImmutableMap.of("key1", 1, "key2", 2, "key3", 3);
-        System.out.println(map2);
+        System.out.println(map2);//endregion
 
-        //guava变版
-        Map<String, Integer> map3 = new ImmutableMap.Builder<String, Integer>().put("key1", 1).put("key2", 2).put("key3", 3).build();
-        System.out.println(map3);
+        //region guava变版
+        Map<String, Integer> map3 = new ImmutableMap.Builder<String, Integer>()
+                .put("key1", 1).put("key2", 2).put("key3", 3).build();
+        System.out.println(map3);//endregion
     }
 
-    /**
-     * @Description Map<String       ,       List       <       String>>的创建以及添加
-     * @Author Lgren
-     * @Date 2018/7/20 16:01
-     *///Map<String,List<String>>的创建以及添加
     @Test
-    public void mapIncludeList() {
-        //guava方式
+    public void Map中还有List等的创建以及添加() {
+        //region guava方式
         Multimap<String, String> multimap = ArrayListMultimap.create();
         multimap.put("stringListOne", "one");
         multimap.put("stringListOne", "two");
@@ -129,58 +118,43 @@ public class GuavaTest {
         multimap.put("stringListTwo", "1");
         multimap.put("stringListTwo", "2");
         multimap.put("stringListTwo", "3");
-        multimap.put("stringListTwo", "4");
-        //{stringListOne=[one, two, tree, four], stringListTwo=[1, 2, 3, 4]}
+        multimap.put("stringListTwo", "4");//endregion {stringListOne=[one, two, tree, four], stringListTwo=[1, 2, 3, 4]}
 
-        //传统+guava方式
+        //region 传统+guava方式
         Map<String, List<String>> map = new HashMap<>();
         List<String> stringListOne = Lists.newArrayList("one", "two", "tree", "four");
         List<String> stringListTwo = Lists.newArrayList("1", "2", "3", "4");
         map.put("stringListOne", stringListOne);
         map.put("stringListTwo", stringListTwo);
         stringListOne.add("five");//有效的添加
-        System.out.println(map);
-        //{stringListOne=[one, two, tree, four, five], stringListTwo=[1, 2, 3, 4]}
+        System.out.println(map);//endregion {stringListOne=[one, two, tree, four, five], stringListTwo=[1, 2, 3, 4]}
     }
 
-    /**
-     * @Description List/Set 变有规则的 String
-     * @Author Lgren
-     * @Date 2018/7/20 16:02
-     *///List/Set 变有规则的 String
     @Test
-    public void listOrSetToString() {
+    public void List_Set变有规则的String() {
         List<String> list = Lists.newArrayList("aa", "bb", "cc", null);
 
-        //传统方式
+        //region 传统方式
         StringBuilder str = new StringBuilder("");
         for (String aList : list) {
             str.append("-").append(aList);
         }
-        System.out.println(str);
-        //-aa-bb-cc-null
+        System.out.println(str);//endregion -aa-bb-cc-null
 
-        //guava版本
+        //region guava版本
         String str1 = Joiner.on("-").useForNull("_").join(list);
-        System.out.println(str1);
-        //aa-bb-cc-_
+        System.out.println(str1);//endregion aa-bb-cc-_
 
-        //java8版本
+        //region java8版本
         String str2 = String.join("-", "teset", "dsadsa");
-        System.out.println(str2);
-        //teset-dsadsa
+        System.out.println(str2);//endregion teset-dsadsa
     }
 
-    /**
-     * @Description String 变成 List或者 Map
-     * @Author Lgren
-     * @Date 2018/7/20 16:31
-     *///String 变成 List 或 Map
     @Test
-    public void stringToListOrSet() {
+    public void String变成List_Map() {
         String str = " 1-2 -3-4  -  - 5-6 ";
 
-        //传统方式
+        //region 传统方式
         List<String> list = new ArrayList<>();
         String[] strList = str.split("-");
         for (String aStrList : strList) {
@@ -190,69 +164,59 @@ public class GuavaTest {
             }
             list.add(strVar);
         }
-        System.out.println(list);
-        //[1, 2, 3, 4, 5, 6]
+        System.out.println(list);//endregion [1, 2, 3, 4, 5, 6]
 
-        //guava方式 omitEmptyStrings:去掉中间为空的部分  "" trimResults:去掉中间空格  " "
-        List<String> list1 = Splitter.on("-").omitEmptyStrings().trimResults().splitToList(str);
-        System.out.println(list1);
-        //[1, 2, 3, 4, 5, 6]
+        //region guava方式 omitEmptyStrings:去掉中间为空的部分  "" trimResults:去掉中间空格  " "
+        List<String> list1 = Lists.newArrayList(Splitter.on("-").omitEmptyStrings().trimResults().splitToList(str));
+        System.out.println(list1);//endregion [1, 2, 3, 4, 5, 6]
     }
 
-    /**
-     * @Description Map 变一定规则的 String
-     * @Author Lgren
-     * @Date 2018/7/20 16:19
-     *///Map 变一定规则的 String
     @Test
-    public void mapToString() {
-        //使用guava方式
+    public void Map变一定规则的String() {
+        //region 使用guava方式
         Map<String, Integer> map = new HashMap<String, Integer>() {{
             put("one", 1);
             put("two", 2);
             put("tree", 3);
         }};
         String resultStr = Joiner.on(",").withKeyValueSeparator("->").join(map);
-        System.out.println(resultStr);
-        //one->1,tree->3,two->2
+        System.out.println(resultStr);//endregion one->1,tree->3,two->2
     }
 
-    /**
-     * @Description String变 Map
-     * @Author Lgren
-     * @Date 2018/7/20 16:45
-     *///String变 Map
     @Test
-    public void stringToMap() {
+    public void String变Map() {
         String str = "   one->1   , ,  tree->3,two->2";
-        Map map = Splitter.on(",").trimResults().omitEmptyStrings().withKeyValueSeparator("->").split(str);
+        Map<String, String> map = Splitter.on(",").trimResults().omitEmptyStrings().withKeyValueSeparator("->").split(str);
         System.out.println(map);
     }
 
-    /**
-     * @Description 交集 差集 并集
-     * @Author Lgren
-     * @Date 2018/7/20 17:41
-     *///交集 差集 并集
     @Test
-    public void IDUSet() {
-        Set<Integer> set1 = Sets.newHashSet(1, 2, 3, 4, 5);
-        Set<Integer> set2 = Sets.newHashSet(3, 4, 5, 6);
-        Sets.SetView<Integer> inter = Sets.intersection(set1, set2); //交集
-        System.out.println(inter);
-        Sets.SetView<Integer> diff = Sets.difference(set1, set2); //差集,在A中不在B中
-        System.out.println(diff);
-        Sets.SetView<Integer> union = Sets.union(set1, set2); //并集
-        System.out.println(union);
+    public void 交集_差集_并集() {
+        Person person1 = new Person(1L,"one",new Date());
+        Person person2 = new Person(2L,"two",new Date());
+        Person person3 = new Person(3L,"tree",new Date());
+        Person person4 = new Person(4L,"four",new Date());
+
+//        guava
+        List<Person> list1 = Lists.newArrayList(person1,person2);
+        List<Person> list2 = Lists.newArrayList(person2, person3, person4);
+        System.out.println(list1);
+        list1.retainAll(list2);
+        System.out.println(list1);
+//        Set<Person> set1 = new LinkedHashSet<>(list1);
+//        Set<Person> set2 = new LinkedHashSet<>(list2);
+////        Set<Integer> set1 = Sets.newHashSet(1, 2, 3, 4, 5);
+////        Set<Integer> set2 = Sets.newHashSet(3, 4, 5, 6);
+//        Sets.SetView<Person> inter = Sets.intersection(set1, set2); //交集
+//        System.out.println(inter);
+//        Sets.SetView<Person> diff = Sets.difference(set1, set2); //差集,在A中不在B中
+//        System.out.println(diff);
+//        Sets.SetView<Person> union = Sets.union(set1, set2); //并集
+//        System.out.println(union);
     }
 
-    /**
-     * @Description 文件处理 写 读 复制
-     * @Author Lgren
-     * @Date 2018/7/21 9:19
-     *///文件处理 写 读 复制
     @Test
-    public void fileTest() throws IOException {
+    public void 文件处理_写_读_复制() throws IOException {
         File file = new File("D:/test.txt");
 //        if (!file.exists()) {
 //            file.createNewFile();
@@ -267,30 +231,20 @@ public class GuavaTest {
         Files.copy(file, file1);//复制文件
     }
 
-    /**
-     * @Description 赋值的时候如果为空早些抛出异常
-     * @Author Lgren
-     * @Date 2018/7/21 13:49
-     *///赋值的时候如果为空早些抛出异常
     @Test
-    public void checkNotNull() {
+    public void 赋值的时候如果为空早些抛出异常() {
         Person person = new Person();
         Person person1 = person;
         //guava方式
         person1 = Preconditions.checkNotNull(person, new Person());//如果person为空则空指针异常
 
-        //java8 方式
+        //java8 方式 建议
         person1 = Objects.requireNonNull(person, "person为空");
 
     }
 
-    /**
-     * @Description 加密
-     * @Author Lgren
-     * @Date 2018/7/21 13:51
-     *///加密
     @Test
-    public void hashingTest() {
+    public void 加密() {
         String input = "hello, world";
         // 计算MD5
         System.out.println(Hashing.md5().hashBytes(input.getBytes()).toString());
@@ -305,8 +259,8 @@ public class GuavaTest {
     }
 
     @Test
-    public void mathTypeTest() {
-        //传统方式
+    public void int数组中是否包含置顶数字() {
+        //region 传统方式
         int[] array = {1, 2, 3, 4, 5};
         int a = 4;
         boolean hasA = false;
@@ -315,35 +269,41 @@ public class GuavaTest {
                 hasA = true;
             }
         }
-        System.out.println(hasA);
+        System.out.println(hasA);//endregion
 
-        //guava方式
+        //region guava方式
         boolean contains = Ints.contains(array, a);
-        System.out.println(contains);
+        System.out.println(contains);//endregion
     }
 
     @Test
-    public void commonTest() {
-        Optional<Person> person = Optional.ofNullable(getPerson(true));
-//        System.out.println(person.orElse(new Person("Two",new Date())));
+    public void MD5加密() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        //确定计算方法
+        MessageDigest md5 = MessageDigest.getInstance("MD5");
+        BASE64Encoder base64en = new BASE64Encoder();
+        //加密后的字符串
+        String newHouseMD5 = base64en.encode(md5.digest("你好哇".getBytes("utf-8")));
+        String newPreferenceMD5 = base64en.encode(md5.digest("我不好".getBytes("utf-8")));
 
-//        Optional<String> x =  person.map(p -> p.getRealName());
-//        Optional<String> x1 =  person.flatMap(p -> Optional.ofNullable(p.getRealName()));
-        if (!person.isPresent()) {
-            System.out.println("对象不存在");
+        System.out.println(newHouseMD5);
+        System.out.println(newPreferenceMD5);
+    }
+
+    @Test
+    public void 公共测试() {
+        Integer var = 1;
+        if (false) {
+            System.out.println("test1");
+        } else if (var == 1) {
+            System.out.println("test2");
+        } else if (var == 2) {
+            System.out.println("test3");
+        } else {
+            System.out.println("test4");
         }
-//        person.orElse("");
-        person.map(Person::getRealName).orElse("名字不能为空");
-        person.map(Person::getRealName);
 
     }
-
-    private Person getPerson(boolean type) {
-        return type ? new Person("One",new Date()) : null;
-    }
-
 }
-
 
 
 
