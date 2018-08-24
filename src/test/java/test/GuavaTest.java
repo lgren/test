@@ -201,18 +201,16 @@ public class GuavaTest {
         List<Person> list1 = Lists.newArrayList(person1,person2);
         List<Person> list2 = Lists.newArrayList(person2, person3, person4);
         System.out.println(list1);
-        list1.retainAll(list2);
-        System.out.println(list1);
-//        Set<Person> set1 = new LinkedHashSet<>(list1);
-//        Set<Person> set2 = new LinkedHashSet<>(list2);
-////        Set<Integer> set1 = Sets.newHashSet(1, 2, 3, 4, 5);
-////        Set<Integer> set2 = Sets.newHashSet(3, 4, 5, 6);
-//        Sets.SetView<Person> inter = Sets.intersection(set1, set2); //交集
-//        System.out.println(inter);
-//        Sets.SetView<Person> diff = Sets.difference(set1, set2); //差集,在A中不在B中
-//        System.out.println(diff);
-//        Sets.SetView<Person> union = Sets.union(set1, set2); //并集
-//        System.out.println(union);
+        Set<Person> set1 = new LinkedHashSet<>(list1);
+        Set<Person> set2 = new LinkedHashSet<>(list2);
+//        Set<Integer> set1 = Sets.newHashSet(1, 2, 3, 4, 5);
+//        Set<Integer> set2 = Sets.newHashSet(3, 4, 5, 6);
+        Sets.SetView<Person> inter = Sets.intersection(set1, set2); //交集
+        System.out.println(inter);
+        Sets.SetView<Person> diff = Sets.difference(set1, set2); //差集,在A中不在B中
+        System.out.println(diff);
+        Sets.SetView<Person> union = Sets.union(set1, set2); //并集
+        System.out.println(union);
     }
 
     @Test
@@ -301,7 +299,6 @@ public class GuavaTest {
         } else {
             System.out.println("test4");
         }
-
     }
 }
 
