@@ -1,6 +1,9 @@
 package test;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
+import com.lgren.ohers.FieldValueStrEnum;
+import com.lgren.一些写法等.CommResult;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
@@ -8,6 +11,8 @@ import pojo.Person;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 
 public class CommonTest {
@@ -107,7 +112,8 @@ public class CommonTest {
     public void test4() {
         test3(new HashMap<>());
     }
-    public String test3(Map<String, String> map) {
+
+    private String test3(Map<String, String> map) {
         String returnStr = "";
         String p1 = map.get("p1");
         String p2 = map.get("p2");
@@ -131,10 +137,10 @@ public class CommonTest {
             listGet = listReturn;
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("查询房源接口失败");
+            System.out.println("1");
         }
         if (listGet == null || listGet.get(0) == null) {
-            System.out.println("未查询到房源信息");
+            System.out.println("2");
         } else {
             list = listGet.stream().limit(10).collect(Collectors.toList());
         }
@@ -153,10 +159,20 @@ public class CommonTest {
 
     @Test
     public void test5() {
-        String str = "start";
-        for (int i = 0; i < 100; i++) {
-            str = str +
-                    "hello";
-        }
+        List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        numbers.parallelStream()
+                .forEachOrdered(System.out::println);
     }
+
+    @Test
+    public void test6() {
+        List<String> list1 = new ArrayList<>(1);
+        List<String> list2 = new ArrayList<>(2);
+        list1.add("I am a boy");
+        list2.add("I love the girl");
+        list2.add("But the girl loves another girl");
+//        list.stream().map(line -> line.split(" ")).map(Arrays::stream).forEach(o -> o.forEach(System.out::println));
+        String test = "";
+    }
+
 }

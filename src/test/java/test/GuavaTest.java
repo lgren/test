@@ -1,11 +1,13 @@
 package test;
 
-import com.google.common.base.*;
+import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import com.google.common.primitives.Ints;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.Test;
 import pojo.Person;
 import sun.misc.BASE64Encoder;
@@ -15,18 +17,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
 import java.util.*;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static java.util.Optional.ofNullable;
+import java.util.stream.Stream;
 
 public class GuavaTest {
     private Date nowDate = new Date();
@@ -63,7 +58,7 @@ public class GuavaTest {
         //传统方式 --- 太麻烦 跳过
 
         //region guava方式
-        Map<Integer, String> map = Maps.asMap(set, new Function<Integer, String>() {
+        Map<Integer, String> map = Maps.asMap(set, new com.google.common.base.Function<Integer, String>() {
             @Override
             public String apply(Integer integer) {
                 return get.get(integer);
@@ -175,6 +170,7 @@ public class GuavaTest {
     public void Map变一定规则的String() {
         //region 使用guava方式
         Map<String, Integer> map = new HashMap<String, Integer>() {{
+            final long serialVersionUID = 1L;// 如果不加这句话 可能通过dubbo等通道的时候会报错 序列化方面的原因
             put("one", 1);
             put("two", 2);
             put("tree", 3);
@@ -211,6 +207,15 @@ public class GuavaTest {
         System.out.println(diff);
         Sets.SetView<Person> union = Sets.union(set1, set2); //并集
         System.out.println(union);
+//          Spring中
+//        //并集
+//        Collection<String> unionO = CollectionUtils.union(list1, list2);
+//        //交集
+//        Collection<String> intersectionO = CollectionUtils.intersection(list1, list2);
+//        //交集的补集
+//        Collection<String> disjunctionO = CollectionUtils.disjunction(list1, list2);
+//        //集合相减
+//        Collection<String> subtrlist1ctO = CollectionUtils.subtract(list1, list2);
     }
 
     @Test
@@ -288,17 +293,42 @@ public class GuavaTest {
     }
 
     @Test
-    public void 公共测试() {
-        Integer var = 1;
-        if (false) {
-            System.out.println("test1");
-        } else if (var == 1) {
-            System.out.println("test2");
-        } else if (var == 2) {
-            System.out.println("test3");
-        } else {
-            System.out.println("test4");
+    public void 公共测试1() {
+        Person person1 = new Person(1L,"one",new Date());
+        Person person2 = new Person(2L,"two",new Date());
+        Person person3 = new Person(3L,"tree",new Date());
+        Person person4 = new Person(4L,"four",new Date());
+
+//        guava
+        List<Person> list1 = Lists.newArrayList(person1, person2, person3, person4);
+//        list1.stream().collect(Collectors.toMap())
+
+        // 将Stream转换成容器或Map
+        Stream<String> stream = Stream.of("I", "love", "you", "too");
+        List<String> list = stream.collect(Collectors.toList()); // (1)
+        Set<String> set = stream.collect(Collectors.toSet()); // (2)
+        Map<String, Integer> map = stream.collect(Collectors.toMap(Function.identity(), String::length)); // (3)
+    }
+
+    @Test
+    public void 公共测试2() {
+        List<Integer> list = Lists.newArrayList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+        getAllStream(list, 10);
+        System.out.println();
+    }
+    private  <T> List<List<T>> getAllStream(List<T> list, Integer pageSize) {
+        int total = list.size();
+        int pages = (int) Math.ceil((double) total / Math.max(pageSize, 1));
+        List<List<T>> result =  new ArrayList<>(pages);
+        for (int i = 0; i < pages; i++) {
+            result.add(list.subList(i * pageSize, Math.min((i + 1) * pageSize, total)));
         }
+        return result;
+    }
+
+    @Test
+    public void 公共测试3() {
+        System.out.println(LocalDate.now().minusDays(10));
     }
 }
 

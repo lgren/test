@@ -50,7 +50,7 @@ public class SSLClient {
             //设置请求头
             post.setHeader("Content-Type", "application/json");
             Map<String, Object> maps = new HashMap<>();
-            maps.put("type", "image");
+            maps.put("getType", "image");
             maps.put("offset", "0");
             maps.put("count", "2");
             //将封装好的map转换成json格式
@@ -86,7 +86,7 @@ public class SSLClient {
 
 //    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 //        Map<String,Object> maps = new HashMap<>();
-//        maps.put("type", "image");
+//        maps.put("getType", "image");
 //        maps.put("offset", "0");
 //        maps.put("count", "2");
 //        //将封装好的map转换成json格式
