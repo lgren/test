@@ -1,6 +1,7 @@
 package com.lgren.建造者模式.thing;
 
-import org.apache.commons.collections.CollectionUtils;
+
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -5,10 +5,9 @@ import com.google.common.collect.Lists;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 /**
  * TODO
@@ -84,5 +83,63 @@ public class 项目测试 {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             action.accept(entry.getKey(), entry.getValue());
         }
+    }
+
+    @Test
+    public void oneResult() {
+//        String result = "AA";
+        // 第一组 :0 -> 一:1 二:2 三:4 四:8 五:16
+        // 第二组 :1 -> 东:1 南:2 西:4 北:8 中:16
+
+        Integer one = 1 + 2 + 16;
+        Integer two = 4 + 8 + 16;
+        Map<Integer, Character> charMap = toCharArr(one, two);
+
+        Map<Character, List<Integer>> intArrMap = toIntArr(charMap.values());
+        toCharArr(intArrMap.values().stream().map(intList -> intList.stream().mapToInt(o -> o).sum()).collect(Collectors.toList()));
+        System.out.println();
+    }
+    private char toChar(int numVar) {
+        return numVar < 10 ? ((char) (numVar + 48)) : numVar < 36 ? ((char) (numVar + 55)) : numVar < 62 ? ((char) (numVar + 61)) : ((char) (numVar + 19906));
+    }
+    private Map<Integer, Character> toCharArr(int... numArr) {
+        Map<Integer, Character> resultMap = new HashMap<>(numArr.length);
+        for (int aNumArr : numArr) {
+            resultMap.put(aNumArr, toChar(aNumArr));
+        }
+        return resultMap;
+    }
+    private Map<Integer, Character> toCharArr(Collection<Integer> numArr) {
+        Map<Integer, Character> resultMap = new HashMap<>(numArr.size());
+        for (int aNumArr : numArr) {
+            resultMap.put(aNumArr, toChar(aNumArr));
+        }
+        return resultMap;
+    }
+
+    private int toInt(char charVar) {
+        return charVar < 58 ? charVar - 48 : charVar < 91 ? charVar - 55 : charVar < 123 ? charVar - 61 : charVar - 19906;
+    }
+    private List<Integer> parseChar(int intVar) {
+        int miNum = 4;
+        List<Integer> resultList = new ArrayList<>(5);
+        int intVarVar = intVar;
+        do {
+            int num = 1 << miNum;
+            if (intVarVar >= num) {
+                intVarVar -= num;
+                resultList.add(num);
+                if (intVarVar == num) break;
+            }
+            miNum--;
+        } while (intVarVar > 0);
+        return resultList;
+    }
+    private Map<Character, List<Integer>> toIntArr(Collection<Character> charArr) {
+        Map<Character, List<Integer>> resultMap = new HashMap<>(charArr.size());
+        for (char charVar : charArr) {
+            resultMap.put(charVar, parseChar(toInt(charVar)));
+        }
+        return resultMap;
     }
 }

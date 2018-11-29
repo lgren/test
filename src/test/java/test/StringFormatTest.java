@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Optional.ofNullable;
 
@@ -14,7 +16,7 @@ import static java.util.Optional.ofNullable;
  * @author Lgren
  * @create 2018-10-11 10:07
  **/
-public class UseTest {
+public class StringFormatTest {
     @Test
     public void StringFormat格式化() {
         // String类型
@@ -82,6 +84,35 @@ public class UseTest {
         String test = "{\"one\": 1, \"two\": 2}";
 //        ofNullable("String").orElseThrow();
         String value = "18273645241";
-        System.out.println(value.substring(0,3) + "****" + value.substring(7));
+        String omitPhone = value.substring(0, 3) + "****" + value.substring(7);
+        System.out.println(omitPhone);
+    }
+
+    @Test
+    public void 数字转中文测试() {
+        System.out.println(String.format(Locale.CHINA, "中文月份简称：%tb 全称：%<tB", new Date()));
+        System.out.println(String.format(Locale.CHINA, "中文星期简称：%ta 全称：%<tA", new Date()));
+
+        System.out.println(String.format(Locale.CHINA, "中文星期简称：%d 全称：%<d", 1));
+
+        System.out.printf("%05d%n",31); //    15 与下边3个数字对其  2. %05d%n 补上0 00015 3. %-5d%n 左对齐 右边有空格
+        System.out.printf("%05d%n",35435431);
+
+    }
+
+    @Test
+    public void 手机截取测试() {
+        String value = "18273645241";
+        Pattern pattern = Pattern.compile("(\\d{3})\\d{4}(\\d{4})");
+        pattern.split(value);
+        Matcher m = pattern.matcher(value);
+        if (m.find()) {
+            System.out.println("Found value: " + m.group(0));// This order was placed for QT3000! OK?
+            System.out.println("Found value: " + m.group(1));// This order was placed for QT
+            System.out.println("Found value: " + m.group(2));// 3000
+        } else {
+            System.out.println("NO MATCH");
+        }
+        System.out.println(value.replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2"));
     }
 }

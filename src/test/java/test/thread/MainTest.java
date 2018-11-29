@@ -1,11 +1,11 @@
 package test.thread;
 
-import com.github.pagehelper.PageInfo;
 import com.lgren.util.LgrenUtil;
 import org.junit.Test;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * TODO
@@ -18,7 +18,8 @@ public class MainTest {
         List<String> numbers = new ArrayList<>(5);
         for (int i = 0; i < 10_0000; i++)
             numbers.add(i + "");
-        return Collections.unmodifiableList(numbers);
+//        return Collections.unmodifiableList(numbers);
+        return numbers;
     }
 
     @Test
@@ -37,45 +38,59 @@ public class MainTest {
         System.out.println("number:" + source.size());
 
     }
+    private Boolean 模拟等待接口(String value) throws InterruptedException {
+//        Random random = new Random();
+        TimeUnit.MILLISECONDS.sleep(50);
+        return value.indexOf("1") > 0;
+    }
 
     @Test
-    public void test1() {
-        long start = System.currentTimeMillis();
-
-        List<String> list = buildIntRange();
-        start = System.currentTimeMillis();
-        Set<String> succList = Collections.synchronizedSet(new HashSet<>(list.size()));
-        Map<String, String> failMap = new ConcurrentHashMap<>(list.size() / 3);
-        int failMapSize = 0;
+    public void 多线程复杂测试() {
         ExecutorService checkUserExecutor = Executors.newCachedThreadPool();
-        int codeNum = 10000;
-        int getPageNum = Math.max(list.size() / codeNum, 10);
-        List<Future<Integer>> checkResultList = new ArrayList<>(codeNum);
-        int pageNum = 1;
-        PageInfo<String> pageUser;
-        do {
-            pageUser = LgrenUtil.pageInfoForList(list, pageNum, getPageNum);
-            List<String> checkUserList = pageUser.getList();
-            pageNum++;
-            checkResultList.add(checkUserExecutor.submit(() -> {
-                int failMapSizeVar = 0;
-                for (String userId : checkUserList) {
-                    failMapSizeVar++;
-                    TimeUnit.MILLISECONDS.sleep(35);
-                }
-                return failMapSizeVar;
-            }));
-        } while (pageUser.isHasNextPage());
+        List<String> list = buildIntRange();
+        for (int i = 0; i < 2000 ; i++) {
+            list.add("12000");
+        }
+        Set<String> testList = ConcurrentHashMap.newKeySet();
 
+        long start = System.currentTimeMillis();
+        int codeNum = 10000;// 计划将一个list分割成多少段
+        int getPageSize = Math.max(list.size() / codeNum, 10);// 每段最少10条数据
+        List<Future<Integer>> checkResultList = new ArrayList<>(codeNum);
+        AtomicInteger x = new AtomicInteger();
+        LgrenUtil.partition(list, getPageSize).forEach(listVar ->
+            checkResultList.add(checkUserExecutor.submit(() -> {
+                x.getAndIncrement();
+                int failNumVar = 0;
+                for (String value : listVar) {
+                    if (testList.contains(value)) {
+//                        failNumVar++;
+                    } else {
+                        if (模拟等待接口(value)) {
+                            testList.add(value);
+                            failNumVar++;
+                        }
+                    }
+                }
+                return failNumVar;
+            }))
+        );
+
+        int failNum = 0;
         for (Future<Integer> integerFuture : checkResultList) {
             try {
-                failMapSize += integerFuture.get();
+                failNum += integerFuture.get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
         System.out.println("parallelStream : " + (System.currentTimeMillis() - start) + "ms");
-        System.out.println("number:" + failMapSize);
+        System.out.println("number:" + failNum + "->" + testList.size());
+
+    }
+
+    @Test
+    public void test2() {
 
     }
 }

@@ -1,10 +1,10 @@
 package com.lgren.poi.poi3_17;
 
-import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.SheetUtil;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileOutputStream;
@@ -13,22 +13,20 @@ import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static java.util.Optional.ofNullable;
 
 
 /**
  * 简化opi操作
- *
  * @author Lgren
  * @create 2018-10-30 10:12
  **/
 public class LWorkbook {
     //region 静态参数区
-    public static final short XLS = 1;
-    public static final short XLSX = 2;
+    public static final LWorkbook XLS = new LWorkbook(new HSSFWorkbook());
+    public static final LWorkbook XLSX = new LWorkbook(new XSSFWorkbook());
+    public static final LWorkbook SXLSX = new LWorkbook(new SXSSFWorkbook(500));
     //endregion
 
     private Workbook wb;
@@ -66,34 +64,32 @@ public class LWorkbook {
         return new LCellStyle(wb.createCellStyle());
     }
 
+    private LCellStyle cellStyle;
+
+    public LCellStyle center() {
+        if (cellStyle == null) {
+            cellStyle = new LCellStyle(wb.createCellStyle());
+            cellStyle.setAlignment(HorizontalAlignment.CENTER);//水平居中
+            cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);//垂直居中
+        }
+        return cellStyle;
+    }
+
     public LSheet sheet(String sheetName) {
         Objects.requireNonNull(sheetName);
         return new LSheet(ofNullable(wb.getSheet(sheetName)).orElseGet(() -> wb.createSheet(sheetName)));
     }
 
-    public LCell cell(String sheetName, int rowNum, int cellNum) {
-        Objects.requireNonNull(sheetName);
-        Sheet sheet = ofNullable(wb.getSheet(sheetName)).orElseGet(() -> wb.createSheet(sheetName));
-        Row row = ofNullable(sheet.getRow(rowNum)).orElseGet(() -> sheet.createRow(rowNum));
-        return new LCell(ofNullable(row.getCell(cellNum)).orElseGet(() -> row.createCell(cellNum)));
-    }
-
-    public LRow row(String sheetName, int rowNum) {
-        Objects.requireNonNull(sheetName);
-        Sheet sheet = ofNullable(wb.getSheet(sheetName)).orElseGet(() -> wb.createSheet(sheetName));
-        return new LRow(ofNullable(sheet.getRow(rowNum)).orElseGet(() -> sheet.createRow(rowNum)));
-    }
+    //    public LRow row(String sheetName, int rowNum) {
+    //        Objects.requireNonNull(sheetName);
+    //        Sheet sheet = ofNullable(wb.getSheet(sheetName)).orElseGet(() -> wb.createSheet(sheetName));
+    //        return new LRow(ofNullable(sheet.getRow(rowNum)).orElseGet(() -> sheet.createRow(rowNum)));
+    //    }
     //endregion
 
     //region LWorkbook构造方法区
     public LWorkbook(Workbook wb) {
         this.wb = wb;
-    }
-
-    public LWorkbook(short wbType) {
-        wb = wbType == 1 ? new HSSFWorkbook()
-                : wbType == 2 ? new XSSFWorkbook()
-                : new XSSFWorkbook();
     }
     //endregion
 
@@ -101,6 +97,7 @@ public class LWorkbook {
     public Workbook getWorkbook() {
         return wb;
     }
+
     //endregion
 
     public class LSheet {
@@ -115,23 +112,41 @@ public class LWorkbook {
             sheet.setColumnWidth(columnIndex, width);
         }
 
-        public void autoSizeColumn(int... column) {
-            for (int i = 0; i < column.length; i++) {
-                autoSizeColumn(false, column);
+        public void autoSizeColumn(int[] column) {
+            autoSizeColumn(false, column);
+        }
+        public void autoSizeColumn(int columnNum) {
+            autoSizeColumn(false, columnNum);
+        }
+
+        public void autoSizeColumnByFirstCol() {
+            short lastCellNum = ofNullable(this.row(0)).map(r -> r.getRow().getLastCellNum()).orElse((short) -1);
+            if (lastCellNum > 0) {
+                autoSizeColumnByFirstCol(false, lastCellNum);
             }
         }
 
-        public void autoSizeColumn(boolean useMergedCells, int... column) {
-            for (int i = 0; i < column.length; i++) {
-                double width = getColumnWidth(sheet, column[i], useMergedCells, sheet.getFirstRowNum(), sheet.getLastRowNum());
-                if (width != -1.0D) {
-                    width *= 256.0D;
-                    int maxColumnWidth = '\uff00';
-                    if (width > (double) maxColumnWidth) {
-                        width = (double) maxColumnWidth;
-                    }
-                    sheet.setColumnWidth(column[i], (int) width);
+        public void autoSizeColumn(boolean useMergedCells, int[] columnArr) {
+            for (int i = 0; i < columnArr.length; i++) {
+                autoSizeColumn(useMergedCells, columnArr[i]);
+            }
+        }
+
+        public void autoSizeColumnByFirstCol(boolean useMergedCells, short lastCellNum) {
+            for (int i = 0; i < lastCellNum; i++) {
+                autoSizeColumn(useMergedCells, i);
+            }
+        }
+
+        public void autoSizeColumn(boolean useMergedCells, int columnNum) {
+            double width = getColumnWidth(sheet, columnNum, useMergedCells, sheet.getFirstRowNum(), sheet.getLastRowNum());
+            if (width != -1.0D) {
+                width *= 256.0D;
+                int maxColumnWidth = '\uff00';
+                if (width > (double) maxColumnWidth) {
+                    width = (double) maxColumnWidth;
                 }
+                sheet.setColumnWidth(columnNum, (int) width);
             }
         }
 
@@ -159,19 +174,20 @@ public class LWorkbook {
                 return -1;
             }
             //region 获取中文字符长度
-            int CNNum = 0;
-            Matcher m = Pattern.compile("[\u4E00-\u9FA5]+").matcher(cell.toString());
-            while (m.find()) {
-                CNNum = m.end();
-            }
+            int cnNum = cell.toString().replaceAll("[^\\u4e00-\\u9fa5]", "").length();
             //endregion
-            return SheetUtil.getCellWidth(cell, defaultCharWidth, formatter, useMergedCells) + CNNum * 0.78;
+            return SheetUtil.getCellWidth(cell, defaultCharWidth, formatter, useMergedCells) + cnNum * 0.931818;
         }
         //endregion
 
         //region 封装方法区
         public LRow row(int rowNum) {
             return new LRow(ofNullable(sheet.getRow(rowNum)).orElseGet(() -> sheet.createRow(rowNum)));
+        }
+
+        public LCell cell(int rowNum, int cellNum) {
+            Row row = ofNullable(sheet.getRow(rowNum)).orElseGet(() -> sheet.createRow(rowNum));
+            return new LCell(ofNullable(row.getCell(cellNum)).orElseGet(() -> row.createCell(cellNum)));
         }
         //endregion
 
@@ -186,7 +202,6 @@ public class LWorkbook {
             return sheet;
         }
         //endregion
-
     }
 
     public class LRow {
@@ -231,36 +246,42 @@ public class LWorkbook {
             cell.setCellValue(value);
             return this;
         }
+
         public LCell setCellValue(Date value) {
             cell.setCellValue(value);
             return this;
         }
+
         public LCell setCellValue(Calendar value) {
             cell.setCellValue(value);
             return this;
         }
+
         public LCell setCellValue(RichTextString value) {
             cell.setCellValue(value);
             return this;
         }
+
         public LCell setCellValue(String value) {
             cell.setCellValue(value);
             return this;
         }
+
         public LCell setCellValue(boolean value) {
             cell.setCellValue(value);
             return this;
         }
+
         public LCell setCellStyle(CellStyle style) {
             cell.setCellStyle(style);
             return this;
         }
+
         public LCell setCellStyle(LCellStyle style) {
             cell.setCellStyle(style.getCellStyle());
             return this;
         }
         //endregion
-
 
         //region 构造方法区
         public LCell(Cell cell) {
@@ -316,17 +337,12 @@ public class LWorkbook {
     public class LCellStyle {
         private CellStyle cellStyle;
 
-        //region 构造方法区
-        public LCellStyle(CellStyle cellStyle) {
-            this.cellStyle = cellStyle;
-        }
-        //endregion
-
         //region CellStyle方法区(略有改动)
         public LCellStyle setFont(Font font) {
             cellStyle.setFont(font);
             return this;
         }
+
         public LCellStyle setFont(LFont font) {
             cellStyle.setFont(font.getFont());
             return this;
@@ -372,6 +388,19 @@ public class LWorkbook {
             return this;
         }
         //endregion
+
+        public LCellStyle center() {
+            cellStyle.setAlignment(HorizontalAlignment.CENTER);//水平居中
+            cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);//垂直居中
+            return this;
+        }
+
+        //region 构造方法区
+        public LCellStyle(CellStyle cellStyle) {
+            this.cellStyle = cellStyle;
+        }
+        //endregion
+
 
         //region get方法区
         public CellStyle getCellStyle() {

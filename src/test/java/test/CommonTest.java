@@ -9,7 +9,10 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 import pojo.Person;
 
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -173,6 +176,12 @@ public class CommonTest {
         list2.add("But the girl loves another girl");
 //        list.stream().map(line -> line.split(" ")).map(Arrays::stream).forEach(o -> o.forEach(System.out::println));
         String test = "";
+    }
+
+    @Test
+    public void test7() {
+        System.out.println(new DecimalFormat(",###").format(432.232432D));
+        ThreadLocalRandom random = ThreadLocalRandom.current();
     }
 
 }

@@ -1,9 +1,6 @@
 package test;
 
-import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
+import com.google.common.base.*;
 import com.google.common.collect.*;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
@@ -19,6 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -127,7 +125,7 @@ public class GuavaTest {
 
     @Test
     public void List_Set变有规则的String() {
-        List<String> list = Lists.newArrayList("aa", "bb", "cc", null);
+        List<String> list = Lists.newArrayList("aa", "bb", "cc", null, "", "  ");
 
         //region 传统方式
         StringBuilder str = new StringBuilder("");
@@ -290,6 +288,40 @@ public class GuavaTest {
 
         System.out.println(newHouseMD5);
         System.out.println(newPreferenceMD5);
+    }
+
+    @Test
+    public void biMap可以根据value查询key() {
+        BiMap<Integer, String> biMap = HashBiMap.create();
+        biMap.put(0, "零");
+        biMap.put(1, "一");
+        biMap.put(2, "二");
+        biMap.put(3, "三");
+        System.out.println();
+
+    }
+
+    @Test
+    public void Table() {
+        // 就像是两个key得到一个value值
+        Table<String, String, String> employeeTable = HashBasedTable.create();
+        employeeTable.put("IBM", "101","Mahesh");
+        employeeTable.put("IBM", "102","Ramesh");
+        employeeTable.put("IBM", "103","Suresh");
+        employeeTable.put("Microsoft", "111","Sohan");
+        employeeTable.put("Microsoft", "112","Mohan");
+        employeeTable.put("Microsoft", "113","Rohan");
+        employeeTable.put("TCS", "121","Ram");
+        employeeTable.put("TCS", "122","Shyam");
+        employeeTable.put("TCS", "123","Sunil");
+        System.out.println(employeeTable);
+    }
+
+    @Test
+    public void 计时器() {
+        Stopwatch watch1 = Stopwatch.createUnstarted();// 累计时间
+        Stopwatch watch = Stopwatch.createStarted();
+        System.out.println();
     }
 
     @Test
