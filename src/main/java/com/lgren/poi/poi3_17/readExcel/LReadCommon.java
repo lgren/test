@@ -102,7 +102,8 @@ public class LReadCommon {
         }).orElse(null);
     }
 
-    /** 获取sheet下的第colIndex列的所有cell的数据
+    /**
+     * 获取sheet下的第colIndex列的所有cell的数据
      * {@link LReadCol#getColValue()} new LReadCol(sheet, colIndex).getColValue()
      */
     @Deprecated
@@ -184,7 +185,7 @@ public class LReadCommon {
 
     }
 
-    /** 获取row下的第cellIndex行的cell*/
+    /** 获取row下的第cellIndex行的cell */
     public static Cell getCell(Row row, int cellIndex) {
         // 如果 cellIndex大于row的最后边的cell 则返回null
         return ofNullable(row).filter(r -> cellIndex < r.getLastCellNum())

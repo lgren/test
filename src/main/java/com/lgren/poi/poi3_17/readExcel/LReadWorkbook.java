@@ -28,7 +28,7 @@ public class LReadWorkbook {
         Workbook workbook;
         CommResult<Workbook> result = new CommResult<>();
         try (InputStream mpbinp = inp.markSupported() ? inp : new PushbackInputStream(inp, 8);
-             InputStream newInp = FileMagic.prepareToCheckMagic(mpbinp)){
+             InputStream newInp = FileMagic.prepareToCheckMagic(mpbinp)) {
             FileMagic fileMagic = FileMagic.valueOf(newInp);
             if (fileMagic == FileMagic.OLE2) {
                 try {
@@ -62,6 +62,7 @@ public class LReadWorkbook {
     //endregion
 
     //region 获取全部数据
+
     /** 获取workbook下的所有cell的数据 通过sheet分组 */
     public Map<String, Map<Object, Map<Object, Object>>> getWorkbookValue() {
         return LReadCommon.getWorkbookValue(workbook);
