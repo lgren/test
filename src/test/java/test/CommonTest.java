@@ -183,5 +183,10 @@ public class CommonTest {
         System.out.println(new DecimalFormat(",###").format(432.232432D));
         ThreadLocalRandom random = ThreadLocalRandom.current();
     }
+    @Test
+    public void test8() {
+        Object s = ofNullable(new Integer(13213)).map(i -> i.toString()).map(str -> null).orElse("");
+        System.out.println(s);
+    }
 
 }

@@ -88,7 +88,7 @@ public class LWorkbook {
     //endregion
 
     //region LWorkbook构造方法区
-    public LWorkbook(Workbook wb) {
+    LWorkbook(Workbook wb) {
         this.wb = wb;
     }
     //endregion
