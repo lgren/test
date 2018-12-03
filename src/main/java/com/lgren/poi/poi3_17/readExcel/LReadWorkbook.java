@@ -4,14 +4,12 @@ import com.lgren.common.CommResult;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PushbackInputStream;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -64,7 +62,7 @@ public class LReadWorkbook {
     //region 获取全部数据
 
     /** 获取workbook下的所有cell的数据 通过sheet分组 */
-    public Map<String, Map<Object, Map<Object, Object>>> getWorkbookValue() {
+    public Map<String, Map<Object, Map<Object, Object>>> getValue() {
         return LReadCommon.getWorkbookValue(workbook);
     }
     //endregion
@@ -79,4 +77,14 @@ public class LReadWorkbook {
         return new LReadSheet(workbook.getSheet(sheetName));
     }
     //endregion
+
+
+    public Workbook getWorkbook() {
+        return workbook;
+    }
+
+    public void setWorkbook(Workbook workbook) {
+        Objects.requireNonNull(workbook);
+        this.workbook = workbook;
+    }
 }

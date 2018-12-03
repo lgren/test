@@ -26,7 +26,7 @@ public class LReadCommon {
             Map<String, Map<Object, Map<Object, Object>>> allFile = null;
             for (int i = 0; i < wb.getNumberOfSheets(); i++) {
                 Sheet sheet = wb.getSheetAt(i);
-                Map<Object, Map<Object, Object>> sheetMap = getSheetValue(sheet);
+                Map<Object, Map<Object, Object>> sheetMap = getSheetValue(sheet, false, null);
                 if (sheetMap != null) {
                     if (allFile == null) {
                         allFile = new LinkedHashMap<>(wb.getNumberOfSheets());
@@ -38,28 +38,38 @@ public class LReadCommon {
         }).orElse(null);
     }
 
-    /** 获取sheet下的所有cell的数据 通过row分组 */
-    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet) {
+    /** 获取sheet下的所有cell的数据 通过row分组
+     *  @param firstColToKey 是否将每一行的第一列作为整个rowValue的key值
+     *  @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
+     */
+    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, boolean firstColToKey, Map<Object, Object> cellKeyMap) {
         return ofNullable(sheet).map(s -> {
             Map<Object, Map<Object, Object>> result = null;
             for (int j = s.getFirstRowNum(); j <= s.getLastRowNum(); j++) {
                 Row row = s.getRow(j);
-                Map<Object, Object> cellMap = getRowValue(row);
+                Map<Object, Object> cellMap = getRowValue(row, cellKeyMap);
                 if (cellMap != null) {
                     if (result == null) {
                         result = new LinkedHashMap<>(s.getPhysicalNumberOfRows());
                     }
-                    result.put(j, cellMap);
+                    result.put(firstColToKey ? ofNullable(getCellValue(row.getCell(row.getFirstCellNum()))).orElse(j) : j, cellMap);
                 }
             }
             return result;
         }).orElse(null);
     }
 
-    /** 获取sheet下的所有cell的数据 通过row分组 */
-    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet) {
+    /** 获取sheet下的所有cell的数据 通过row分组
+     *  @param firstRowToKey 是否将第一行的值作为整个colValue的key值
+     *  @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
+     */
+    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, boolean firstRowToKey, Map<Object, Object> cellKeyMap) {
         return ofNullable(sheet).map(s -> {
             Map<Object, Map<Object, Object>> result = new LinkedHashMap<>(s.getRow(s.getFirstRowNum()).getPhysicalNumberOfCells());
+            Map<Object, Object> firstColKeyMap = null;
+            if (firstRowToKey) {
+                firstColKeyMap = LReadCommon.getRowValue(sheet.getRow(sheet.getFirstRowNum()), null);
+            }
             for (int j = s.getFirstRowNum(); j <= s.getLastRowNum(); j++) {
                 Row row = s.getRow(j);
                 if (row == null) {
@@ -68,15 +78,14 @@ public class LReadCommon {
                 for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
                     Cell cell = row.getCell(k);
                     Object cellValue = getCellValue(cell);
-
                     Map<Object, Object> cellMap;
                     if (cellValue != null) {
-                        cellMap = result.get(k);
+                        cellMap = result.get(firstColKeyMap == null ? k : firstColKeyMap.get(k));
                         if (cellMap == null) {
                             cellMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
-                            result.put(k, cellMap);
+                            result.put(firstColKeyMap == null ? k : firstColKeyMap.get(k), cellMap);
                         }
-                        cellMap.put(j, getCellValue(cell));
+                        cellMap.put(cellKeyMap == null ? j : cellKeyMap.get(j), getCellValue(cell));
                     }
                 }
             }
@@ -84,18 +93,18 @@ public class LReadCommon {
         }).orElse(null);
     }
 
-    /** 获取row下的所有cell的数据 */
-    public static Map<Object, Object> getRowValue(Row row) {
+    /** 获取row下的所有cell的数据 指定一个cellKeyMap作为key值 如果cell对应的key为空则将其编号作为key */
+    public static Map<Object, Object> getRowValue(Row row, Map<Object, Object> cellKeyMap) {
         return ofNullable(row).map(r -> {
             Map<Object, Object> cellMap = null;
-            for (int k = r.getFirstCellNum(); k < r.getLastCellNum(); k++) {
-                Cell cell = r.getCell(k);
+            for (int i = r.getFirstCellNum(); i < r.getLastCellNum(); i++) {
+                Cell cell = r.getCell(i);
                 Object cellValue = getCellValue(cell);
                 if (cellValue != null) {
                     if (cellMap == null) {
                         cellMap = new LinkedHashMap<>(r.getPhysicalNumberOfCells());
                     }
-                    cellMap.put(k, getCellValue(cell));
+                    cellMap.put(cellKeyMap == null ? i : ofNullable(cellKeyMap.get(i)).orElse(i), getCellValue(cell));
                 }
             }
             return cellMap;
@@ -103,16 +112,16 @@ public class LReadCommon {
     }
 
     /**
-     * 获取sheet下的第colIndex列的所有cell的数据
-     * {@link LReadCol#getColValue()} new LReadCol(sheet, colIndex).getColValue()
+     * 获取sheet下的第colIndex列的所有cell的数据 指定一个list作为key值 如果cell对应的key为空则将其编号作为key
+     * {@link LReadCol#getValue()} new LReadCol(sheet, colIndex, cellKeyMap).getColValue()
      */
     @Deprecated
-    public static Map<Object, Object> getColValue(Sheet sheet, int colIndex) {
+    public static Map<Object, Object> getColValue(Sheet sheet, int colIndex, Map<Object, Object> cellKeyMap) {
         return ofNullable(sheet).map(s -> {
             // 否则输出所有cell的值
             Map<Object, Object> result = null;
-            for (int j = s.getFirstRowNum(); j <= s.getLastRowNum(); j++) {
-                Row row = s.getRow(j);
+            for (int i = s.getFirstRowNum(); i <= s.getLastRowNum(); i++) {
+                Row row = s.getRow(i);
                 if (row == null) {
                     continue;
                 }
@@ -120,18 +129,19 @@ public class LReadCommon {
                 if (colIndex < row.getFirstCellNum() || colIndex > row.getLastCellNum() - 1) {
                     break;
                 }
-                Object cellValue = getCellValue(s.getRow(j), colIndex);
+                Object cellValue = getCellValue(s.getRow(i), colIndex);
                 if (cellValue != null) {
                     if (result == null) {
                         result = new LinkedHashMap<>(s.getPhysicalNumberOfRows());
                     }
-                    result.put(j, cellValue);
+                    result.put(cellKeyMap == null ? i : ofNullable(cellKeyMap.get(i)).orElse(i), cellValue);
                 }
             }
             return result;
         }).orElse(null);
     }
 
+    //region 获取 Cell的值 通过cell,row,sheet,workbook
     /** 获取cell下的数据 */
     public static Object getCellValue(Cell cell) {
         return ofNullable(cell).map(c -> {
@@ -184,7 +194,9 @@ public class LReadCommon {
         return getCellValue(getCell(workbook, sheetName, rowIndex, colIndex));
 
     }
+    //endregion
 
+    //region 获取 Cell 通过row,sheet,workbook
     /** 获取row下的第cellIndex行的cell */
     public static Cell getCell(Row row, int cellIndex) {
         // 如果 cellIndex大于row的最后边的cell 则返回null
@@ -213,4 +225,5 @@ public class LReadCommon {
     public static Cell getCell(Workbook workbook, String sheetName, int rowIndex, int colIndex) {
         return getCell(workbook.getSheet(sheetName), rowIndex, colIndex);
     }
+    //endregion
 }

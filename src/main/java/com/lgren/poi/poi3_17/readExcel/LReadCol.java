@@ -4,8 +4,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Optional.ofNullable;
@@ -16,12 +16,13 @@ import static java.util.Optional.ofNullable;
  * @create 2018-11-30 11:17
  **/
 public class LReadCol {
-    private Map<Object, Cell> cellMap;
-    private Map<Object, Object> colValueMap;
+    private Map<Integer, Cell> cellMap;
+    private Sheet sheet;
 
     //region 构造区
     public LReadCol(Sheet sheet, int colIndex) {
         if (sheet != null) {
+            this.sheet = sheet;
             // 否则输出所有cell的值
             for (int j = sheet.getFirstRowNum(); j <= sheet.getLastRowNum(); j++) {
                 Row row = sheet.getRow(j);
@@ -33,18 +34,11 @@ public class LReadCol {
                     break;
                 }
                 Cell cell = LReadCommon.getCell(sheet, j, colIndex);
-                if (cellMap == null) {
-                    cellMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
-                }
                 if (cell != null) {
+                    if (cellMap == null) {
+                        cellMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
+                    }
                     cellMap.put(j, cell);
-                }
-                Object cellValue = LReadCommon.getCellValue(cell);
-                if (colValueMap == null) {
-                    colValueMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
-                }
-                if (cellValue != null) {
-                    colValueMap.put(j, cellValue);
                 }
             }
         }
@@ -54,7 +48,31 @@ public class LReadCol {
     //region 获取Row全部数据 或者Cell数据
 
     /** 获取col下的所有cell的数据 */
-    public Map<Object, Object> getColValue() {
+    public Map<Object, Object> getValue() {
+        return getValue(null);
+    }
+
+    /** 获取col下的所有cell的数据 第一列的值作为key值 */
+    public Map<Object, Object> getValueWithFirstColKey() {
+        if (sheet == null || cellMap == null || cellMap.isEmpty()) {
+            return null;
+        }
+        int lastRowNum = sheet.getLastRowNum();
+        Map<Object, Object> cellKeyMap = new HashMap<>(sheet.getPhysicalNumberOfRows());
+        for (int i = sheet.getFirstRowNum(); i <= lastRowNum; i++) {
+            Row row = sheet.getRow(i);
+            if (row != null) {
+                cellKeyMap.put(i, LReadCommon.getCellValue(row, row.getFirstCellNum()));
+            }
+        }
+        return getValue(cellKeyMap);
+    }
+
+    private Map<Object, Object> getValue(Map<Object, Object> cellKeyMap) {
+        Map<Object, Object> colValueMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
+        cellMap.forEach((k,v) ->
+                colValueMap.put(cellKeyMap == null ? k : ofNullable(cellKeyMap.get(k)).orElse(k), LReadCommon.getCellValue(v))
+        );
         return colValueMap;
     }
     //endregion
@@ -63,7 +81,7 @@ public class LReadCol {
 
     /** 获取row下的第cellIndex行的cell的数据 */
     public Object getCellValue(int colIndex) {
-        return colValueMap.get(colIndex);
+        return LReadCommon.getCellValue(cellMap.get(colIndex));
     }
 
     /** 获取row下的第cellIndex行的cell的数据 */
@@ -76,4 +94,9 @@ public class LReadCol {
         return cellMap.get(colIndex);
     }
     //endregion
+
+
+    public Map<Integer, Cell> getCellMap() {
+        return cellMap;
+    }
 }
