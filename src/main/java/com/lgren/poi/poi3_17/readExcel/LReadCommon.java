@@ -25,8 +25,7 @@ import static java.util.Optional.ofNullable;
  * @create 2018-11-30 10:51
  **/
 public class LReadCommon {
-    private static DecimalFormat df = new DecimalFormat("0");// 格式化 number String 字符
-    private static DecimalFormat nf = new DecimalFormat("0.00");// 格式化数字
+    private static DecimalFormat df = new DecimalFormat("#.#########");// 格式化数字
 
     /** 通过输入流inp获取Workbook */
     public static Workbook getWorkbook(InputStream inp) throws IOException {
@@ -80,7 +79,7 @@ public class LReadCommon {
     public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, boolean firstColToKey, Map<Object, Object> cellKeyMap) {
         return ofNullable(sheet).map(s -> {
             Map<Object, Map<Object, Object>> result = null;
-            for (int j = s.getFirstRowNum(); j <= s.getLastRowNum(); j++) {
+            for (int j = s.getFirstRowNum() + (cellKeyMap == null ? 0 : 1); j <= s.getLastRowNum(); j++) {
                 Row row = s.getRow(j);
                 Map<Object, Object> cellMap = getRowValue(row, cellKeyMap);
                 if (cellMap != null) {
@@ -105,12 +104,12 @@ public class LReadCommon {
                 firstColKeyMap = LReadCommon.getRowValue(sheet.getRow(sheet.getFirstRowNum()), null);
             }
             Map<Object, Map<Object, Object>> result = null;
-            for (int j = s.getFirstRowNum(); j <= s.getLastRowNum(); j++) {
+            for (int j = s.getFirstRowNum() + (cellKeyMap == null ? 0 : 1); j <= s.getLastRowNum(); j++) {
                 Row row = s.getRow(j);
                 if (row == null) {
                     continue;
                 }
-                for (int k = row.getFirstCellNum(); k < row.getLastCellNum(); k++) {
+                for (int k = row.getFirstCellNum() + (firstRowToKey ? 1 : 0); k < row.getLastCellNum(); k++) {
                     Cell cell = row.getCell(k);
                     Object cellValue = getCellValue(cell);
                     Map<Object, Object> cellMap;
@@ -123,7 +122,7 @@ public class LReadCommon {
                             cellMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
                             result.put(firstColKeyMap == null ? k : firstColKeyMap.get(k), cellMap);
                         }
-                        cellMap.put(cellKeyMap == null ? j : cellKeyMap.get(j), getCellValue(cell));
+                        cellMap.put(cellKeyMap == null ? j : ofNullable(cellKeyMap.get(j)).orElse(j), getCellValue(cell));
                     }
                 }
             }
@@ -137,7 +136,7 @@ public class LReadCommon {
     public static Map<Object, Object> getRowValue(Row row, Map<Object, Object> cellKeyMap) {
         return ofNullable(row).map(r -> {
             Map<Object, Object> cellMap = null;
-            for (int i = r.getFirstCellNum(); i < r.getLastCellNum(); i++) {
+            for (int i = r.getFirstCellNum() + (cellKeyMap == null ? 0 : 1); i < r.getLastCellNum(); i++) {
                 Cell cell = r.getCell(i);
                 Object cellValue = getCellValue(cell);
                 if (cellValue != null) {
@@ -156,7 +155,7 @@ public class LReadCommon {
         return ofNullable(sheet).map(s -> {
             // 否则输出所有cell的值
             Map<Object, Object> result = null;
-            for (int i = s.getFirstRowNum(); i <= s.getLastRowNum(); i++) {
+            for (int i = s.getFirstRowNum() + (cellKeyMap == null ? 0 : 1); i <= s.getLastRowNum(); i++) {
                 Row row = s.getRow(i);
                 if (row == null) {
                     continue;
@@ -188,13 +187,14 @@ public class LReadCommon {
                     result = c.getStringCellValue();
                     break;
                 case NUMERIC:
-                    if ("@".equals(c.getCellStyle().getDataFormatString())) {
-                        result = df.format(c.getNumericCellValue());
-                    } else if ("General".equals(c.getCellStyle().getDataFormatString())) {
-                        result = nf.format(c.getNumericCellValue());
-                    } else {
-                        result = c.getNumericCellValue();
-                    }
+                    result = df.format(c.getNumericCellValue());
+//                    if ("@".equals(c.getCellStyle().getDataFormatString())) {
+//                        result = df.format(c.getNumericCellValue());
+//                    } else if ("General".equals(c.getCellStyle().getDataFormatString())) {
+//                        result = nf.format(c.getNumericCellValue());
+//                    } else {
+//                        result = c.getNumericCellValue();
+//                    }
                     break;
                 case BOOLEAN:
                     result = c.getBooleanCellValue();

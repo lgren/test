@@ -108,7 +108,7 @@ public class LRWorkbook {
                 return null;
             }
             int lastRowNum = sheet.getLastRowNum();
-            Map<Object, Object> cellKeyMap = new HashMap<>(sheet.getPhysicalNumberOfRows());
+            Map<Object, Object> cellKeyMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
             for (int i = sheet.getFirstRowNum(); i <= lastRowNum; i++) {
                 Row row = sheet.getRow(i);
                 cellKeyMap.put(i, LReadCommon.getCellValue(row, row.getFirstCellNum()));
@@ -265,11 +265,17 @@ public class LRWorkbook {
         }
 
         private Map<Object, Object> getValue(Map<Object, Object> cellKeyMap) {
+            if (cellMap == null) {
+                return null;
+            }
             Map<Object, Object> colValueMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
-            cellMap.forEach((k,v) ->
-                    colValueMap.put(cellKeyMap == null ? k : ofNullable(cellKeyMap.get(k)).orElse(k), LReadCommon.getCellValue(v))
-            );
-            return colValueMap;
+            cellMap.forEach((k,v) ->{
+                Object value = LReadCommon.getCellValue(v);
+                if (value != null) {
+                    colValueMap.put(cellKeyMap == null ? k : ofNullable(cellKeyMap.get(k)).orElse(k), value);
+                }
+            });
+            return colValueMap.isEmpty() ? null : colValueMap;
         }
         //endregion
 

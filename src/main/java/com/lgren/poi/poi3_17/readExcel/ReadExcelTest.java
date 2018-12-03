@@ -15,8 +15,10 @@ public class ReadExcelTest {
     public void LRWorkbookTest() throws IOException {
         LRWorkbook lrwb = new LRWorkbook(new FileInputStream("E:\\usr\\测试1.xlsx"));
         LRWorkbook lrwb2 = new LRWorkbook(new FileInputStream("E:\\usr\\测试2.xlsx"));
+        LRWorkbook lrwb3 = new LRWorkbook(new FileInputStream("E:\\usr\\数字测试.xlsx"));
 
-        lrwb2.sheet("one").getValueWithFirstKey();
+//        lrwb3.sheet("sheet1").col(0).getValue();
+        lrwb3.sheet("sheet1").getValueWithFirstKeyByCol();
         System.out.println();
     }
 }
