@@ -1,27 +1,22 @@
 package com.lgren.poi.poi3_17.readExcel;
 
-import org.apache.poi.ss.usermodel.Workbook;
+import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
- * TODO
+ * 测试
  * @author Lgren
  * @create 2018-11-30 10:25
  **/
 public class ReadExcelTest {
-    public static void main(String[] args) throws IOException {
-        InputStream wbInp = new FileInputStream("D:\\Documents\\Desktop\\测试(2).xlsx");
-        Workbook wb = LReadWorkbook.getWorkbook(wbInp).getData();
-        LReadWorkbook lrwb = new LReadWorkbook(wb);
+    @Test
+    public void LRWorkbookTest() throws IOException {
+        LRWorkbook lrwb = new LRWorkbook(new FileInputStream("E:\\usr\\测试1.xlsx"));
+        LRWorkbook lrwb2 = new LRWorkbook(new FileInputStream("E:\\usr\\测试2.xlsx"));
 
-        InputStream wbInp2 = new FileInputStream("E:\\usr\\testttt.xlsx");
-        Workbook wb2 = LReadWorkbook.getWorkbook(wbInp2).getData();
-        LReadWorkbook lrwb2 = new LReadWorkbook(wb2);
-
-        lrwb2.sheet("sheet").row(2).cell(1);
+        lrwb2.sheet("one").getValueWithFirstKey();
         System.out.println();
     }
 }

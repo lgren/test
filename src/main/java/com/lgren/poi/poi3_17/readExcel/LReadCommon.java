@@ -1,10 +1,18 @@
 package com.lgren.poi.poi3_17.readExcel;
 
+import com.lgren.common.CommResult;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.FileMagic;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,7 +20,7 @@ import java.util.Map;
 import static java.util.Optional.ofNullable;
 
 /**
- * TODO
+ * 读取excel公共类
  * @author Lgren
  * @create 2018-11-30 10:51
  **/
@@ -20,24 +28,51 @@ public class LReadCommon {
     private static DecimalFormat df = new DecimalFormat("0");// 格式化 number String 字符
     private static DecimalFormat nf = new DecimalFormat("0.00");// 格式化数字
 
+    /** 通过输入流inp获取Workbook */
+    public static Workbook getWorkbook(InputStream inp) throws IOException {
+        Workbook workbook;
+        CommResult<Workbook> result = new CommResult<>();
+        try (InputStream mpbinp = inp.markSupported() ? inp : new PushbackInputStream(inp, 8);
+             InputStream newInp = FileMagic.prepareToCheckMagic(mpbinp)) {
+            FileMagic fileMagic = FileMagic.valueOf(newInp);
+            if (fileMagic == FileMagic.OLE2) {
+                try {
+                    POIFSFileSystem fs = new POIFSFileSystem(newInp);
+                    workbook = new HSSFWorkbook(fs);
+                    result.setErrorMsg("xls");
+                } catch (Exception e) {
+                    throw new RuntimeException("读取失败！");
+                }
+            } else if (fileMagic == FileMagic.OOXML) {
+                try {
+                    workbook = new XSSFWorkbook(newInp);
+                    result.setErrorMsg("xlsx");
+                } catch (Exception e) {
+                    throw new RuntimeException("读取失败！");
+                }
+            } else {
+                throw new RuntimeException("不支持的文件类型！");
+            }
+        }
+        return workbook;
+    }
+
+    //region 获取一个workbook的值
     /** 获取workbook下的所有cell的数据 通过sheet分组 */
     public static Map<String, Map<Object, Map<Object, Object>>> getWorkbookValue(Workbook workbook) {
         return ofNullable(workbook).map(wb -> {
-            Map<String, Map<Object, Map<Object, Object>>> allFile = null;
+            Map<String, Map<Object, Map<Object, Object>>> allSheet = new LinkedHashMap<>(wb.getNumberOfSheets());
             for (int i = 0; i < wb.getNumberOfSheets(); i++) {
                 Sheet sheet = wb.getSheetAt(i);
                 Map<Object, Map<Object, Object>> sheetMap = getSheetValue(sheet, false, null);
-                if (sheetMap != null) {
-                    if (allFile == null) {
-                        allFile = new LinkedHashMap<>(wb.getNumberOfSheets());
-                    }
-                    allFile.put(sheet.getSheetName(), sheetMap);
-                }
+                allSheet.put(sheet.getSheetName(), sheetMap);
             }
-            return allFile;
+            return allSheet;
         }).orElse(null);
     }
+    //endregion
 
+    //region 获取一个sheet的值 通过行or列分组
     /** 获取sheet下的所有cell的数据 通过row分组
      *  @param firstColToKey 是否将每一行的第一列作为整个rowValue的key值
      *  @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
@@ -65,11 +100,11 @@ public class LReadCommon {
      */
     public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, boolean firstRowToKey, Map<Object, Object> cellKeyMap) {
         return ofNullable(sheet).map(s -> {
-            Map<Object, Map<Object, Object>> result = new LinkedHashMap<>(s.getRow(s.getFirstRowNum()).getPhysicalNumberOfCells());
             Map<Object, Object> firstColKeyMap = null;
             if (firstRowToKey) {
                 firstColKeyMap = LReadCommon.getRowValue(sheet.getRow(sheet.getFirstRowNum()), null);
             }
+            Map<Object, Map<Object, Object>> result = null;
             for (int j = s.getFirstRowNum(); j <= s.getLastRowNum(); j++) {
                 Row row = s.getRow(j);
                 if (row == null) {
@@ -80,6 +115,9 @@ public class LReadCommon {
                     Object cellValue = getCellValue(cell);
                     Map<Object, Object> cellMap;
                     if (cellValue != null) {
+                        if (result == null) {
+                            result = new LinkedHashMap<>(s.getRow(s.getFirstRowNum()).getPhysicalNumberOfCells());
+                        }
                         cellMap = result.get(firstColKeyMap == null ? k : firstColKeyMap.get(k));
                         if (cellMap == null) {
                             cellMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
@@ -92,7 +130,9 @@ public class LReadCommon {
             return result;
         }).orElse(null);
     }
+    //endregion
 
+    //region 获取一行或者一列的所有cell的值
     /** 获取row下的所有cell的数据 指定一个cellKeyMap作为key值 如果cell对应的key为空则将其编号作为key */
     public static Map<Object, Object> getRowValue(Row row, Map<Object, Object> cellKeyMap) {
         return ofNullable(row).map(r -> {
@@ -111,11 +151,7 @@ public class LReadCommon {
         }).orElse(null);
     }
 
-    /**
-     * 获取sheet下的第colIndex列的所有cell的数据 指定一个list作为key值 如果cell对应的key为空则将其编号作为key
-     * {@link LReadCol#getValue()} new LReadCol(sheet, colIndex, cellKeyMap).getColValue()
-     */
-    @Deprecated
+    /** 获取sheet下的第colIndex列的所有cell的数据 指定一个list作为key值 如果cell对应的key为空则将其编号作为key */
     public static Map<Object, Object> getColValue(Sheet sheet, int colIndex, Map<Object, Object> cellKeyMap) {
         return ofNullable(sheet).map(s -> {
             // 否则输出所有cell的值
@@ -140,6 +176,7 @@ public class LReadCommon {
             return result;
         }).orElse(null);
     }
+    //endregion
 
     //region 获取 Cell的值 通过cell,row,sheet,workbook
     /** 获取cell下的数据 */
@@ -163,7 +200,7 @@ public class LReadCommon {
                     result = c.getBooleanCellValue();
                     break;
                 case BLANK:
-                    result = "";
+                    result = null;
                     break;
                 default:
                     result = c.toString();

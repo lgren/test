@@ -1,13 +1,8 @@
 package test.poi;
 
-import com.lgren.poi.poi3_17.LReadExcelPlusUtils;
-import com.lgren.poi.poi3_17.LReadExcelUtils;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Test;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * LReadExcelPlusUtils 测试
