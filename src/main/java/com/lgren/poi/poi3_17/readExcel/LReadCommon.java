@@ -1,6 +1,7 @@
 package com.lgren.poi.poi3_17.readExcel;
 
 import com.lgren.common.CommResult;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.FileMagic;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -57,72 +58,186 @@ public class LReadCommon {
     }
 
     //region 获取一个workbook的值
+
     /** 获取workbook下的所有cell的数据 通过sheet分组 */
     public static Map<String, Map<Object, Map<Object, Object>>> getWorkbookValue(Workbook workbook) {
         return ofNullable(workbook).map(wb -> {
             Map<String, Map<Object, Map<Object, Object>>> allSheet = new LinkedHashMap<>(wb.getNumberOfSheets());
             for (int i = 0; i < wb.getNumberOfSheets(); i++) {
                 Sheet sheet = wb.getSheetAt(i);
-                Map<Object, Map<Object, Object>> sheetMap = getSheetValue(sheet, false, null);
-                allSheet.put(sheet.getSheetName(), sheetMap);
+                allSheet.put(sheet.getSheetName(), getSheetValue(sheet));
             }
             return allSheet;
         }).orElse(null);
     }
     //endregion
 
-    //region 获取一个sheet的值 通过行or列分组
-    /** 获取sheet下的所有cell的数据 通过row分组
-     *  @param firstColToKey 是否将每一行的第一列作为整个rowValue的key值
-     *  @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
+    //region 获取一个sheet的值 通过行分组
+
+    /**
+     * 获取sheet下的所有cell的数据 通过row分组
+     * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, boolean firstColToKey, Map<Object, Object> cellKeyMap) {
+    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet) {
+        return getSheetValue(sheet, false);
+    }
+
+    /**
+     * 获取sheet下的所有cell的数据 通过row分组
+     * @param firstToKeyAndSkip 1.将第一列作为每一个row分组的key值
+     *                          2.跳过哪一列
+     *                          3.将第一行作为每一个cell的key值
+     *                          4.跳过哪一行
+     * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
+     */
+    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, boolean firstToKeyAndSkip) {
+        return firstToKeyAndSkip ? getSheetValue(sheet, getColValue(sheet, 0), new int[]{0}, getRowValue(sheet, 0), new int[]{0})
+                : getSheetValue(sheet, null, null, null, null);
+    }
+
+    /**
+     * 获取sheet下的所有cell的数据 通过row分组
+     * @param whichColToRowKey  将whichColToRowKey列作为每一个row分组的key值 (从0计数)
+     * @param skipWhichRow      跳过哪一行 如果小于0则不跳过
+     * @param whichRowToCellKey 将第 whichRowToCellKey行作为每一个cell的key值 (从0计数)
+     * @param skipWhichCol      跳过哪一列 如果小于0则不跳过
+     * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
+     */
+    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, int whichColToRowKey, int skipWhichRow, int whichRowToCellKey, int skipWhichCol) {
+        int[] skipRowArr = skipWhichRow < 0 ? null : new int[]{skipWhichRow};
+        int[] skipColArr = skipWhichCol < 0 ? null : new int[]{skipWhichCol};
+        return getSheetValue(sheet, getColValue(sheet, whichColToRowKey), skipRowArr, getRowValue(sheet, whichRowToCellKey), skipColArr);
+    }
+
+    /**
+     * 获取sheet下的所有cell的数据 通过row分组
+     * @param whichColToRowKey  将whichColToRowKey列作为每一个row分组的key值 (从0计数)
+     * @param skipRowArr        跳过哪几列
+     * @param whichRowToCellKey 将第 whichRowToCellKey行作为每一个cell的key值 (从0计数)
+     * @param skipColArr        跳过哪几行
+     * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
+     */
+    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, int whichColToRowKey, int[] skipRowArr, int whichRowToCellKey, int[] skipColArr) {
+        return getSheetValue(sheet, getColValue(sheet, whichColToRowKey), skipRowArr, getRowValue(sheet, whichRowToCellKey), skipColArr);
+    }
+
+    /**
+     * 获取sheet下的所有cell的数据 通过row分组
+     * @param rowKeyMap  每个row分组的key值 如果为空则是对应的编号
+     * @param skipRowArr 跳过哪几列
+     * @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
+     * @param skipColArr 跳过哪几行
+     * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
+     */
+    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, Map<Object, Object> rowKeyMap, int[] skipRowArr, Map<Object, Object> cellKeyMap, int[] skipColArr) {
         return ofNullable(sheet).map(s -> {
             Map<Object, Map<Object, Object>> result = null;
-            for (int j = s.getFirstRowNum() + (cellKeyMap == null ? 0 : 1); j <= s.getLastRowNum(); j++) {
-                Row row = s.getRow(j);
-                Map<Object, Object> cellMap = getRowValue(row, cellKeyMap);
+            for (int i = s.getFirstRowNum(); i <= s.getLastRowNum(); i++) {
+                if (skipRowArr != null && ArrayUtils.contains(skipRowArr, i)) {
+                    continue;
+                }
+                Row row = s.getRow(i);
+                Map<Object, Object> cellMap = getRowValue(row, cellKeyMap, skipColArr);
                 if (cellMap != null) {
                     if (result == null) {
                         result = new LinkedHashMap<>(s.getPhysicalNumberOfRows());
                     }
-                    result.put(firstColToKey ? ofNullable(getCellValue(row.getCell(row.getFirstCellNum()))).orElse(j) : j, cellMap);
+                    Object rowKey = (rowKeyMap == null || rowKeyMap.isEmpty()) ? i : ofNullable(rowKeyMap.get(i)).orElse(i);
+                    result.put(rowKey, cellMap);
                 }
             }
             return result;
         }).orElse(null);
     }
+    //endregion
 
-    /** 获取sheet下的所有cell的数据 通过row分组
-     *  @param firstRowToKey 是否将第一行的值作为整个colValue的key值
-     *  @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
+    //region 获取一个sheet的值 通过列分组
+
+    /**
+     * 获取sheet下的所有cell的数据 通过row分组
+     * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, boolean firstRowToKey, Map<Object, Object> cellKeyMap) {
+    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet) {
+        return getSheetValueByCol(sheet, false);
+    }
+
+    /**
+     * 获取sheet下的所有cell的数据 通过row分组
+     * @param firstToKeyAndSkip 1.将第一行作为每一个col分组的key值
+     *                          2.跳过哪一行
+     *                          3.将第一列作为每一个cell的key值
+     *                          4.跳过哪一列
+     * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
+     */
+    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, boolean firstToKeyAndSkip) {
+        return firstToKeyAndSkip ? getSheetValueByCol(sheet, getRowValue(sheet, 0), new int[]{0}, getColValue(sheet, 0), new int[]{0})
+                : getSheetValueByCol(sheet, null, null, null, null);
+    }
+
+    /**
+     * 获取sheet下的所有cell的数据 通过row分组
+     * @param whichRowToColKey  将 whichRowToColKey行作为每一个col分组的key值 (从0计数)
+     * @param skipWhichCol      跳过哪一列 如果小于0则不跳过
+     * @param whichColToCellKey 将第 whichColToCellKey列作为每一个cell的key值 (从0计数)
+     * @param skipWhichRow      跳过哪一行 如果小于0则不跳过
+     * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
+     */
+    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, int whichRowToColKey, int skipWhichCol, int whichColToCellKey, int skipWhichRow) {
+        int[] skipColArr = skipWhichCol < 0 ? null : new int[]{skipWhichCol};
+        int[] skipRowArr = skipWhichRow < 0 ? null : new int[]{skipWhichRow};
+        return getSheetValueByCol(sheet, getRowValue(sheet, whichRowToColKey), skipRowArr, getColValue(sheet, whichColToCellKey), skipColArr);
+    }
+
+    /**
+     * 获取sheet下的所有cell的数据 通过row分组
+     * @param whichRowToColKey  将 whichRowToColKey行作为每一个col分组的key值 (从0计数)
+     * @param skipColArr        跳过哪几列
+     * @param whichColToCellKey 将第 whichColToCellKey列作为每一个cell的key值 (从0计数)
+     * @param skipRowArr        跳过哪几行
+     * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
+     */
+    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, int whichRowToColKey, int[] skipColArr, int whichColToCellKey, int[] skipRowArr) {
+        return getSheetValueByCol(sheet, getRowValue(sheet, whichRowToColKey), skipRowArr, getColValue(sheet, whichColToCellKey), skipColArr);
+    }
+
+    /**
+     * 获取sheet下的所有cell的数据 通过row分组
+     * @param colKeyMap  每个col分组的key值 如果为空则是对应的编号
+     * @param skipColArr 跳过哪几列
+     * @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
+     * @param skipRowArr 跳过哪几行
+     * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
+     */
+    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, Map<Object, Object> colKeyMap, int[] skipColArr, Map<Object, Object> cellKeyMap, int[] skipRowArr) {
         return ofNullable(sheet).map(s -> {
-            Map<Object, Object> firstColKeyMap = null;
-            if (firstRowToKey) {
-                firstColKeyMap = LReadCommon.getRowValue(sheet.getRow(sheet.getFirstRowNum()), null);
-            }
             Map<Object, Map<Object, Object>> result = null;
-            for (int j = s.getFirstRowNum() + (cellKeyMap == null ? 0 : 1); j <= s.getLastRowNum(); j++) {
-                Row row = s.getRow(j);
+            for (int i = s.getFirstRowNum(); i <= s.getLastRowNum(); i++) {
+                if (skipRowArr != null && ArrayUtils.contains(skipRowArr, i)) {
+                    continue;
+                }
+                Row row = s.getRow(i);
                 if (row == null) {
                     continue;
                 }
-                for (int k = row.getFirstCellNum() + (firstRowToKey ? 1 : 0); k < row.getLastCellNum(); k++) {
-                    Cell cell = row.getCell(k);
+                for (int j = row.getFirstCellNum(); j < row.getLastCellNum(); j++) {
+                    if (skipColArr != null && ArrayUtils.contains(skipColArr, j)) {
+                        continue;
+                    }
+                    Cell cell = row.getCell(j);
                     Object cellValue = getCellValue(cell);
                     Map<Object, Object> cellMap;
                     if (cellValue != null) {
                         if (result == null) {
                             result = new LinkedHashMap<>(s.getRow(s.getFirstRowNum()).getPhysicalNumberOfCells());
                         }
-                        cellMap = result.get(firstColKeyMap == null ? k : firstColKeyMap.get(k));
+                        Object colKey = colKeyMap == null ? j : ofNullable(colKeyMap.get(j)).orElse(j);
+                        cellMap = result.get(colKey);
                         if (cellMap == null) {
                             cellMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
-                            result.put(firstColKeyMap == null ? k : firstColKeyMap.get(k), cellMap);
+                            result.put(colKey, cellMap);
                         }
-                        cellMap.put(cellKeyMap == null ? j : ofNullable(cellKeyMap.get(j)).orElse(j), getCellValue(cell));
+                        Object cellKey = cellKeyMap == null || cellKeyMap.isEmpty() ? i : ofNullable(cellKeyMap.get(i)).orElse(i);
+                        cellMap.put(cellKey, getCellValue(cell));
                     }
                 }
             }
@@ -131,31 +246,113 @@ public class LReadCommon {
     }
     //endregion
 
-    //region 获取一行或者一列的所有cell的值
-    /** 获取row下的所有cell的数据 指定一个cellKeyMap作为key值 如果cell对应的key为空则将其编号作为key */
-    public static Map<Object, Object> getRowValue(Row row, Map<Object, Object> cellKeyMap) {
+    //region 获取一行所有cell的值
+
+    /**
+     * 获取sheet下的第rowIndex行的所有cell的数据 指定一个cellKeyMap作为key值 如果cell对应的key为空则将其编号作为key
+     * @param rowIndex 第 rowIndex行 (从0计数)
+     * @return 第 rowIndex行的所有cell的值的集合
+     */
+    public static Map<Object, Object> getRowValue(Sheet sheet, int rowIndex) {
+        return getRowValue(sheet, rowIndex, null);
+    }
+
+    /**
+     * 获取sheet下的第rowIndex行的所有cell的数据 指定一个cellKeyMap作为key值 如果cell对应的key为空则将其编号作为key
+     * @param rowIndex          第 rowIndex行 (从0计数)
+     * @param whichRowToCellKey 将第 whichRowToCellKey行作为每一个cell的key值 (从0计数)
+     * @param skipColArr        跳过哪几列
+     * @return 第 rowIndex行的所有cell的值的集合
+     */
+    public static Map<Object, Object> getRowValue(Sheet sheet, int rowIndex, int whichRowToCellKey, int... skipColArr) {
+        return getRowValue(sheet, rowIndex, getRowValue(sheet, whichRowToCellKey, null), skipColArr);
+    }
+
+    /**
+     * 获取sheet下的第rowIndex行的所有cell的数据 指定一个cellKeyMap作为key值 如果cell对应的key为空则将其编号作为key
+     * @param rowIndex   第 rowIndex行 (从0计数)
+     * @param cellKeyMap 每一个cell的key值
+     *                   cellKeyMap的key对应cell的key
+     *                   cellKeyMap的value成为cell新的Key
+     *                   注意!: 是一对一对应 如果对应的cellKeyMap的值为空则cell的key不变
+     * @param skipColArr 跳过哪几列
+     * @return 第 rowIndex行的所有cell的值的集合
+     */
+    public static Map<Object, Object> getRowValue(Sheet sheet, int rowIndex, Map<Object, Object> cellKeyMap, int... skipColArr) {
+        return ofNullable(sheet).map(s -> getRowValue(s.getRow(rowIndex), cellKeyMap, skipColArr)).orElse(null);
+    }
+
+    /**
+     * 获取row下的所有cell的数据 指定一个cellKeyMap作为key值 如果cell对应的key为空则将其编号作为key
+     * @param cellKeyMap 每一个cell的key值
+     *                   cellKeyMap的key对应cell的key
+     *                   cellKeyMap的value成为cell新的Key
+     *                   注意!: 是一对一对应 如果对应的cellKeyMap的值为空则cell的key不变
+     * @param skipColArr 跳过哪几列
+     * @return row的所有cell的值的集合
+     */
+    public static Map<Object, Object> getRowValue(Row row, Map<Object, Object> cellKeyMap, int... skipColArr) {
         return ofNullable(row).map(r -> {
             Map<Object, Object> cellMap = null;
-            for (int i = r.getFirstCellNum() + (cellKeyMap == null ? 0 : 1); i < r.getLastCellNum(); i++) {
+            for (int i = r.getFirstCellNum(); i < r.getLastCellNum(); i++) {
+                if (skipColArr != null && ArrayUtils.contains(skipColArr, i)) {
+                    continue;
+                }
                 Cell cell = r.getCell(i);
                 Object cellValue = getCellValue(cell);
                 if (cellValue != null) {
                     if (cellMap == null) {
                         cellMap = new LinkedHashMap<>(r.getPhysicalNumberOfCells());
                     }
-                    cellMap.put(cellKeyMap == null ? i : ofNullable(cellKeyMap.get(i)).orElse(i), getCellValue(cell));
+                    Object cellKey = (cellKeyMap == null || cellKeyMap.isEmpty()) ? i : ofNullable(cellKeyMap.get(i)).orElse(i);
+                    cellMap.put(cellKey, cellValue);
                 }
             }
             return cellMap;
         }).orElse(null);
     }
+    //endregion
 
-    /** 获取sheet下的第colIndex列的所有cell的数据 指定一个list作为key值 如果cell对应的key为空则将其编号作为key */
-    public static Map<Object, Object> getColValue(Sheet sheet, int colIndex, Map<Object, Object> cellKeyMap) {
+    //region 获取一列所有cell的值
+
+    /**
+     * 获取sheet下的第colIndex列的所有cell的数据 指定一个list作为key值 如果cell对应的key为空则将其编号作为key
+     * @param colIndex 第 colIndex列 (从0计数)
+     * @return 一列的所有cell的值的集合
+     */
+    public static Map<Object, Object> getColValue(Sheet sheet, int colIndex) {
+        return getColValue(sheet, colIndex, null);
+    }
+
+    /**
+     * 获取sheet下的第colIndex列的所有cell的数据 指定一个list作为key值 如果cell对应的key为空则将其编号作为key
+     * @param colIndex          第 colIndex列 (从0计数)
+     * @param whichColToCellKey 将第 whichColToCellKey列作为每一个cell的key值 (从0计数)
+     * @param skipRowArr        跳过哪几行
+     * @return 一列的所有cell的值的集合
+     */
+    public static Map<Object, Object> getColValue(Sheet sheet, int colIndex, int whichColToCellKey, int... skipRowArr) {
+        return getColValue(sheet, colIndex, getColValue(sheet, whichColToCellKey, null), skipRowArr);
+    }
+
+    /**
+     * 获取sheet下的第colIndex列的所有cell的数据 指定一个list作为key值 如果cell对应的key为空则将其编号作为key
+     * @param colIndex   第 colIndex列 (从0计数)
+     * @param cellKeyMap 每一个cell的key值
+     *                   cellKeyMap的key对应cell的key
+     *                   cellKeyMap的value成为cell新的Key
+     *                   注意!: 是一对一对应 如果对应的cellKeyMap的值为空则cell的key不变
+     * @param skipRowArr 跳过哪几行
+     * @return 第 colIndex列的所有cell的值的集合
+     */
+    public static Map<Object, Object> getColValue(Sheet sheet, int colIndex, Map<Object, Object> cellKeyMap, int... skipRowArr) {
         return ofNullable(sheet).map(s -> {
             // 否则输出所有cell的值
-            Map<Object, Object> result = null;
-            for (int i = s.getFirstRowNum() + (cellKeyMap == null ? 0 : 1); i <= s.getLastRowNum(); i++) {
+            Map<Object, Object> cellMap = null;
+            for (int i = s.getFirstRowNum(); i <= s.getLastRowNum(); i++) {
+                if (skipRowArr != null && ArrayUtils.contains(skipRowArr, i)) {
+                    continue;
+                }
                 Row row = s.getRow(i);
                 if (row == null) {
                     continue;
@@ -166,18 +363,20 @@ public class LReadCommon {
                 }
                 Object cellValue = getCellValue(s.getRow(i), colIndex);
                 if (cellValue != null) {
-                    if (result == null) {
-                        result = new LinkedHashMap<>(s.getPhysicalNumberOfRows());
+                    if (cellMap == null) {
+                        cellMap = new LinkedHashMap<>(s.getPhysicalNumberOfRows());
                     }
-                    result.put(cellKeyMap == null ? i : ofNullable(cellKeyMap.get(i)).orElse(i), cellValue);
+                    Object cellKey = (cellKeyMap == null || cellKeyMap.isEmpty()) ? i : ofNullable(cellKeyMap.get(i)).orElse(i);
+                    cellMap.put(cellKey, cellValue);
                 }
             }
-            return result;
+            return cellMap;
         }).orElse(null);
     }
     //endregion
 
     //region 获取 Cell的值 通过cell,row,sheet,workbook
+
     /** 获取cell下的数据 */
     public static Object getCellValue(Cell cell) {
         return ofNullable(cell).map(c -> {
@@ -188,13 +387,13 @@ public class LReadCommon {
                     break;
                 case NUMERIC:
                     result = df.format(c.getNumericCellValue());
-//                    if ("@".equals(c.getCellStyle().getDataFormatString())) {
-//                        result = df.format(c.getNumericCellValue());
-//                    } else if ("General".equals(c.getCellStyle().getDataFormatString())) {
-//                        result = nf.format(c.getNumericCellValue());
-//                    } else {
-//                        result = c.getNumericCellValue();
-//                    }
+                    // if ("@".equals(c.getCellStyle().getDataFormatString())) {
+                    //     result = df.format(c.getNumericCellValue());
+                    // } else if ("General".equals(c.getCellStyle().getDataFormatString())) {
+                    //     result = nf.format(c.getNumericCellValue());
+                    // } else {
+                    //     result = c.getNumericCellValue();
+                    // }
                     break;
                 case BOOLEAN:
                     result = c.getBooleanCellValue();
@@ -209,24 +408,49 @@ public class LReadCommon {
         }).orElse(null);
     }
 
-    /** 获取row下的第cellIndex行的cell的数据 */
+    /**
+     * 获取 Cell的
+     * 获取row下的第cellIndex行的cell的数据
+     * @param cellIndex 第 cellIndex个cell (从0计数)
+     * @return Cell对象的值
+     */
     public static Object getCellValue(Row row, int cellIndex) {
         return getCellValue(getCell(row, cellIndex));
     }
 
-    /** 获取sheet下的第cellIndex行第colIndex列的cell的数据 */
+    /**
+     * 获取 Cell的值
+     * 获取sheet下的第cellIndex行第colIndex列的cell的数据
+     * @param rowIndex 第 rowIndex行 (从0计数)
+     * @param colIndex 第 colIndex列 (从0计数)
+     * @return Cell对象的值
+     */
     public static Object getCellValue(Sheet sheet, int rowIndex, int colIndex) {
         return getCellValue(getCell(sheet, rowIndex, colIndex));
 
     }
 
-    /** 获取workbook下的第sheetIndex个sheet的第rowIndex行第colIndex列的cell的数据 */
+    /**
+     * 获取 Cell的值
+     * 获取workbook下的第sheetIndex个sheet的第rowIndex行第colIndex列的cell的数据
+     * @param sheetIndex sheet的编号 (从0计数)
+     * @param rowIndex   第 rowIndex行 (从0计数)
+     * @param colIndex   第 colIndex列 (从0计数)
+     * @return Cell对象的值
+     */
     public static Object getCellValue(Workbook workbook, int sheetIndex, int rowIndex, int colIndex) {
         return getCellValue(getCell(workbook, sheetIndex, rowIndex, colIndex));
 
     }
 
-    /** 获取workbook下的名字叫做sheetName的sheet的第rowIndex行第colIndex列的cell的数据 */
+    /**
+     * 获取 Cell的值
+     * 获取workbook下的名字叫做sheetName的sheet的第rowIndex行第colIndex列的cell的数据
+     * @param sheetName sheet的名字
+     * @param rowIndex  第 rowIndex行 (从0计数)
+     * @param colIndex  第 colIndex列 (从0计数)
+     * @return Cell对象的值
+     */
     public static Object getCellValue(Workbook workbook, String sheetName, int rowIndex, int colIndex) {
         return getCellValue(getCell(workbook, sheetName, rowIndex, colIndex));
 
@@ -234,31 +458,57 @@ public class LReadCommon {
     //endregion
 
     //region 获取 Cell 通过row,sheet,workbook
-    /** 获取row下的第cellIndex行的cell */
+
+    /**
+     * 获取 Cell的
+     * 获取row下的第cellIndex行的Cell
+     * @param cellIndex 第 cellIndex个cell (从0计数)
+     * @return Cell对象 {@link Cell}
+     */
     public static Cell getCell(Row row, int cellIndex) {
         // 如果 cellIndex大于row的最后边的cell 则返回null
-        return ofNullable(row).filter(r -> cellIndex < r.getLastCellNum())
+        return ofNullable(row).filter(r -> cellIndex >= r.getFirstCellNum() && cellIndex < r.getLastCellNum())
                 // 否则输出对应的Cell的
                 .map(r -> r.getCell(cellIndex)).orElse(null);
     }
 
-    /** 获取sheet下的第cellIndex行第colIndex列的 */
+    /**
+     * 获取 Cell的
+     * 获取sheet下的第cellIndex行第colIndex列的Cell
+     * @param rowIndex 第 rowIndex行 (从0计数)
+     * @param colIndex 第 colIndex列 (从0计数)
+     * @return Cell对象 {@link Cell}
+     */
     public static Cell getCell(Sheet sheet, int rowIndex, int colIndex) {
         // 如果 rowIndex大于sheet的最后边的row 则返回null
-        return ofNullable(sheet).filter(s -> rowIndex <= s.getLastRowNum())
+        return ofNullable(sheet).filter(s -> rowIndex >= s.getFirstRowNum() && rowIndex <= s.getLastRowNum())
                 // 否则输出对应的Cell的
                 .map(s -> getCell(s.getRow(rowIndex), colIndex)).orElse(null);
     }
 
-    /** 获取workbook下的第sheetIndex个sheet的第rowIndex行第colIndex列的cell */
+    /**
+     * 获取 Cell的
+     * 获取workbook下的第sheetIndex个sheet的第rowIndex行第colIndex列的Cell
+     * @param sheetIndex sheet的编号 (从0计数)
+     * @param rowIndex   第 rowIndex行 (从0计数)
+     * @param colIndex   第 colIndex列 (从0计数)
+     * @return Cell对象 {@link Cell}
+     */
     public static Cell getCell(Workbook workbook, int sheetIndex, int rowIndex, int colIndex) {
         // 如果 sheetIndex大于等于workbook所有sheet数量 则返回null
-        return ofNullable(workbook).filter(w -> w.getNumberOfSheets() > sheetIndex)
+        return ofNullable(workbook).filter(w -> sheetIndex > -1 && sheetIndex < w.getNumberOfSheets())
                 // 否则输出对应的Cell的
                 .map(w -> getCell(w.getSheetAt(sheetIndex), rowIndex, colIndex)).orElse(null);
     }
 
-    /** 获取workbook下的名字叫做sheetName的sheet的第rowIndex行第colIndex列的cell */
+    /**
+     * 获取 Cell的
+     * 获取workbook下的名字叫做sheetName的sheet的第rowIndex行第colIndex列的Cell
+     * @param sheetName sheet的名字
+     * @param rowIndex  第 rowIndex行 (从0计数)
+     * @param colIndex  第 colIndex列 (从0计数)
+     * @return Cell对象 {@link Cell}
+     */
     public static Cell getCell(Workbook workbook, String sheetName, int rowIndex, int colIndex) {
         return getCell(workbook.getSheet(sheetName), rowIndex, colIndex);
     }

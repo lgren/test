@@ -7,7 +7,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -15,7 +14,7 @@ import java.util.Objects;
 import static java.util.Optional.ofNullable;
 
 /**
- * TODO
+ * 读取workbook的类
  * @author Lgren
  * @create 2018-12-03 11:37
  **/
@@ -53,8 +52,14 @@ public class LRWorkbook {
     }
     //endregion
 
+
     public Workbook getWorkbook() {
         return workbook;
+    }
+
+    @Override
+    public String toString() {
+        return getValue().toString();
     }
     //endregion
 
@@ -74,54 +79,66 @@ public class LRWorkbook {
 
         //region 获取Sheet所有数据
         //region 以一行为单位
+
         /** 获取sheet下的所有cell的数据 通过row分组 */
         public Map<Object, Map<Object, Object>> getValue() {
-            return getValue(false, null);
+            return LReadCommon.getSheetValue(sheet, false);
         }
 
-        /** 获取sheet下的所有cell的数据 通过row分组 每一行的第一列作为row的key值 第一行对应的值作为cell的key */
-        public Map<Object, Map<Object, Object>> getValueWithFirstKey() {
-            if (sheet == null) {
-                return null;
-            }
-            return getValue(true, LReadCommon.getRowValue(sheet.getRow(sheet.getFirstRowNum()), null));
-        }
-
-        /** 获取sheet下的所有cell的数据 通过row分组
-         *  @param firstColToKey 是否将每一行的第一列作为整个rowValue的key值
-         *  @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
+        /**
+         * 获取sheet下的所有cell的数据 通过row分组
+         * @param firstToKeyAndSkip 1.将一列作为每一个row分组的key值
+         *                          2.跳过哪一列
+         *                          3.将第一行作为每一个cell的key值
+         *                          3.跳过哪一行
+         * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
          */
-        public Map<Object, Map<Object, Object>> getValue(boolean firstColToKey, Map<Object, Object> cellKeyMap) {
-            return LReadCommon.getSheetValue(sheet, firstColToKey, cellKeyMap);
+        public Map<Object, Map<Object, Object>> getValueWithFirstKey(boolean firstToKeyAndSkip) {
+            return LReadCommon.getSheetValue(sheet, firstToKeyAndSkip);
+        }
+
+        /**
+         * 获取sheet下的所有cell的数据 通过row分组
+         * @param rowKeyMap  每个row分组的key值 如果为空则是对应的编号
+         * @param skipRowArr 跳过哪几列
+         * @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
+         * @param skipColArr 跳过哪几行
+         * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
+         */
+        public Map<Object, Map<Object, Object>> getValue(Map<Object, Object> rowKeyMap, int[] skipRowArr, Map<Object, Object> cellKeyMap, int[] skipColArr) {
+            return LReadCommon.getSheetValue(sheet, rowKeyMap, skipRowArr, cellKeyMap, skipColArr);
         }
         //endregion
 
         //region 以一列为单位
+
         /** 获取sheet下的所有cell的数据 通过row分组 */
         public Map<Object, Map<Object, Object>> getValueByCol() {
-            return getValueByCol(false, null);
+            return LReadCommon.getSheetValueByCol(sheet, false);
         }
 
-        /** 获取sheet下的所有cell的数据 通过row分组 */
-        public Map<Object, Map<Object, Object>> getValueWithFirstKeyByCol() {
-            if (sheet == null) {
-                return null;
-            }
-            int lastRowNum = sheet.getLastRowNum();
-            Map<Object, Object> cellKeyMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
-            for (int i = sheet.getFirstRowNum(); i <= lastRowNum; i++) {
-                Row row = sheet.getRow(i);
-                cellKeyMap.put(i, LReadCommon.getCellValue(row, row.getFirstCellNum()));
-            }
-            return getValueByCol(true, cellKeyMap);
-        }
-
-        /** 获取sheet下的所有cell的数据 通过row分组
-         *  @param firstRowToKey 是否将第一行的值作为整个colValue的key值
-         *  @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
+        /**
+         * 获取sheet下的所有cell的数据 通过row分组
+         * @param firstToKeyAndSkip 1.将第一行作为每一个col分组的key值
+         *                          2.跳过哪一行
+         *                          3.将第一列作为每一个cell的key值
+         *                          4.跳过哪一列
+         * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
          */
-        public Map<Object, Map<Object, Object>> getValueByCol(boolean firstRowToKey, Map<Object, Object> cellKeyMap) {
-            return LReadCommon.getSheetValueByCol(sheet, firstRowToKey, cellKeyMap);
+        public Map<Object, Map<Object, Object>> getValueWithFirstKeyByCol(boolean firstToKeyAndSkip) {
+            return LReadCommon.getSheetValueByCol(sheet, firstToKeyAndSkip);
+        }
+
+        /**
+         * 获取sheet下的所有cell的数据 通过row分组
+         * @param colKeyMap  每个col分组的key值 如果为空则是对应的编号
+         * @param skipColArr 跳过哪几列
+         * @param cellKeyMap 每个cell的key值 如果为空则是对应的编号
+         * @param skipRowArr 跳过哪几行
+         * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
+         */
+        public Map<Object, Map<Object, Object>> getValueByCol(Map<Object, Object> colKeyMap, int[] skipColArr, Map<Object, Object> cellKeyMap, int[] skipRowArr) {
+            return LReadCommon.getSheetValueByCol(sheet, colKeyMap, skipColArr, cellKeyMap, skipRowArr);
         }
         //endregion
         //endregion
@@ -140,6 +157,11 @@ public class LRWorkbook {
 
         public Sheet getSheet() {
             return sheet;
+        }
+
+        @Override
+        public String toString() {
+            return getValue().toString();
         }
     }
 
@@ -160,6 +182,7 @@ public class LRWorkbook {
         //endregion
 
         //region 获取Row全部数据
+
         /** 获取row下的所有cell的数据 */
         public Map<Object, Object> getValue() {
             return getValue(null);
@@ -174,9 +197,16 @@ public class LRWorkbook {
             return getValue(firstColKeyMap);
         }
 
-        /** 获取row下的所有cell的数据 指定一个cellKeyMap作为key值 如果cell对应的key为空则将其编号作为key */
-        public Map<Object, Object> getValue(Map<Object, Object> firstColKeyMap) {
-            return LReadCommon.getRowValue(row, firstColKeyMap);
+        /**
+         * 获取row下的所有cell的数据 指定一个cellKeyMap作为key值 如果cell对应的key为空则将其编号作为key
+         * @param cellKeyMap 每一个cell的key值
+         *                   cellKeyMap的key对应cell的key
+         *                   cellKeyMap的value成为cell新的Key
+         *                   注意!: 是一对一对应 如果对应的cellKeyMap的值为空则cell的key不变
+         * @param skipColArr 跳过哪几列
+         * @return row的所有cell的值的集合
+         */        public Map<Object, Object> getValue(Map<Object, Object> cellKeyMap, int... skipColArr) {
+            return LReadCommon.getRowValue(row, cellKeyMap, skipColArr);
         }
         //endregion
 
@@ -200,9 +230,13 @@ public class LRWorkbook {
         }
         //endregion
 
-
         public Row getRow() {
             return row;
+        }
+
+        @Override
+        public String toString() {
+            return getValue().toString();
         }
     }
 
@@ -253,15 +287,7 @@ public class LRWorkbook {
             if (sheet == null || cellMap == null || cellMap.isEmpty()) {
                 return null;
             }
-            int lastRowNum = sheet.getLastRowNum();
-            Map<Object, Object> cellKeyMap = new HashMap<>(sheet.getPhysicalNumberOfRows());
-            for (int i = sheet.getFirstRowNum(); i <= lastRowNum; i++) {
-                Row row = sheet.getRow(i);
-                if (row != null) {
-                    cellKeyMap.put(i, LReadCommon.getCellValue(row, row.getFirstCellNum()));
-                }
-            }
-            return getValue(cellKeyMap);
+            return getValue(LReadCommon.getColValue(sheet, 0, null));
         }
 
         private Map<Object, Object> getValue(Map<Object, Object> cellKeyMap) {
@@ -269,10 +295,10 @@ public class LRWorkbook {
                 return null;
             }
             Map<Object, Object> colValueMap = new LinkedHashMap<>(sheet.getPhysicalNumberOfRows());
-            cellMap.forEach((k,v) ->{
+            cellMap.forEach((k, v) -> {
                 Object value = LReadCommon.getCellValue(v);
                 if (value != null) {
-                    colValueMap.put(cellKeyMap == null ? k : ofNullable(cellKeyMap.get(k)).orElse(k), value);
+                    colValueMap.put(cellKeyMap == null || cellKeyMap.isEmpty() ? k : ofNullable(cellKeyMap.get(k)).orElse(k), value);
                 }
             });
             return colValueMap.isEmpty() ? null : colValueMap;
@@ -297,9 +323,13 @@ public class LRWorkbook {
         }
         //endregion
 
-
         public Map<Integer, Cell> getCol() {
             return cellMap;
+        }
+
+        @Override
+        public String toString() {
+            return getValue().toString();
         }
     }
 }
