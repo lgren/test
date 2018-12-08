@@ -135,8 +135,9 @@ public class GuavaTest {
         System.out.println(str);//endregion -aa-bb-cc-null
 
         //region guava版本
-        String str1 = Joiner.on("-").useForNull("_").join(list);
-        System.out.println(str1);//endregion aa-bb-cc-_
+//        String str1 = Joiner.on("-").useForNull("_").join(list);
+        String str1 = Joiner.on("-").skipNulls().join(list);
+        System.out.println(str1);//endregion aa-bb-cc-_--
 
         //region java8版本
         String str2 = String.join("-", "teset", "dsadsa");

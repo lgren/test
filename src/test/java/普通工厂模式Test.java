@@ -1,6 +1,4 @@
 import com.google.common.base.Optional;
-import com.lgren.简单工厂模式.a_普通.SendFactory;
-import com.lgren.简单工厂模式.a_普通.Sender;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -14,11 +12,6 @@ import java.util.Map;
 
 public class 普通工厂模式Test {
 
-    @Test
-    public void test1() {
-        SendFactory sendFactory = new SendFactory();
-        Optional<Sender> sender = (Optional<Sender>) sendFactory.product("");
-    }
 
     @Test
     public void test2() {

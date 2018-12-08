@@ -1,16 +1,12 @@
 package test;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
-import com.lgren.ohers.FieldValueStrEnum;
-import com.lgren.一些写法等.CommResult;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 import pojo.Person;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -21,14 +17,14 @@ import static java.util.Optional.ofNullable;
 public class CommonTest {
     @Test
     public void test1() {
-        Person personOne = new Person(1L, "one", DateUtils.addDays(new Date(), -1), 2, DateUtils.addDays(new Date(), -1), DateUtils.addDays(new Date(), -1));
-        Person personTwo = new Person(2L, "two", DateUtils.addDays(new Date(), -2), 2, DateUtils.addDays(new Date(), -2), DateUtils.addDays(new Date(), 0));
-        Person personTree = new Person(3L, "tree", DateUtils.addDays(new Date(), -3), 2, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -3));
-        Person personFour = new Person(4L, "four", DateUtils.addDays(new Date(), -4), 1, DateUtils.addDays(new Date(), -4), DateUtils.addDays(new Date(), -4));
-        Person personFive = new Person(5L, "five", DateUtils.addDays(new Date(), -5), 1, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -5));
-        Person personSix = new Person(6L, "six", DateUtils.addDays(new Date(), -6), 1, DateUtils.addDays(new Date(), -6), DateUtils.addDays(new Date(), -6));
-        List<Person> list = Lists.newArrayList(personOne, personTwo, personTree, personFour, personFive, personSix);
-        list.forEach(p -> System.out.println(p.getRealName()));
+//        Person personOne = new Person(1L, "one", DateUtils.addDays(new Date(), -1), 2, DateUtils.addDays(new Date(), -1), DateUtils.addDays(new Date(), -1));
+//        Person personTwo = new Person(2L, "two", DateUtils.addDays(new Date(), -2), 2, DateUtils.addDays(new Date(), -2), DateUtils.addDays(new Date(), 0));
+//        Person personTree = new Person(3L, "tree", DateUtils.addDays(new Date(), -3), 2, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -3));
+//        Person personFour = new Person(4L, "four", DateUtils.addDays(new Date(), -4), 1, DateUtils.addDays(new Date(), -4), DateUtils.addDays(new Date(), -4));
+//        Person personFive = new Person(5L, "five", DateUtils.addDays(new Date(), -5), 1, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -5));
+//        Person personSix = new Person(6L, "six", DateUtils.addDays(new Date(), -6), 1, DateUtils.addDays(new Date(), -6), DateUtils.addDays(new Date(), -6));
+//        List<Person> list = Lists.newArrayList(personOne, personTwo, personTree, personFour, personFive, personSix);
+//        list.forEach(p -> System.out.println(p.getRealName()));
 
 //        list.sort((r1, r2) -> {
 //            if (Objects.equals(1, r1.getZjStatus()) && Objects.equals(1, r2.getZjStatus())) {//r1 r2都是未接单智荐
@@ -85,80 +81,80 @@ public class CommonTest {
 //        });
 //        list.forEach(p -> System.out.println("3排序后->" + p.getRealName()));
 
-        list.sort((r1, r2) -> {
-            Integer zjStatus2 = r2.getZjStatus();
-            Integer zjStatus1 = r1.getZjStatus();
-            return ((Objects.equals(zjStatus2, zjStatus1)
-                    && ((Objects.equals(1, zjStatus2) && r2.getInsertDate().after(r1.getInsertDate()))// 1:当智荐状态都为未抢单,r2插入时间大与r1 -> 返回r2
-                    || Objects.equals(2, zjStatus2) && r2.getUpdateDate().after(r1.getUpdateDate())))// 2:当智荐状态都为已抢单,r2更新时间大与r1 -> 返回r2
-                    || Objects.equals(1, zjStatus2) && !Objects.equals(1, zjStatus1)) ? 1 // 3:当r2为未接单状态 r1不是未接单状态 -> 返回r2
-                    : -1;
-        });//上述3条件都不满足 -> 返回r1
-        list.forEach(p -> System.out.println("4排序后->" + p.getRealName()));
+//        list.sort((r1, r2) -> {
+//            Integer zjStatus2 = r2.getZjStatus();
+//            Integer zjStatus1 = r1.getZjStatus();
+//            return ((Objects.equals(zjStatus2, zjStatus1)
+//                    && ((Objects.equals(1, zjStatus2) && r2.getInsertDate().after(r1.getInsertDate()))// 1:当智荐状态都为未抢单,r2插入时间大与r1 -> 返回r2
+//                    || Objects.equals(2, zjStatus2) && r2.getUpdateDate().after(r1.getUpdateDate())))// 2:当智荐状态都为已抢单,r2更新时间大与r1 -> 返回r2
+//                    || Objects.equals(1, zjStatus2) && !Objects.equals(1, zjStatus1)) ? 1 // 3:当r2为未接单状态 r1不是未接单状态 -> 返回r2
+//                    : -1;
+//        });//上述3条件都不满足 -> 返回r1
+//        list.forEach(p -> System.out.println("4排序后->" + p.getRealName()));
     }
 
-    @Test
-    public void test2() {
-        Person personOne = new Person(1L, "one", DateUtils.addDays(new Date(), -1), 2, DateUtils.addDays(new Date(), -1), DateUtils.addDays(new Date(), -1));
-        Person personTwo = new Person(2L, "two", DateUtils.addDays(new Date(), -2), 2, DateUtils.addDays(new Date(), -2), DateUtils.addDays(new Date(), 0));
-        Person personTree = new Person(3L, "tree", DateUtils.addDays(new Date(), -3), 2, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -3));
-        Person personFour = new Person(4L, "four", DateUtils.addDays(new Date(), -4), 1, DateUtils.addDays(new Date(), -4), DateUtils.addDays(new Date(), -4));
-        Person personFive = new Person(5L, "five", DateUtils.addDays(new Date(), -5), 1, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -5));
-        Person personSix = new Person(6L, "six", DateUtils.addDays(new Date(), -6), 1, DateUtils.addDays(new Date(), -6), DateUtils.addDays(new Date(), -6));
-        List<Person> list = Lists.newArrayList(personOne, personTwo, personTree, personFour, personFive, personSix);
-//        list.sort(((o1, o2) -> o1.getId() == o2.getId() ? 0 : o2.getId() > o1.getId() ? 1 : -1));
-        list.sort(Person::compareTo);
-        list.forEach(p -> System.out.println(p.getId() + " " + p.getRealName()));
-    }
+//    @Test
+//    public void test2() {
+//        Person personOne = new Person(1L, "one", DateUtils.addDays(new Date(), -1), 2, DateUtils.addDays(new Date(), -1), DateUtils.addDays(new Date(), -1));
+//        Person personTwo = new Person(2L, "two", DateUtils.addDays(new Date(), -2), 2, DateUtils.addDays(new Date(), -2), DateUtils.addDays(new Date(), 0));
+//        Person personTree = new Person(3L, "tree", DateUtils.addDays(new Date(), -3), 2, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -3));
+//        Person personFour = new Person(4L, "four", DateUtils.addDays(new Date(), -4), 1, DateUtils.addDays(new Date(), -4), DateUtils.addDays(new Date(), -4));
+//        Person personFive = new Person(5L, "five", DateUtils.addDays(new Date(), -5), 1, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -5));
+//        Person personSix = new Person(6L, "six", DateUtils.addDays(new Date(), -6), 1, DateUtils.addDays(new Date(), -6), DateUtils.addDays(new Date(), -6));
+//        List<Person> list = Lists.newArrayList(personOne, personTwo, personTree, personFour, personFive, personSix);
+////        list.sort(((o1, o2) -> o1.getId() == o2.getId() ? 0 : o2.getId() > o1.getId() ? 1 : -1));
+//        list.sort(Person::compareTo);
+//        list.forEach(p -> System.out.println(p.getId() + " " + p.getRealName()));
+//    }
 
-    @Test
-    public void test4() {
-        test3(new HashMap<>());
-    }
+//    @Test
+//    public void test4() {
+//        test3(new HashMap<>());
+//    }
 
-    private String test3(Map<String, String> map) {
-        String returnStr = "";
-        String p1 = map.get("p1");
-        String p2 = map.get("p2");
-        String p3 = map.get("p3");
-        //region 数据
-        Person personOne = new Person(1L, "one", DateUtils.addDays(new Date(), -1), null, DateUtils.addDays(new Date(), -1), DateUtils.addDays(new Date(), -1));
-        Person personTwo = new Person(2L, "two", DateUtils.addDays(new Date(), -2), 2, DateUtils.addDays(new Date(), -2), DateUtils.addDays(new Date(), 0));
-        Person personTree = new Person(3L, "", DateUtils.addDays(new Date(), -3), null, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -3));
-        Person personFour = null;
-        Person personFive = new Person();
-        personFive.setId(5L);
-        Person personSix = null;
-        Person personSeven = new Person(7L, "seven", null, 1, DateUtils.addDays(new Date(), -7), DateUtils.addDays(new Date(), -7));
-        //endregion
-        List<Person> listReturn = Lists.newArrayList(personOne, personTwo, personTree, personFive, personSix);
-        listReturn.add(personFour);
-
-        List<Person> listGet = null;
-        List<Person> list = null;
-        try {
-            listGet = listReturn;
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("1");
-        }
-        if (listGet == null || listGet.get(0) == null) {
-            System.out.println("2");
-        } else {
-            list = listGet.stream().limit(10).collect(Collectors.toList());
-        }
-        final String[] x = new String[1];
-        list.stream().filter(Objects::nonNull)
-                .forEach(o -> {
-//                    o.setRealName(Optional.ofNullable(o.getRealName()).filter(StringUtils::isNotBlank).map(p -> p + "改造一波").orElse("这是空的"));
-                    o.setRealName(StringUtils.isNotBlank((x[0] = o.getRealName())) ? x[0] + "改造一波" : "这是空的");
-                    o.setZjStatus(Optional.ofNullable(o.getZjStatus()).map(p -> p + 100).orElse(-1));
-                });
-        list.stream().filter(Objects::nonNull).forEach(p -> System.out.println(p.getId() + " " + p.getZjStatus() + " " +p.getRealName()));
-
-//        Map<String, Object> map = new HashMap<>();
-        return returnStr;
-    }
+//    private String test3(Map<String, String> map) {
+//        String returnStr = "";
+//        String p1 = map.get("p1");
+//        String p2 = map.get("p2");
+//        String p3 = map.get("p3");
+//        //region 数据
+//        Person personOne = new Person(1L, "one", DateUtils.addDays(new Date(), -1), null, DateUtils.addDays(new Date(), -1), DateUtils.addDays(new Date(), -1));
+//        Person personTwo = new Person(2L, "two", DateUtils.addDays(new Date(), -2), 2, DateUtils.addDays(new Date(), -2), DateUtils.addDays(new Date(), 0));
+//        Person personTree = new Person(3L, "", DateUtils.addDays(new Date(), -3), null, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -3));
+//        Person personFour = null;
+//        Person personFive = new Person();
+//        personFive.setId(5L);
+//        Person personSix = null;
+//        Person personSeven = new Person(7L, "seven", null, 1, DateUtils.addDays(new Date(), -7), DateUtils.addDays(new Date(), -7));
+//        //endregion
+//        List<Person> listReturn = Lists.newArrayList(personOne, personTwo, personTree, personFive, personSix);
+//        listReturn.add(personFour);
+//
+//        List<Person> listGet = null;
+//        List<Person> list = null;
+//        try {
+//            listGet = listReturn;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            System.out.println("1");
+//        }
+//        if (listGet == null || listGet.get(0) == null) {
+//            System.out.println("2");
+//        } else {
+//            list = listGet.stream().limit(10).collect(Collectors.toList());
+//        }
+//        final String[] x = new String[1];
+//        list.stream().filter(Objects::nonNull)
+//                .forEach(o -> {
+////                    o.setRealName(Optional.ofNullable(o.getRealName()).filter(StringUtils::isNotBlank).map(p -> p + "改造一波").orElse("这是空的"));
+//                    o.setRealName(StringUtils.isNotBlank((x[0] = o.getRealName())) ? x[0] + "改造一波" : "这是空的");
+//                    o.setZjStatus(Optional.ofNullable(o.getZjStatus()).map(p -> p + 100).orElse(-1));
+//                });
+//        list.stream().filter(Objects::nonNull).forEach(p -> System.out.println(p.getId() + " " + p.getZjStatus() + " " +p.getRealName()));
+//
+////        Map<String, Object> map = new HashMap<>();
+//        return returnStr;
+//    }
 
     @Test
     public void test5() {
