@@ -26,7 +26,7 @@ public class LgrenUtilsTest {
 
 //        System.out.println(JSON.toJSONString(new Person().setInsertTime(LocalDateTime.now()), SerializerFeature.WriteDateUseDateFormat));
         System.out.println(JSON.toJSONString(new Student(new Person().setInsertTime(LocalDateTime.now())), SerializerFeature.WriteDateUseDateFormat));
-
+        System.out.println();
         System.out.println();
         System.out.println();
     }
