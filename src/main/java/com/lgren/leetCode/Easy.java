@@ -31,8 +31,6 @@ public class Easy {
             int match = target - nums[i];
             if (map.containsKey(match)) {
                 return new int[]{map.get(match), i};
-
-
             }
             map.put(nums[i], i);
         }
