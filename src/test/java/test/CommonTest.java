@@ -26,7 +26,7 @@ public class CommonTest {
 //        List<Person> list = Lists.newArrayList(personOne, personTwo, personTree, personFour, personFive, personSix);
 //        list.forEach(p -> System.out.println(p.getRealName()));
 
-//        list.sort((r1, r2) -> {
+//        list.bubbleSort((r1, r2) -> {
 //            if (Objects.equals(1, r1.getZjStatus()) && Objects.equals(1, r2.getZjStatus())) {//r1 r2都是未接单智荐
 //                if (r1.getInsertDate().getTime() >= r2.getInsertDate().getTime()) {//r1的插入时间大于等于r2的插入时间
 //                    return -1;
@@ -47,7 +47,7 @@ public class CommonTest {
 //        });
 //        list.forEach(p -> System.out.println("1排序后->" + p.getRealName()));
 
-//        list.sort((r1, r2) -> {
+//        list.bubbleSort((r1, r2) -> {
 //            if (Objects.equals(r2.getZjStatus(), r1.getZjStatus())){//当r1 和 r2智荐状态相同
 //                if (Objects.equals(1, r2.getZjStatus())) {//当智荐状态为未抢单
 //                    if (r2.getInsertDate().getTime() >= r1.getInsertDate().getTime()) {//r2的插入时间 大于等于 r1的插入时间 (新在前)
@@ -67,7 +67,7 @@ public class CommonTest {
 //        });
 //        list.forEach(p -> System.out.println("2排序后->" + p.getRealName()));
 
-//        list.sort((r1, r2) -> {
+//        list.bubbleSort((r1, r2) -> {
 //            if (Objects.equals(r2.getZjStatus(), r1.getZjStatus())){//当r1 和 r2智荐状态相同
 //                if (Objects.equals(1, r2.getZjStatus()) && r2.getInsertDate().getTime() >= r1.getInsertDate().getTime()) {//当智荐状态为未抢单 且r2的插入时间 大于等于 r1的插入时间 (新在前)
 //                    return 1;//返回r2
@@ -81,7 +81,7 @@ public class CommonTest {
 //        });
 //        list.forEach(p -> System.out.println("3排序后->" + p.getRealName()));
 
-//        list.sort((r1, r2) -> {
+//        list.bubbleSort((r1, r2) -> {
 //            Integer zjStatus2 = r2.getZjStatus();
 //            Integer zjStatus1 = r1.getZjStatus();
 //            return ((Objects.equals(zjStatus2, zjStatus1)
@@ -102,8 +102,8 @@ public class CommonTest {
 //        Person personFive = new Person(5L, "five", DateUtils.addDays(new Date(), -5), 1, DateUtils.addDays(new Date(), -3), DateUtils.addDays(new Date(), -5));
 //        Person personSix = new Person(6L, "six", DateUtils.addDays(new Date(), -6), 1, DateUtils.addDays(new Date(), -6), DateUtils.addDays(new Date(), -6));
 //        List<Person> list = Lists.newArrayList(personOne, personTwo, personTree, personFour, personFive, personSix);
-////        list.sort(((o1, o2) -> o1.getId() == o2.getId() ? 0 : o2.getId() > o1.getId() ? 1 : -1));
-//        list.sort(Person::compareTo);
+////        list.bubbleSort(((o1, o2) -> o1.getId() == o2.getId() ? 0 : o2.getId() > o1.getId() ? 1 : -1));
+//        list.bubbleSort(Person::compareTo);
 //        list.forEach(p -> System.out.println(p.getId() + " " + p.getRealName()));
 //    }
 
