@@ -151,7 +151,6 @@ public class AllSort {
     public static void quickSort(int[] arr) {
         quickSort(arr, 0, arr.length - 1);
     }
-
     private static void quickSort(int[] arr, int l, int r) {
         if (l >= r) return;
         int low = l;

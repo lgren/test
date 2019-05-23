@@ -60,12 +60,12 @@ public class LReadCommon {
     //region 获取一个workbook的值
 
     /** 获取workbook下的所有cell的数据 通过sheet分组 */
-    public static Map<String, Map<Object, Map<Object, Object>>> getWorkbookValue(Workbook workbook) {
+    public static Map<String, Map<Object, Map<Object, Object>>> getWorkbookV(Workbook workbook) {
         return ofNullable(workbook).map(wb -> {
             Map<String, Map<Object, Map<Object, Object>>> allSheet = new LinkedHashMap<>(wb.getNumberOfSheets());
             for (int i = 0; i < wb.getNumberOfSheets(); i++) {
                 Sheet sheet = wb.getSheetAt(i);
-                allSheet.put(sheet.getSheetName(), getSheetValue(sheet));
+                allSheet.put(sheet.getSheetName(), getSheetV(sheet));
             }
             return allSheet;
         }).orElse(null);
@@ -78,8 +78,8 @@ public class LReadCommon {
      * 获取sheet下的所有cell的数据 通过row分组
      * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet) {
-        return getSheetValue(sheet, false);
+    public static Map<Object, Map<Object, Object>> getSheetV(Sheet sheet) {
+        return getSheetV(sheet, false);
     }
 
     /**
@@ -90,9 +90,9 @@ public class LReadCommon {
      *                          4.跳过哪一行
      * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, boolean firstToKeyAndSkip) {
-        return firstToKeyAndSkip ? getSheetValue(sheet, getColValue(sheet, 0), new int[]{0}, getRowValue(sheet, 0), new int[]{0})
-                : getSheetValue(sheet, null, null, null, null);
+    public static Map<Object, Map<Object, Object>> getSheetV(Sheet sheet, boolean firstToKeyAndSkip) {
+        return firstToKeyAndSkip ? getSheetV(sheet, getColV(sheet, 0), new int[]{0}, getRowV(sheet, 0), new int[]{0})
+                : getSheetV(sheet, null, null, null, null);
     }
 
     /**
@@ -103,10 +103,10 @@ public class LReadCommon {
      * @param skipWhichCol      跳过哪一列 如果小于0则不跳过
      * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, int whichColToRowKey, int skipWhichRow, int whichRowToCellKey, int skipWhichCol) {
+    public static Map<Object, Map<Object, Object>> getSheetV(Sheet sheet, int whichColToRowKey, int skipWhichRow, int whichRowToCellKey, int skipWhichCol) {
         int[] skipRowArr = skipWhichRow < 0 ? null : new int[]{skipWhichRow};
         int[] skipColArr = skipWhichCol < 0 ? null : new int[]{skipWhichCol};
-        return getSheetValue(sheet, getColValue(sheet, whichColToRowKey), skipRowArr, getRowValue(sheet, whichRowToCellKey), skipColArr);
+        return getSheetV(sheet, getColV(sheet, whichColToRowKey), skipRowArr, getRowV(sheet, whichRowToCellKey), skipColArr);
     }
 
     /**
@@ -117,8 +117,8 @@ public class LReadCommon {
      * @param skipColArr        跳过哪几行
      * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, int whichColToRowKey, int[] skipRowArr, int whichRowToCellKey, int[] skipColArr) {
-        return getSheetValue(sheet, getColValue(sheet, whichColToRowKey), skipRowArr, getRowValue(sheet, whichRowToCellKey), skipColArr);
+    public static Map<Object, Map<Object, Object>> getSheetV(Sheet sheet, int whichColToRowKey, int[] skipRowArr, int whichRowToCellKey, int[] skipColArr) {
+        return getSheetV(sheet, getColV(sheet, whichColToRowKey), skipRowArr, getRowV(sheet, whichRowToCellKey), skipColArr);
     }
 
     /**
@@ -129,15 +129,15 @@ public class LReadCommon {
      * @param skipColArr 跳过哪几行
      * @return sheet下所有的cell的值的集合 通过row(行)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValue(Sheet sheet, Map<Object, Object> rowKeyMap, int[] skipRowArr, Map<Object, Object> cellKeyMap, int[] skipColArr) {
+    public static Map<Object, Map<Object, Object>> getSheetV(Sheet sheet, Map<Object, Object> rowKeyMap, int[] skipRowArr, Map<Object, Object> cellKeyMap, int[] skipColArr) {
         return ofNullable(sheet).map(s -> {
             Map<Object, Map<Object, Object>> result = null;
             for (int i = s.getFirstRowNum(); i <= s.getLastRowNum(); i++) {
-                if (skipRowArr != null && ArrayUtils.contains(skipRowArr, i)) {
+                if (ArrayUtils.contains(skipRowArr, i)) {
                     continue;
                 }
                 Row row = s.getRow(i);
-                Map<Object, Object> cellMap = getRowValue(row, cellKeyMap, skipColArr);
+                Map<Object, Object> cellMap = getRowV(row, cellKeyMap, skipColArr);
                 if (cellMap != null) {
                     if (result == null) {
                         result = new LinkedHashMap<>(s.getPhysicalNumberOfRows());
@@ -157,8 +157,8 @@ public class LReadCommon {
      * 获取sheet下的所有cell的数据 通过row分组
      * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet) {
-        return getSheetValueByCol(sheet, false);
+    public static Map<Object, Map<Object, Object>> getSheetVByCol(Sheet sheet) {
+        return getSheetVByCol(sheet, false);
     }
 
     /**
@@ -169,9 +169,9 @@ public class LReadCommon {
      *                          4.跳过哪一列
      * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, boolean firstToKeyAndSkip) {
-        return firstToKeyAndSkip ? getSheetValueByCol(sheet, getRowValue(sheet, 0), new int[]{0}, getColValue(sheet, 0), new int[]{0})
-                : getSheetValueByCol(sheet, null, null, null, null);
+    public static Map<Object, Map<Object, Object>> getSheetVByCol(Sheet sheet, boolean firstToKeyAndSkip) {
+        return firstToKeyAndSkip ? getSheetVByCol(sheet, getRowV(sheet, 0), new int[]{0}, getColV(sheet, 0), new int[]{0})
+                : getSheetVByCol(sheet, null, null, null, null);
     }
 
     /**
@@ -182,10 +182,10 @@ public class LReadCommon {
      * @param skipWhichRow      跳过哪一行 如果小于0则不跳过
      * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, int whichRowToColKey, int skipWhichCol, int whichColToCellKey, int skipWhichRow) {
+    public static Map<Object, Map<Object, Object>> getSheetVByCol(Sheet sheet, int whichRowToColKey, int skipWhichCol, int whichColToCellKey, int skipWhichRow) {
         int[] skipColArr = skipWhichCol < 0 ? null : new int[]{skipWhichCol};
         int[] skipRowArr = skipWhichRow < 0 ? null : new int[]{skipWhichRow};
-        return getSheetValueByCol(sheet, getRowValue(sheet, whichRowToColKey), skipRowArr, getColValue(sheet, whichColToCellKey), skipColArr);
+        return getSheetVByCol(sheet, getRowV(sheet, whichRowToColKey), skipRowArr, getColV(sheet, whichColToCellKey), skipColArr);
     }
 
     /**
@@ -196,8 +196,8 @@ public class LReadCommon {
      * @param skipRowArr        跳过哪几行
      * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, int whichRowToColKey, int[] skipColArr, int whichColToCellKey, int[] skipRowArr) {
-        return getSheetValueByCol(sheet, getRowValue(sheet, whichRowToColKey), skipRowArr, getColValue(sheet, whichColToCellKey), skipColArr);
+    public static Map<Object, Map<Object, Object>> getSheetVByCol(Sheet sheet, int whichRowToColKey, int[] skipColArr, int whichColToCellKey, int[] skipRowArr) {
+        return getSheetVByCol(sheet, getRowV(sheet, whichRowToColKey), skipRowArr, getColV(sheet, whichColToCellKey), skipColArr);
     }
 
     /**
@@ -208,11 +208,11 @@ public class LReadCommon {
      * @param skipRowArr 跳过哪几行
      * @return sheet下所有的cell的值的集合 通过col(列)为单位分组
      */
-    public static Map<Object, Map<Object, Object>> getSheetValueByCol(Sheet sheet, Map<Object, Object> colKeyMap, int[] skipColArr, Map<Object, Object> cellKeyMap, int[] skipRowArr) {
+    public static Map<Object, Map<Object, Object>> getSheetVByCol(Sheet sheet, Map<Object, Object> colKeyMap, int[] skipColArr, Map<Object, Object> cellKeyMap, int[] skipRowArr) {
         return ofNullable(sheet).map(s -> {
             Map<Object, Map<Object, Object>> result = null;
             for (int i = s.getFirstRowNum(); i <= s.getLastRowNum(); i++) {
-                if (skipRowArr != null && ArrayUtils.contains(skipRowArr, i)) {
+                if (ArrayUtils.contains(skipRowArr, i)) {
                     continue;
                 }
                 Row row = s.getRow(i);
@@ -220,11 +220,11 @@ public class LReadCommon {
                     continue;
                 }
                 for (int j = row.getFirstCellNum(); j < row.getLastCellNum(); j++) {
-                    if (skipColArr != null && ArrayUtils.contains(skipColArr, j)) {
+                    if (ArrayUtils.contains(skipColArr, j)) {
                         continue;
                     }
                     Cell cell = row.getCell(j);
-                    Object cellValue = getCellValue(cell);
+                    Object cellValue = getCellV(cell);
                     Map<Object, Object> cellMap;
                     if (cellValue != null) {
                         if (result == null) {
@@ -237,7 +237,7 @@ public class LReadCommon {
                             result.put(colKey, cellMap);
                         }
                         Object cellKey = cellKeyMap == null || cellKeyMap.isEmpty() ? i : ofNullable(cellKeyMap.get(i)).orElse(i);
-                        cellMap.put(cellKey, getCellValue(cell));
+                        cellMap.put(cellKey, getCellV(cell));
                     }
                 }
             }
@@ -253,8 +253,8 @@ public class LReadCommon {
      * @param rowIndex 第 rowIndex行 (从0计数)
      * @return 第 rowIndex行的所有cell的值的集合
      */
-    public static Map<Object, Object> getRowValue(Sheet sheet, int rowIndex) {
-        return getRowValue(sheet, rowIndex, null);
+    public static Map<Object, Object> getRowV(Sheet sheet, int rowIndex) {
+        return getRowV(sheet, rowIndex, null);
     }
 
     /**
@@ -264,8 +264,8 @@ public class LReadCommon {
      * @param skipColArr        跳过哪几列
      * @return 第 rowIndex行的所有cell的值的集合
      */
-    public static Map<Object, Object> getRowValue(Sheet sheet, int rowIndex, int whichRowToCellKey, int... skipColArr) {
-        return getRowValue(sheet, rowIndex, getRowValue(sheet, whichRowToCellKey, null), skipColArr);
+    public static Map<Object, Object> getRowV(Sheet sheet, int rowIndex, int whichRowToCellKey, int... skipColArr) {
+        return getRowV(sheet, rowIndex, getRowV(sheet, whichRowToCellKey, null), skipColArr);
     }
 
     /**
@@ -278,8 +278,8 @@ public class LReadCommon {
      * @param skipColArr 跳过哪几列
      * @return 第 rowIndex行的所有cell的值的集合
      */
-    public static Map<Object, Object> getRowValue(Sheet sheet, int rowIndex, Map<Object, Object> cellKeyMap, int... skipColArr) {
-        return ofNullable(sheet).map(s -> getRowValue(s.getRow(rowIndex), cellKeyMap, skipColArr)).orElse(null);
+    public static Map<Object, Object> getRowV(Sheet sheet, int rowIndex, Map<Object, Object> cellKeyMap, int... skipColArr) {
+        return ofNullable(sheet).map(s -> getRowV(s.getRow(rowIndex), cellKeyMap, skipColArr)).orElse(null);
     }
 
     /**
@@ -291,15 +291,14 @@ public class LReadCommon {
      * @param skipColArr 跳过哪几列
      * @return row的所有cell的值的集合
      */
-    public static Map<Object, Object> getRowValue(Row row, Map<Object, Object> cellKeyMap, int... skipColArr) {
+    public static Map<Object, Object> getRowV(Row row, Map<Object, Object> cellKeyMap, int... skipColArr) {
         return ofNullable(row).map(r -> {
             Map<Object, Object> cellMap = null;
             for (int i = r.getFirstCellNum(); i < r.getLastCellNum(); i++) {
-                if (skipColArr != null && ArrayUtils.contains(skipColArr, i)) {
+                if (ArrayUtils.contains(skipColArr, i)) {
                     continue;
                 }
-                Cell cell = r.getCell(i);
-                Object cellValue = getCellValue(cell);
+                Object cellValue = getCellV(r.getCell(i));
                 if (cellValue != null) {
                     if (cellMap == null) {
                         cellMap = new LinkedHashMap<>(r.getPhysicalNumberOfCells());
@@ -320,8 +319,8 @@ public class LReadCommon {
      * @param colIndex 第 colIndex列 (从0计数)
      * @return 一列的所有cell的值的集合
      */
-    public static Map<Object, Object> getColValue(Sheet sheet, int colIndex) {
-        return getColValue(sheet, colIndex, null);
+    public static Map<Object, Object> getColV(Sheet sheet, int colIndex) {
+        return getColV(sheet, colIndex, null);
     }
 
     /**
@@ -331,8 +330,8 @@ public class LReadCommon {
      * @param skipRowArr        跳过哪几行
      * @return 一列的所有cell的值的集合
      */
-    public static Map<Object, Object> getColValue(Sheet sheet, int colIndex, int whichColToCellKey, int... skipRowArr) {
-        return getColValue(sheet, colIndex, getColValue(sheet, whichColToCellKey, null), skipRowArr);
+    public static Map<Object, Object> getColV(Sheet sheet, int colIndex, int whichColToCellKey, int... skipRowArr) {
+        return getColV(sheet, colIndex, getColV(sheet, whichColToCellKey, null), skipRowArr);
     }
 
     /**
@@ -345,12 +344,12 @@ public class LReadCommon {
      * @param skipRowArr 跳过哪几行
      * @return 第 colIndex列的所有cell的值的集合
      */
-    public static Map<Object, Object> getColValue(Sheet sheet, int colIndex, Map<Object, Object> cellKeyMap, int... skipRowArr) {
+    public static Map<Object, Object> getColV(Sheet sheet, int colIndex, Map<Object, Object> cellKeyMap, int... skipRowArr) {
         return ofNullable(sheet).map(s -> {
             // 否则输出所有cell的值
             Map<Object, Object> cellMap = null;
             for (int i = s.getFirstRowNum(); i <= s.getLastRowNum(); i++) {
-                if (skipRowArr != null && ArrayUtils.contains(skipRowArr, i)) {
+                if (ArrayUtils.contains(skipRowArr, i)) {
                     continue;
                 }
                 Row row = s.getRow(i);
@@ -361,7 +360,7 @@ public class LReadCommon {
                 if (colIndex < row.getFirstCellNum() || colIndex > row.getLastCellNum() - 1) {
                     break;
                 }
-                Object cellValue = getCellValue(s.getRow(i), colIndex);
+                Object cellValue = getCellV(s.getRow(i), colIndex);
                 if (cellValue != null) {
                     if (cellMap == null) {
                         cellMap = new LinkedHashMap<>(s.getPhysicalNumberOfRows());
@@ -378,7 +377,7 @@ public class LReadCommon {
     //region 获取 Cell的值 通过cell,row,sheet,workbook
 
     /** 获取cell下的数据 */
-    public static Object getCellValue(Cell cell) {
+    public static Object getCellV(Cell cell) {
         return ofNullable(cell).map(c -> {
             Object result;
             switch (c.getCellTypeEnum()) {
@@ -414,8 +413,8 @@ public class LReadCommon {
      * @param cellIndex 第 cellIndex个cell (从0计数)
      * @return Cell对象的值
      */
-    public static Object getCellValue(Row row, int cellIndex) {
-        return getCellValue(getCell(row, cellIndex));
+    public static Object getCellV(Row row, int cellIndex) {
+        return getCellV(getCell(row, cellIndex));
     }
 
     /**
@@ -425,8 +424,8 @@ public class LReadCommon {
      * @param colIndex 第 colIndex列 (从0计数)
      * @return Cell对象的值
      */
-    public static Object getCellValue(Sheet sheet, int rowIndex, int colIndex) {
-        return getCellValue(getCell(sheet, rowIndex, colIndex));
+    public static Object getCellV(Sheet sheet, int rowIndex, int colIndex) {
+        return getCellV(getCell(sheet, rowIndex, colIndex));
 
     }
 
@@ -438,8 +437,8 @@ public class LReadCommon {
      * @param colIndex   第 colIndex列 (从0计数)
      * @return Cell对象的值
      */
-    public static Object getCellValue(Workbook workbook, int sheetIndex, int rowIndex, int colIndex) {
-        return getCellValue(getCell(workbook, sheetIndex, rowIndex, colIndex));
+    public static Object getCellV(Workbook workbook, int sheetIndex, int rowIndex, int colIndex) {
+        return getCellV(getCell(workbook, sheetIndex, rowIndex, colIndex));
 
     }
 
@@ -451,8 +450,8 @@ public class LReadCommon {
      * @param colIndex  第 colIndex列 (从0计数)
      * @return Cell对象的值
      */
-    public static Object getCellValue(Workbook workbook, String sheetName, int rowIndex, int colIndex) {
-        return getCellValue(getCell(workbook, sheetName, rowIndex, colIndex));
+    public static Object getCellV(Workbook workbook, String sheetName, int rowIndex, int colIndex) {
+        return getCellV(getCell(workbook, sheetName, rowIndex, colIndex));
 
     }
     //endregion

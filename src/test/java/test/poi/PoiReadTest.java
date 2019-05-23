@@ -14,13 +14,13 @@ public class PoiReadTest {
     public void test1() throws IOException {
 //        InputStream wbInp = new FileInputStream("D:\\Documents\\Desktop\\测试(2).xlsx");
 //        Workbook wb = LReadExcelPlusUtils.getWorkbook(wbInp).getData();
-//        LReadExcelPlusUtils.getWorkbookValue(wb, true, true);
-//        LReadExcelPlusUtils.getRowValue(wb.getSheetAt(0).getRow(0), true);
-//        LReadExcelUtils.getWorkbookValue(wb);
+//        LReadExcelPlusUtils.getWorkbookV(wb, true, true);
+//        LReadExcelPlusUtils.getRowV(wb.getSheetAt(0).getRow(0), true);
+//        LReadExcelUtils.getWorkbookV(wb);
 //
 //        InputStream wbInp2 = new FileInputStream("E:\\usr\\testttt.xlsx");
 //        Workbook wb2 = LReadExcelPlusUtils.getWorkbook(wbInp2).getData();
-//        LReadExcelUtils.getWorkbookValue(wb2);
+//        LReadExcelUtils.getWorkbookV(wb2);
 //
 //        System.out.println();
     }

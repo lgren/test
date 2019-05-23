@@ -28,7 +28,6 @@ import static org.springframework.beans.BeanUtils.getPropertyDescriptors;
 
 /**
  * Lgren的部分工具类
- *
  * @author Lgren
  * @create 2018-10-17 1121
  **/
@@ -60,8 +59,9 @@ public class LgrenUtil {
         newPage.setHasNextPage(pageNum < pages);//  是否有下一页
         return newPage;
     }
+
     @Data
-//    @Accessors(chain = true)
+    //    @Accessors(chain = true)
     @NoArgsConstructor
     private static class LPageInfo<T> {
         private Integer PageNum;
@@ -72,14 +72,15 @@ public class LgrenUtil {
         private Boolean HasNextPage = false;
         private List<T> list;
     }
+
     /**
      * 将 list按照每 pageSize为一段分割
+     * @param list     计划分割的list
+     * @param pageSize 每段的长度
+     * @param <T>      计划的List<T>的泛型
+     * @return 分割好的所有 list
      * @create 2018/11/1 15:04
      * @author Lgren
-     * @param list 计划分割的list
-     * @param pageSize 每段的长度
-     * @param <T>  计划的List<T>的泛型
-     * @return 分割好的所有 list
      */
 
     public static <T> List<List<T>> partition(List<T> list, Integer pageSize) {
@@ -91,17 +92,18 @@ public class LgrenUtil {
         }
         return result;
     }
+
     /**
      * 遍历 list变成线程分段遍历
      * 相当于将 list.forEach(msg -> {action})
      * 变成     LgrenUtil.execute(executorService, onceNum, action);
+     * @param executorService 例如 :ExecutorService.newFixedThreadPool(4)
+     * @param onceNum         一次处理的最大数量 默认最小为 1
+     * @param list            需要处理的 list
+     * @param action          list遍历里边的方法
+     * @param <T>             需要处理的 list<T>的泛型
      * @create 2018/11/20 17:40
      * @author Lgren
-     * @param executorService 例如 :ExecutorService.newFixedThreadPool(4)
-     * @param onceNum 一次处理的最大数量 默认最小为 1
-     * @param list 需要处理的 list
-     * @param action list遍历里边的方法
-     * @param <T>  需要处理的 list<T>的泛型
      */
     public static <T> void execute(ExecutorService executorService, Integer onceNum, List<T> list, Consumer<? super T> action) {
         int total = list.size();
@@ -119,17 +121,17 @@ public class LgrenUtil {
         }
     }
 
-//    public static void execute(ExecutorService executorService, Integer time, Runnable command) {
-//        for (int i = 0; i < time; i++) {
-//            executorService.execute(command);
-//        }
-//        executorService.shutdown();
-//        try {
-//            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    //    public static void execute(ExecutorService executorService, Integer time, Runnable command) {
+    //        for (int i = 0; i < time; i++) {
+    //            executorService.execute(command);
+    //        }
+    //        executorService.shutdown();
+    //        try {
+    //            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+    //        } catch (InterruptedException e) {
+    //            e.printStackTrace();
+    //        }
+    //    }
     public static <E> void forEach(Iterable<? extends E> elements, BiConsumer<? super E, Integer> action) {
         Objects.requireNonNull(elements);
         Objects.requireNonNull(action);
@@ -141,11 +143,11 @@ public class LgrenUtil {
 
     /**
      * 修改 org.springframework.beans.BeanUtils.copyProperties 将里边的 String全部转义
-     * @create 2018/10/31 18:27
-     * @author Lgren
      * @param source
      * @param target
      * @throws BeansException
+     * @create 2018/10/31 18:27
+     * @author Lgren
      */
     public static void copyProperties(Object source, Object target) throws BeansException {
         Assert.notNull(source, "Source must not be null");
@@ -154,7 +156,7 @@ public class LgrenUtil {
         PropertyDescriptor[] targetPds = getPropertyDescriptors(actualEditable);
         PropertyDescriptor[] var7 = targetPds;
         int var8 = targetPds.length;
-        for(int var9 = 0; var9 < var8; ++var9) {
+        for (int var9 = 0; var9 < var8; ++var9) {
             PropertyDescriptor targetPd = var7[var9];
             Method writeMethod = targetPd.getWriteMethod();
             if (writeMethod != null) {
@@ -197,161 +199,160 @@ public class LgrenUtil {
         return str.length() + 2 * CNNum;
     }
 
-/*    public static <K,V> void forEach(Map<K, V> map, ThiConsumer<? super K, ? super V, Integer> action) {
-        Objects.requireNonNull(map);
-        Objects.requireNonNull(action);
-        int index = 0;
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            action.accept(entry.getKey(), entry.getValue(), index++);
-        }
-    }
+    // /*    public static <K,V> void forEach(Map<K, V> map, ThiConsumer<? super K, ? super V, Integer> action) {
+    //         Objects.requireNonNull(map);
+    //         Objects.requireNonNull(action);
+    //         int index = 0;
+    //         for (Map.Entry<K, V> entry : map.entrySet()) {
+    //             action.accept(entry.getKey(), entry.getValue(), index++);
+    //         }
+    //     }
+    //
+    //     public static <K,V> void forEach(Map<K, V> map, BiConsumer<? super K, ? super V> action) {
+    //         Objects.requireNonNull(map);
+    //         Objects.requireNonNull(action);
+    //         for (Map.Entry<K, V> entry : map.entrySet()) {
+    //             action.accept(entry.getKey(), entry.getValue());
+    //         }
+    //     }
+    //
+    //     @FunctionalInterface
+    //     public interface ThiConsumer<T,U,W>{
+    //         void accept(T t, U u, W w);
+    //         default ThiConsumer<T,U,W> andThen(ThiConsumer<? super T,? super U,? super W> consumer){
+    //             return (t, u, w)->{
+    //                 accept(t, u, w);
+    //                 consumer.accept(t, u, w);
+    //             };
+    //         }
+    //     }*/
 
-    public static <K,V> void forEach(Map<K, V> map, BiConsumer<? super K, ? super V> action) {
-        Objects.requireNonNull(map);
-        Objects.requireNonNull(action);
-        for (Map.Entry<K, V> entry : map.entrySet()) {
-            action.accept(entry.getKey(), entry.getValue());
-        }
-    }
-
-    @FunctionalInterface
-    public interface ThiConsumer<T,U,W>{
-        void accept(T t, U u, W w);
-        default ThiConsumer<T,U,W> andThen(ThiConsumer<? super T,? super U,? super W> consumer){
-            return (t, u, w)->{
-                accept(t, u, w);
-                consumer.accept(t, u, w);
-            };
-        }
-    }*/
-
-//    public static String encode(String input) {
-//        if (input == null) {
-//            return null;
-//        }
-//        StringBuilder sb = new StringBuilder(input.length());
-//        for (int i = 0, c = input.length(); i < c; i++) {
-//            char ch = input.charAt(i);
-//            switch (ch) {
-//                case '&':
-//                    sb.append("&amp;");
-//                    break;
-//                case '<':
-//                    sb.append("&lt;");
-//                    break;
-//                case '>':
-//                    sb.append("&gt;");
-//                    break;
-//                case '"':
-//                    sb.append("&quot;");
-//                    break;
-//                case '\'':
-//                    sb.append("&#x27;");
-//                    break;
-//                case '/':
-//                    sb.append("&#x2F;");
-//                    break;
-//                default:
-//                    sb.append(ch);
-//            }
-//        }
-//        return sb.toString();
-//    }
-
-
-//    public static <T> List<PageInfo<T>> getPageList(List<T> list, Integer pageSize) {
-//        List<PageInfo<T>> result = new ArrayList<>();
-//        int getPageSize = Math.max(pageSize, 0);
-//        PageInfo<T> pageUser = null;
-//        do {
-//            pageUser = pageInfoForList(list, ofNullable(pageUser).map(PageInfo::getPageNum).orElse(0) + 1, getPageSize);
-//            result.add(pageUser);
-//        } while (pageUser.isHasNextPage());
-//        return result;
-//    }
+    //    public static String encode(String input) {
+    //        if (input == null) {
+    //            return null;
+    //        }
+    //        StringBuilder sb = new StringBuilder(input.length());
+    //        for (int i = 0, c = input.length(); i < c; i++) {
+    //            char ch = input.charAt(i);
+    //            switch (ch) {
+    //                case '&':
+    //                    sb.append("&amp;");
+    //                    break;
+    //                case '<':
+    //                    sb.append("&lt;");
+    //                    break;
+    //                case '>':
+    //                    sb.append("&gt;");
+    //                    break;
+    //                case '"':
+    //                    sb.append("&quot;");
+    //                    break;
+    //                case '\'':
+    //                    sb.append("&#x27;");
+    //                    break;
+    //                case '/':
+    //                    sb.append("&#x2F;");
+    //                    break;
+    //                default:
+    //                    sb.append(ch);
+    //            }
+    //        }
+    //        return sb.toString();
+    //    }
 
 
-//    public static Map<String, String> getStrObjBetweenOfTwoStr(String str, String start, String end) {
-//        Map<String, String> result = new IdentityHashMap<>();
-//        if (StringUtils.isBlank(str)) {
-//            return result;
-//        }
-//        start = StringUtils.isBlank(start) ? "{" : start;
-//        end = StringUtils.isBlank(end) ? "}" : end;
-//        String strVar = str;
-//        int startNum = strVar.indexOf(start);
-//        int endNum;
-//        if (start.equals(end)) {
-//            int sstartNumVar = strVar.indexOf(end) + 1;
-//            endNum = strVar.substring(sstartNumVar).indexOf(end) + sstartNumVar;
-//        } else {
-//            endNum = strVar.indexOf(end);
-//        }
-////        int lastNum = 0;
-//        int thisNum = 0;
-//        String preStr = "";
-//        while(startNum != -1 && endNum != -1) {
-//            if (start.equals(end)) {
-//                int sstartNumVar = strVar.indexOf(end) + 1;
-//                endNum = strVar.substring(sstartNumVar).indexOf(end) + sstartNumVar;
-//            } else {
-//                endNum = strVar.indexOf(end);
-//            }
-//            String findStr = strVar.substring(startNum+1, endNum);
-////            int[] startAndEnd = {lastNum + startNum + 1, lastNum + endNum};
-////            result.put(findStr, startAndEnd);
-//            if (thisNum%2 != 0) {
-//                result.put(preStr, findStr);
-//            }
-//            strVar = strVar.substring(endNum + 1);
-////            lastNum += endNum + 1;
-//            startNum = strVar.indexOf(start);
-//            endNum = strVar.indexOf(end);
-//            preStr = findStr;
-//            thisNum++;
-//        }
-//        return result;
-//    }
-//    public static <T> FacetedPage<T> facetedPageLikePageInfoForList(List<T> list, Integer pageNum, Integer pageSize) {
-//        if (CollectionUtils.isEmpty(list)) {
-//            list = new ArrayList<>(0);
-//            pageNum = 0;
-//            pageSize = 0;
-//        }
-//        int total = list.size();
-//        int startNum = (pageNum - 1) * pageSize;
-//        int endNum = list.size() < pageSize ? list.size() : pageSize;
-//        list = list.subList(startNum, startNum + endNum);
-//        int pages = (int) Math.ceil(total/(Objects.equals(pageSize, 0) ? 1 : pageSize));
-//
-//        FacetedPage<T> newPage = new ;
-//        newPage.setPageNum(pageNum);// 当前页
-//        newPage.setPageSize(pageSize);// 每页显示的数量
-//        newPage.setPages(pages);// 总共页数
-//        newPage.setTotal(total);// 总数
-//        newPage.setList(list);// 数据
-//        return newPage;
-//    }
+    //    public static <T> List<PageInfo<T>> getPageList(List<T> list, Integer pageSize) {
+    //        List<PageInfo<T>> result = new ArrayList<>();
+    //        int getPageSize = Math.max(pageSize, 0);
+    //        PageInfo<T> pageUser = null;
+    //        do {
+    //            pageUser = pageInfoForList(list, ofNullable(pageUser).map(PageInfo::getPageNum).orElse(0) + 1, getPageSize);
+    //            result.add(pageUser);
+    //        } while (pageUser.isHasNextPage());
+    //        return result;
+    //    }
 
-//    public static <T> Map<String, Object> mapLikePageInfoForList(List<T> list, Integer pageNum, Integer pageSize) {
-//        if (CollectionUtils.isEmpty(list)) {
-//            list = new ArrayList<>(0);
-//            pageNum = 0;
-//            pageSize = 0;
-//        }
-//        int total = list.size();
-//        int startNum = (pageNum - 1) * pageSize;
-//        int endNum = list.size() < pageSize ? list.size() : pageSize;
-//        list = list.subList(startNum, startNum + endNum);
-//        int pages = (int) Math.ceil(total/(Objects.equals(pageSize, 0) ? 1 : pageSize));
-//
-//        Map<String, Object> resultMap = new HashMap<>(5);
-//        resultMap.put("pageNum" ,pageNum);// 当前页
-//        resultMap.put("pageSize", pageSize);// 每页显示的数量
-//        resultMap.put("pages", pages);// 总共页数
-//        resultMap.put("total", total);// 总数
-//        resultMap.put("list", list);// 数据
-//        return resultMap;
-//    }
 
+    //    public static Map<String, String> getStrObjBetweenOfTwoStr(String str, String start, String end) {
+    //        Map<String, String> result = new IdentityHashMap<>();
+    //        if (StringUtils.isBlank(str)) {
+    //            return result;
+    //        }
+    //        start = StringUtils.isBlank(start) ? "{" : start;
+    //        end = StringUtils.isBlank(end) ? "}" : end;
+    //        String strVar = str;
+    //        int startNum = strVar.indexOf(start);
+    //        int endNum;
+    //        if (start.equals(end)) {
+    //            int sstartNumVar = strVar.indexOf(end) + 1;
+    //            endNum = strVar.substring(sstartNumVar).indexOf(end) + sstartNumVar;
+    //        } else {
+    //            endNum = strVar.indexOf(end);
+    //        }
+    ////        int lastNum = 0;
+    //        int thisNum = 0;
+    //        String preStr = "";
+    //        while(startNum != -1 && endNum != -1) {
+    //            if (start.equals(end)) {
+    //                int sstartNumVar = strVar.indexOf(end) + 1;
+    //                endNum = strVar.substring(sstartNumVar).indexOf(end) + sstartNumVar;
+    //            } else {
+    //                endNum = strVar.indexOf(end);
+    //            }
+    //            String findStr = strVar.substring(startNum+1, endNum);
+    ////            int[] startAndEnd = {lastNum + startNum + 1, lastNum + endNum};
+    ////            result.put(findStr, startAndEnd);
+    //            if (thisNum%2 != 0) {
+    //                result.put(preStr, findStr);
+    //            }
+    //            strVar = strVar.substring(endNum + 1);
+    ////            lastNum += endNum + 1;
+    //            startNum = strVar.indexOf(start);
+    //            endNum = strVar.indexOf(end);
+    //            preStr = findStr;
+    //            thisNum++;
+    //        }
+    //        return result;
+    //    }
+    //    public static <T> FacetedPage<T> facetedPageLikePageInfoForList(List<T> list, Integer pageNum, Integer pageSize) {
+    //        if (CollectionUtils.isEmpty(list)) {
+    //            list = new ArrayList<>(0);
+    //            pageNum = 0;
+    //            pageSize = 0;
+    //        }
+    //        int total = list.size();
+    //        int startNum = (pageNum - 1) * pageSize;
+    //        int endNum = list.size() < pageSize ? list.size() : pageSize;
+    //        list = list.subList(startNum, startNum + endNum);
+    //        int pages = (int) Math.ceil(total/(Objects.equals(pageSize, 0) ? 1 : pageSize));
+    //
+    //        FacetedPage<T> newPage = new ;
+    //        newPage.setPageNum(pageNum);// 当前页
+    //        newPage.setPageSize(pageSize);// 每页显示的数量
+    //        newPage.setPages(pages);// 总共页数
+    //        newPage.setTotal(total);// 总数
+    //        newPage.setList(list);// 数据
+    //        return newPage;
+    //    }
+
+    //    public static <T> Map<String, Object> mapLikePageInfoForList(List<T> list, Integer pageNum, Integer pageSize) {
+    //        if (CollectionUtils.isEmpty(list)) {
+    //            list = new ArrayList<>(0);
+    //            pageNum = 0;
+    //            pageSize = 0;
+    //        }
+    //        int total = list.size();
+    //        int startNum = (pageNum - 1) * pageSize;
+    //        int endNum = list.size() < pageSize ? list.size() : pageSize;
+    //        list = list.subList(startNum, startNum + endNum);
+    //        int pages = (int) Math.ceil(total/(Objects.equals(pageSize, 0) ? 1 : pageSize));
+    //
+    //        Map<String, Object> resultMap = new HashMap<>(5);
+    //        resultMap.put("pageNum" ,pageNum);// 当前页
+    //        resultMap.put("pageSize", pageSize);// 每页显示的数量
+    //        resultMap.put("pages", pages);// 总共页数
+    //        resultMap.put("total", total);// 总数
+    //        resultMap.put("list", list);// 数据
+    //        return resultMap;
+    //    }
 }

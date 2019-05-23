@@ -65,8 +65,8 @@ public class Common {
         int[] arrTrue = getArr();
         int[] sortArr = getArr();
         Arrays.sort(arrTrue);
-        // sortMethod.accept(sortArr);
-        AllSort.mergeSort(sortArr);
+        sortMethod.accept(sortArr);
+        // AllSort.mergeSort(sortArr);
         System.out.println(Arrays.equals(arrTrue, sortArr) + ":" + name);
     }
 
