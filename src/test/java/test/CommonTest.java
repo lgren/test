@@ -1,11 +1,13 @@
 package test;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 import pojo.Person;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -185,4 +187,16 @@ public class CommonTest {
         System.out.println(s);
     }
 
+    @Test
+    public void test9() {
+        ArrayList<BigDecimal> list1 = Lists.newArrayList(new BigDecimal(1), new BigDecimal(3), new BigDecimal(5));
+        ArrayList<BigDecimal> list2 = Lists.newArrayList(new BigDecimal(2), new BigDecimal(3), new BigDecimal(5));
+        list1.removeAll(list2);
+        System.out.println();
+    }
+
+    @Test
+    public void test10() {
+        Lists.newArrayList(ImmutableMap.of("id", 1), ImmutableMap.of("id", 2), ImmutableMap.of("id", 3));
+    }
 }

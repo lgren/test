@@ -28,9 +28,10 @@ public class StringFormatTest {
         System.out.println("-----------------------数字---------------------------");
         System.out.println(String.format("%,d", 99899999));// 千分位 ::99,899,999
         System.out.printf("%+(,d %n", -9999999);// 如果是负数则为(9,999,999)
-        System.out.printf("%05d%n",31); //    15 与下边3个数字对其  2. %05d%n 补上0 00015 3. %-5d%n 左对齐 右边有空格
+        System.out.printf("%05d%n",31); //    31 与下边3个数字对其  2. %05d%n 补上0 00015 3. %-5d%n 左对齐 右边有空格
         System.out.printf("% 5d%n",185);//   185 与相邻3个数字对其  2. %05d%n 补上0 00185 3. %-5d%n 左对齐 右边有空格
         System.out.printf("% 5d%n",155);//   155 与上边3个数字对其  2. %05d%n 补上0 00155 3. %-5d%n 左对齐 右边有空格
+        System.out.printf("%03d%n",1);//   155 与上边3个数字对其  2. %05d%n 补上0 00155 3. %-5d%n 左对齐 右边有空格
         System.out.printf("%5.2f%n",155.435);// 155.44 浮点型数字格式化
 //        System.out.printf("%d%n",123456789);
         System.out.printf("%,.3f%n",123456789.94456);

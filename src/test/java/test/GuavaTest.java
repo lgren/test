@@ -161,7 +161,7 @@ public class GuavaTest {
         System.out.println(list);//endregion [1, 2, 3, 4, 5, 6]
 
         //region guava方式 omitEmptyStrings:去掉中间为空的部分  "" trimResults:去掉中间空格  " "
-        List<String> list1 = Lists.newArrayList(Splitter.on("-").omitEmptyStrings().trimResults().splitToList(str));
+        List<String> list1 = Splitter.on("-").omitEmptyStrings().trimResults().splitToList(str);
         System.out.println(list1);//endregion [1, 2, 3, 4, 5, 6]
     }
 

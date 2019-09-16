@@ -1,9 +1,5 @@
-package com.lgren.反射;
+package com.lgren.jyyh_jsp.util;
 
-import org.apache.poi.ss.formula.functions.T;
-import org.springframework.util.ReflectionUtils;
-
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -13,16 +9,18 @@ import java.lang.reflect.Method;
  * @create 2019-05-22 15:21
  **/
 public class LReflectionUtils {
-    public static <T extends Annotation> Method findMethod(Class<?> clazz, String name, Class<T> annotationClass, Class... paramTypes) {
-        Method method = ReflectionUtils.findMethod(clazz, name, paramTypes);
-        T anno = method.getAnnotation(annotationClass);
-        if (anno == null) {
-            return null;
+    public static Method getMethod(Class<?> clazz, String field, Class<?>... parameterTypes) {
+        Method rMethod = null;
+        try {
+            rMethod = clazz.getDeclaredMethod(field, parameterTypes);
+        } catch (NoSuchMethodException ignored) { }
+        if (rMethod == null && clazz.getSuperclass() != null) {
+            rMethod = getMethod(clazz.getSuperclass(), field, parameterTypes);
         }
-        return method;
+        return rMethod;
     }
 
-    public static Field[] findFields(Class<?> clazz) {
+    public static Field[] getFields(Class<?> clazz) {
         Field[] fields = clazz.getDeclaredFields();
         Class<?> tmp = clazz.getSuperclass();
         while (tmp != null) {

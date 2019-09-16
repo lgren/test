@@ -13,15 +13,14 @@ import org.springframework.util.ClassUtils;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.springframework.beans.BeanUtils.getPropertyDescriptor;
 import static org.springframework.beans.BeanUtils.getPropertyDescriptors;
@@ -187,6 +186,10 @@ public class LgrenUtil {
         }
     }
 
+    /**
+     * 计算具有中文字符的字段长度
+     * @param str
+     */
     public static int calStrLength(String str) {
         if (StringUtils.isBlank(str)) {
             return 0;
@@ -355,4 +358,40 @@ public class LgrenUtil {
     //        resultMap.put("list", list);// 数据
     //        return resultMap;
     //    }
+
+
+    /** 创建HashMap */
+    public static <K, V> Map<K, V> newHashMap(K k1, V v1) {
+        Map<K, V> map = new HashMap<>(1);
+        map.put(k1, v1);
+        return map;
+    }
+
+    /** 创建HashMap */
+    public static <K, V> Map<K, V> newHashMap(K k1, V v1, K k2, V v2) {
+        Map<K, V> map = new HashMap<>(2);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        return map;
+    }
+
+    /** 创建HashMap */
+    public static <K, V> Map<K, V> newHashMap(K k1, V v1, K k2, V v2, K k3, V v3) {
+        Map<K, V> map = new HashMap<>(3);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        return map;
+    }
+
+    /** 创建HashMap */
+    public static <K, V> Map<K, V> newHashMap(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
+        Map<K, V> map = new HashMap<>(4);
+        map.put(k1, v1);
+        map.put(k2, v2);
+        map.put(k3, v3);
+        map.put(k4, v4);
+        return map;
+    }
+
 }
