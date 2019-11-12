@@ -1,6 +1,5 @@
 package time;
 
-import com.lgren.util.LgrenUtil;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
@@ -8,7 +7,7 @@ import org.junit.Test;
 import java.util.Date;
 
 /**
- * TODO
+ * apache时间工具类测试
  * @author lgren
  * @since 2019-09-26 11:20
  */

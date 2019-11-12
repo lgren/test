@@ -1,5 +1,7 @@
 package com.lgren.java8;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -38,5 +40,25 @@ public class Function_Supplier_Predicate_Consumer {
 
         System.out.println(s1.get());
         System.out.println(p1.test(6));
+    }
+
+    private <K,V> void forEach(Map<K, V> map, ThiConsumer<? super K, ? super V, Integer> action) {
+        Objects.requireNonNull(map);
+        Objects.requireNonNull(action);
+        int index = 0;
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            action.accept(entry.getKey(), entry.getValue(), index++);
+        }
+    }
+    @FunctionalInterface
+    interface ThiConsumer<T,U,W>{
+        void accept(T t, U u, W w);
+
+        default ThiConsumer<T,U,W> andThen(ThiConsumer<? super T,? super U,? super W> consumer){
+            return (t, u, w)->{
+                accept(t, u, w);
+                consumer.accept(t, u, w);
+            };
+        }
     }
 }
