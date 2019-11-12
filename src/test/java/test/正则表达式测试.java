@@ -31,4 +31,14 @@ public class 正则表达式测试 {
             System.out.println("NO MATCH");
         }
     }
+
+    @Test
+    public void test2() {
+        String str = "test54353";
+        str.replaceAll("[a-z|A-Z]", "");
+        System.out.println();
+        // String regEx = "[^0-9]";
+        // Pattern p = Pattern.compile(pattern);
+        // Matcher m = p.matcher(str);
+    }
 }

@@ -1,12 +1,9 @@
 package test.enumsTest;
 
 import com.alibaba.fastjson.JSONObject;
-import com.lgren.enums.TestEnum;
-import com.lgren.ohers.TaskAndMsgEnum;
 import org.junit.Test;
 import pojo.Person;
 
-import static java.util.Optional.ofNullable;
 
 /**
  * TODO

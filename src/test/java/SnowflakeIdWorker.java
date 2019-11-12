@@ -1,5 +1,3 @@
-package com.lgren;
-
 import java.util.UUID;
 
 /**
@@ -142,6 +140,7 @@ public class SnowflakeIdWorker {
         SnowflakeIdWorker idWorker01 = new SnowflakeIdWorker(0, 1);
         System.out.println(Long.toBinaryString(idWorker.nextId()));
         System.out.println(Long.toBinaryString(idWorker.nextId()));
+        System.out.println(idWorker.nextId());
         System.out.println(Long.toBinaryString(idWorker01.nextId()));
         System.out.println(Long.toBinaryString(idWorker01.nextId()));
 

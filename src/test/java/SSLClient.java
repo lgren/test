@@ -1,5 +1,3 @@
-package com.lgren;
-
 import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -22,6 +20,7 @@ import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +38,7 @@ public class SSLClient {
         String result = null;
         HttpClient client = HttpClients.createDefault();
         URIBuilder builder = new URIBuilder();
-        URI uri = null;
+        URI uri;
         try {
             uri = builder.setScheme("https")
                     .setHost("api.weixin.qq.com")
@@ -54,15 +53,14 @@ public class SSLClient {
             maps.put("offset", "0");
             maps.put("count", "2");
             //将封装好的map转换成json格式
-            String jsonStr = JSON.toJSONString(maps);
-            String body = jsonStr;
+            String body = JSON.toJSONString(maps);
             //设置请求体
             post.setEntity(new StringEntity(body));
             //获取返回信息
             HttpResponse response = client.execute(post);
             result = response.toString();
         } catch (Exception e) {
-            System.out.println("接口请求失败" + e.getStackTrace());
+            System.out.println("接口请求失败" + Arrays.toString(e.getStackTrace()));
         }
         System.out.println(result);
     }

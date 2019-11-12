@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.FatalBeanException;
@@ -13,6 +14,7 @@ import org.springframework.util.ClassUtils;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -120,17 +122,18 @@ public class LgrenUtil {
         }
     }
 
-    //    public static void execute(ExecutorService executorService, Integer time, Runnable command) {
-    //        for (int i = 0; i < time; i++) {
-    //            executorService.execute(command);
-    //        }
-    //        executorService.shutdown();
-    //        try {
-    //            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-    //        } catch (InterruptedException e) {
-    //            e.printStackTrace();
-    //        }
-    //    }
+    // public static void execute(ExecutorService executorService, Integer time, Runnable command) {
+    //     for (int i = 0; i < time; i++) {
+    //         executorService.execute(command);
+    //     }
+    //     executorService.shutdown();
+    //     try {
+    //         executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+    //     } catch (InterruptedException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
+
     public static <E> void forEach(Iterable<? extends E> elements, BiConsumer<? super E, Integer> action) {
         Objects.requireNonNull(elements);
         Objects.requireNonNull(action);
@@ -392,6 +395,60 @@ public class LgrenUtil {
         map.put(k3, v3);
         map.put(k4, v4);
         return map;
+    }
+
+    public static String getInterval(Date date, String type) {
+        if (date == null) {
+            return "无";
+        }
+        // 定义最终返回的结果字符串。
+        String interval;
+        type = StringUtils.isEmpty(type) ? "" : type;
+        long millisecond = new Date().getTime() - date.getTime();
+
+        long second = millisecond / 1000;
+
+        if (second <= 0) {
+            second = 0;
+        }
+        if (second <= 5 * 60) {//大于0分钟 小于5分钟
+            interval = "刚刚";
+        } else if (second <= 30 * 60) {//大于5分钟 小于30分钟
+            long minute = second / 60;
+            interval = minute + "分钟前";
+        }else if (second <= 60 * 60) {//大于30分钟 小于1小时
+            interval = 30 + "分钟前";
+        } else if (second <= 60 * 60 * 24) {//大于1小时 小于24小时
+            long hour = (second / 60) / 60;
+            interval = hour + "小时前";
+        } else if (second <= 60 * 60 * 24 * 2) {//大于1天 小于2天
+            interval = "昨天";
+        } else if (second <= 60 * 60 * 24 * 3) {//大于2天 小于 3天
+            interval = "前天";
+        } else if (second <= 60 * 60 * 24 * 7) {//大于3天 小于 7天
+            long day = (second / 60) / 60 / 24;
+            interval = day + "天前";
+        } else if (second <= 60 * 60 * 24 * 15) {//大于7天 小于 15天
+            interval = "一周前";
+        } else if (second <= 60 * 60 * 24 * 30) {//大于15天 小于 30天
+            interval = "半个月前";
+        } else if (second <= 60 * 60 * 24 * 183) {//大于30天 小于 6个月
+            long month = (second / 60) / 60 / 24 / 30;
+            interval = month + "个月前";
+        } else {
+            interval = "近半年";
+        }
+        return interval + type;
+    }
+
+    public static String getInterval(String dateStr, String type) {
+        Date date = null;
+        try {
+            date = DateUtils.parseDate(dateStr, "yyyy-MM-dd HH:mm:ss");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return getInterval(date, type);
     }
 
 }
