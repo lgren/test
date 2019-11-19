@@ -49,7 +49,7 @@ public class LRowCommon {
                         Method method = ReflectionUtils.findMethod(rClass, "set" + StringUtils.capitalize(field.getName()), field.getType());
                         if (method != null) {
                             if (field.getType() == Integer.class) {// TODO
-                                data = (int) data;
+                                data = data;
                             }
                             method.invoke(result, data);
                         }

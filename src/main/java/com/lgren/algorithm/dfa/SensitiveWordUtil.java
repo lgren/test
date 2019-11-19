@@ -114,7 +114,7 @@ public class SensitiveWordUtil {
      * @param matchType 匹配类型 MIN_MATCH_TYPE-最小匹配规则 MAX_MATCH_TYPE-最大匹配规则
      * @return 替换检查文本中所有匹配到的词后的结果
      */
-    private static String replaceAllWord(String text, int matchType) {
+    public static String replaceAllWord(String text, int matchType) {
         Map<Integer, Integer> allWordBeginEnd = getAllWordBeginEnd(text, matchType);
 
         char[] textCharArr = text.toCharArray();
@@ -178,7 +178,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void getAllWordBeginEndNew_minMatch_1() {
+    public void 获取所有开始结束坐标_最小匹配_1() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "testtttttttttttt";
         Map<Integer, Integer> actualMap = SensitiveWordUtil.getAllWordBeginEnd(text, MIN_MATCH_TYPE);
@@ -201,7 +202,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void getAllWordBeginEndNew_minMatch_2() {
+    public void 获取所有开始结束坐标_最小匹配_2() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "testtt";
         Map<Integer, Integer> actualMap = SensitiveWordUtil.getAllWordBeginEnd(text, MIN_MATCH_TYPE);
@@ -224,7 +226,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void getAllWordBeginEndNew_minMatch_3() {
+    public void 获取所有开始结束坐标_最小匹配_3() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "vdvdtestssvtesvdsvdsttt";
         Map<Integer, Integer> actualMap = SensitiveWordUtil.getAllWordBeginEnd(text, MIN_MATCH_TYPE);
@@ -247,7 +250,32 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void getAllWordBeginEndNew_maxMatch_1() {
+    public void 获取所有开始结束坐标_最小匹配_4() {
+        SENSITIVE_MAP.clear();
+        Sets.newHashSet("123", "1234", "1234567").forEach(SensitiveWordUtil::addWordToMap);
+        String text = "543512534123454312345673431232";
+        Map<Integer, Integer> actualMap = SensitiveWordUtil.getAllWordBeginEnd(text, MIN_MATCH_TYPE);
+
+        Map<Integer, Integer> expectMap = LgrenUtil.newHashMap(9, 11, 16, 18, 26, 28);
+        boolean result = false;
+        for (Map.Entry<Integer, Integer> entry : actualMap.entrySet()) {
+            result = Objects.equals(expectMap.remove(entry.getKey()), entry.getValue());
+            if (!result) {
+                break;
+            }
+        }
+        result &= expectMap.isEmpty();
+        if (!result) {
+            System.out.println(LgrenUtil.newHashMap(9, 11, 16, 18, 26, 28));
+            System.out.println(actualMap);
+        }
+        Assert.assertTrue(result);
+        // Assert.assertEquals(matchLength, matchLength, 0);
+    }
+
+    @Test
+    public void 获取所有开始结束坐标_最大匹配_1() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "testtttttttttttt";
         Map<Integer, Integer> actualMap = SensitiveWordUtil.getAllWordBeginEnd(text, MAX_MATCH_TYPE);
@@ -269,7 +297,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void getAllWordBeginEndNew_maxMatch_2() {
+    public void 获取所有开始结束坐标_最大匹配_2() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "testtt";
         Map<Integer, Integer> actualMap = SensitiveWordUtil.getAllWordBeginEnd(text, MAX_MATCH_TYPE);
@@ -291,7 +320,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void getAllWordBeginEndNew_maxMatch_3() {
+    public void 获取所有开始结束坐标_最大匹配_3() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "vdvdtestssvtesvdsvdsttt";
         Map<Integer, Integer> actualMap = SensitiveWordUtil.getAllWordBeginEnd(text, MAX_MATCH_TYPE);
@@ -314,7 +344,32 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void check_minMatch_0() {
+    public void 获取所有开始结束坐标_最大匹配_4() {
+        SENSITIVE_MAP.clear();
+        Sets.newHashSet("123", "1234", "1234567").forEach(SensitiveWordUtil::addWordToMap);
+        String text = "543512534123454312345673431232";
+        Map<Integer, Integer> actualMap = SensitiveWordUtil.getAllWordBeginEnd(text, MAX_MATCH_TYPE);
+
+        Map<Integer, Integer> expectMap = LgrenUtil.newHashMap(9, 12, 16, 22, 26, 28);
+        boolean result = false;
+        for (Map.Entry<Integer, Integer> entry : actualMap.entrySet()) {
+            result = Objects.equals(expectMap.remove(entry.getKey()), entry.getValue());
+            if (!result) {
+                break;
+            }
+        }
+        result &= expectMap.isEmpty();
+        if (!result) {
+            System.out.println(LgrenUtil.newHashMap(9, 12, 16, 22, 26, 28));
+            System.out.println(actualMap);
+        }
+        Assert.assertTrue(result);
+        // Assert.assertEquals(matchLength, matchLength, 0);
+    }
+
+    @Test
+    public void 检查文本_最小匹配_0() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "tes";
         int matchLength = SensitiveWordUtil.checkWord(text, MIN_MATCH_TYPE);
@@ -323,7 +378,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void check_minMatch_1() {
+    public void 检查文本_最小匹配_1() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "testtttttttttttt";
         int matchLength = SensitiveWordUtil.checkWord(text, MIN_MATCH_TYPE);
@@ -332,7 +388,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void check_minMatch_2() {
+    public void 检查文本_最小匹配_2() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "testtt";
         int matchLength = SensitiveWordUtil.checkWord(text, MIN_MATCH_TYPE);
@@ -341,7 +398,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void check_minMatch_3() {
+    public void 检查文本_最小匹配_3() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "vdvdtestssvtesvdsvdsttt";
         int matchLength = SensitiveWordUtil.checkWord(text, MIN_MATCH_TYPE);
@@ -350,7 +408,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void check_minMatch_4() {
+    public void 检查文本_最小匹配_4() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "vdvdtesssvtesvdsvdtestttttsttt";
         int matchLength = SensitiveWordUtil.checkWord(text, MIN_MATCH_TYPE);
@@ -359,7 +418,38 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void check_maxMatch_0() {
+    public void 检查文本_最小匹配_5() {
+        SENSITIVE_MAP.clear();
+        Sets.newHashSet("test", "sasr", "testttt").forEach(SensitiveWordUtil::addWordToMap);
+        String text = "sdfhsdjfhdskfhdsk";
+        int matchLength = SensitiveWordUtil.checkWord(text, MIN_MATCH_TYPE);
+
+        Assert.assertEquals(0, matchLength, 0);
+    }
+
+    @Test
+    public void 检查文本_最小匹配_6() {
+        SENSITIVE_MAP.clear();
+        Sets.newHashSet("t", "sasr", "testttt").forEach(SensitiveWordUtil::addWordToMap);
+        String text = "t";
+        int matchLength = SensitiveWordUtil.checkWord(text, MIN_MATCH_TYPE);
+
+        Assert.assertEquals(1, matchLength, 0);
+    }
+
+    @Test
+    public void 检查文本_最小匹配_7() {
+        SENSITIVE_MAP.clear();
+        Sets.newHashSet("123", "1234", "1234567").forEach(SensitiveWordUtil::addWordToMap);
+        String text = "123456";
+        int matchLength = SensitiveWordUtil.checkWord(text, MIN_MATCH_TYPE);
+
+        Assert.assertEquals(3, matchLength, 0);
+    }
+
+    @Test
+    public void 检查文本_最大匹配_0() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "tes";
         int matchLength = SensitiveWordUtil.checkWord(text, MAX_MATCH_TYPE);
@@ -368,7 +458,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void check_maxMatch_1() {
+    public void 检查文本_最大匹配_1() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "testtttttttttttt";
         int matchLength = SensitiveWordUtil.checkWord(text, MAX_MATCH_TYPE);
@@ -377,7 +468,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void check_maxMatch_2() {
+    public void 检查文本_最大匹配_2() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "testtt";
         int matchLength = SensitiveWordUtil.checkWord(text, MAX_MATCH_TYPE);
@@ -386,7 +478,8 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void check_maxMatch_3() {
+    public void 检查文本_最大匹配_3() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "vdvdtestssvtesvdsvdsttt";
         int matchLength = SensitiveWordUtil.checkWord(text, MAX_MATCH_TYPE);
@@ -395,11 +488,42 @@ public class SensitiveWordUtil {
     }
 
     @Test
-    public void check_maxMatch_4() {
+    public void 检查文本_最大匹配_4() {
+        SENSITIVE_MAP.clear();
         Sets.newHashSet("test", "testt", "testttt").forEach(SensitiveWordUtil::addWordToMap);
         String text = "vdvdtesssvtesvdsvdtestttttsttt";
         int matchLength = SensitiveWordUtil.checkWord(text, MAX_MATCH_TYPE);
 
         Assert.assertEquals(7, matchLength, 0);
+    }
+
+    @Test
+    public void 检查文本_最大匹配_5() {
+        SENSITIVE_MAP.clear();
+        Sets.newHashSet("123", "1234", "1234567").forEach(SensitiveWordUtil::addWordToMap);
+        String text = "123456";
+        int matchLength = SensitiveWordUtil.checkWord(text, MAX_MATCH_TYPE);
+
+        Assert.assertEquals(4, matchLength, 0);
+    }
+
+    @Test
+    public void 检查文本_最大匹配_6() {
+        SENSITIVE_MAP.clear();
+        Sets.newHashSet("123", "1234", "1234567").forEach(SensitiveWordUtil::addWordToMap);
+        String text = "12345678";
+        int matchLength = SensitiveWordUtil.checkWord(text, MAX_MATCH_TYPE);
+
+        Assert.assertEquals(7, matchLength, 0);
+    }
+
+    @Test
+    public void 检查文本_最大匹配_7() {
+        SENSITIVE_MAP.clear();
+        Sets.newHashSet("123", "1234", "1234567").forEach(SensitiveWordUtil::addWordToMap);
+        String text = "54351253412354312345673432`1234";
+        int matchLength = SensitiveWordUtil.checkWord(text, MAX_MATCH_TYPE);
+
+        Assert.assertEquals(3, matchLength, 0);
     }
 }

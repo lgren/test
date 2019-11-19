@@ -1,0 +1,107 @@
+package pojo;
+
+import com.alibaba.dubbo.common.compiler.support.ClassUtils;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.beanutils.BeanUtilsBean2;
+import org.apache.poi.ss.formula.functions.T;
+import org.springframework.cglib.beans.BeanMap;
+
+import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDateTime;
+import java.util.*;
+
+import static java.util.Optional.ofNullable;
+
+@Data
+@Accessors(chain = false)
+@NoArgsConstructor
+public class Person implements Comparable<Person>,Cloneable,Component {
+    private Long id;
+    private String realName;
+    private Date birthday;
+    private Integer zjStatus;
+    private Date insertDate;
+    private Date updateDate;
+    private Integer[] intArr;
+    private Integer sex;
+    private Integer identity;
+    private LocalDateTime insertTime;
+
+    public Person(long id, String tree, Date date) {
+        this.id = id;
+        this.realName = tree;
+        this.birthday = date;
+    }
+
+    @Override
+    public int compareTo(Person o) {
+        return this.getId() > o.getId() ? 1 : -1;
+    }
+
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\":" + id +
+                ",\"realName\":\"" + realName + '\"' +
+                ",\"birthday\":\"" + birthday + '\"' +
+                ",\"zjStatus\":" + zjStatus +
+                ",\"insertDate\":\"" + insertDate + '\"' +
+                ",\"updateDate\":\"" + updateDate + '\"' +
+                ",\"intArr\":" + Arrays.toString(intArr) +
+                ",\"sex\":" + sex +
+                ",\"identity\":" + identity +
+                "}";
+    }
+
+    @Override
+    public Object clone()   {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public String getSexStr(Integer sex) {
+        return ofNullable(this.sex).filter(o -> o == 1 || o == 2).map(o -> Objects.equals(o, 1) ? "男" : "女").orElse("");
+    }
+
+    @Override
+    public String getIdentityStr(Integer identity) {
+        return ofNullable(this.identity).map(o -> {
+            switch (o) {
+                case 1: return "学生";
+                case 2: return "老师";
+                case 3: return "警察";
+                case 4: return "医生";
+                case 5: return "科学家";
+                case 6: return "建筑师";
+                case 0: default: return null;
+            }
+        }).orElse("");
+    }
+
+    public static void main(String[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Person person = new Person(1L, "test", new Date());
+        BeanMap.create(person);
+        System.out.println();
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", 3);
+        map.put("realName", "你猜");
+        map.put("birthday", new Date());
+        map.put("intArr", new Integer[]{1, 2, 3, 4, 5});
+        Person person1 = new Person();
+        // BeanMap.create(person1).putAll(map);
+        BeanUtils.populate(person1, map);
+        BeanUtils.getProperty(person1, "id");
+        System.out.println();
+
+    }
+}

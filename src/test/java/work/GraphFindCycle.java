@@ -27,7 +27,7 @@ public class GraphFindCycle {
     public List<String> findRefServ(String servId,List<ServRel> servRelList){  
         List<String> refServList = new ArrayList<String>();  
         for(int i=0;i<servRelList.size();i++){  
-            ServRel rel = (ServRel)servRelList.get(i);  
+            ServRel rel = servRelList.get(i);
             if(servId.equals(rel.useServId)){  
                 refServList.add(rel.providerServId);  
             }  
@@ -53,7 +53,7 @@ public class GraphFindCycle {
             else{  
                 cyclePath = cyclePath+","+id;  
                 for(int j=0;j<refServList.size();j++){  
-                    String childServId = (String)refServList.get(j);  
+                    String childServId = refServList.get(j);
                     findCycleServ(childServId,cyclePath,servRelList);  
                 }  
             }  
@@ -103,7 +103,7 @@ public class GraphFindCycle {
           
         //System.out.println(servRelList.size());  
         for(int i=0;i<servList.size();i++){  
-            String servId = (String)servList.get(i);  
+            String servId = servList.get(i);
             gfc.findCycleServ(servId,"",servRelList);  
         }  
     }  

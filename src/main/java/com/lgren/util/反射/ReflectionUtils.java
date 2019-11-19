@@ -306,8 +306,7 @@ public class ReflectionUtils {
         // BeanUtils.copyProperties(dest, orig);
     }
 
-    public static void main(String[] args) throws InvocationTargetException,
-            IllegalAccessException {
+    public static void main(String[] args) {
         /*
          * Document document = new Document(); document.setId(2);
          * document.setCreateDate(new Date()); DocumentVo dcoVo = new

@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class DateTimeTest {
     @Test
-    public void name() throws ParseException {
+    public void name() {
         String beginStr = "200101";
         String endStr = "200212";
         int i = betweenMonth(beginStr, endStr);

@@ -126,7 +126,7 @@ public class GuavaTest {
         List<String> list = Lists.newArrayList("aa", "bb", "cc", null, "", "  ");
 
         //region 传统方式
-        StringBuilder str = new StringBuilder("");
+        StringBuilder str = new StringBuilder();
         for (String aList : list) {
             str.append("-").append(aList);
         }

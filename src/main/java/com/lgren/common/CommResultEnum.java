@@ -19,7 +19,7 @@ public enum CommResultEnum {
     private String errorCode;
     private String msg;
 
-    private CommResultEnum(String errorCode, String msg) {
+    CommResultEnum(String errorCode, String msg) {
         this.errorCode = errorCode;
         this.msg = msg;
     }
