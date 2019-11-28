@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>左侧垂直导航菜单</title>
+    <style type="text/css">
+        /*region (插件)左侧导航条样式*/
+        .z_tree>li{position:relative;z-index: 999;list-style: none;}
+        .z_tree>li>h3{padding: 5px 0 5px 3px;font-weight: normal;color: rgba(0, 0, 0, 0.65);}
+        .z_tree>li.on>h3{background-color: #D7E4F9;border-radius: 2px;color: rgba(0, 0, 0, 0.85);}
+        /*.z_tree>li>h3:hover{background-color: #D7E4F9;border-radius: 2px;color: rgba(0, 0, 0, 0.85);}*/
+
+        .z_tree>li>h3 a{color: inherit;}
+        /*导航条继续树展示样式*/
+        .z_tree .z_tree{position:absolute;top:0;left:100%;width:100%;outline:1px solid #D7E4F9;background:#fff;box-shadow: 2px 0 15px 0 rgba(50, 100, 250, 0.4);display: none;}
+        /*导航条单界面展示样式*/
+        .z_tree_info{
+            position:absolute;top:0;left:100%;border:1px solid #D7E4F9;background:#fff;box-shadow: 2px 0 15px 0 rgba(50, 100, 250, 0.4);
+            padding:10px 18px;width:515px;line-height:14px;text-indent:0;overflow-y: scroll;height: 400px;display: none;
+        }
+
+        .z_tree>li.on>.z_tree_info {display: block;}
+        /*.z_tree_info:hover, .z_tree>li>h3:hover+.z_tree_info {display: block;}*/
+
+        .z_tree_info>dl{float:left;width: 125px;}
+        .z_tree_info>dl>dt{margin-bottom:5px;}
+        .z_tree_info>dl>dd{float:left;width:125px;line-height:27px;}
+        /*.z_tree_info>dl>dd a{display:inline;background:none;border:0 none;color:#000;}*/
+        /*.z_tree_info>dl>dd a:hover{color:#f60;text-decoration:underline;}*/
+        /*单界面的一级标题样式*/
+        .z_tree_dl_sub {margin-bottom: 5px}
+        .z_tree_dl_sub a{color: inherit;}
+        .z_tree_dl_sub a:hover{text-decoration:underline;}
+        .z_tree_dl_sub>dt {font-size: 16px;font-weight:800;}
+        /*单界面的二级标题样式*/
+        .z_tree_dl_sub>dd>dl.z_tree_dl_sub>dt {font-size: 14px;font-weight:700;color: #0541a7}
+        .z_tree_dl_sub>dd>dl.z_tree_dl_sub>dd {line-height: 20px;}
+        /*endregion*/
+    </style>
+</head>
+<body>
+<div class="z_tree_div" style="display: inline-block; width: 200px">
+    <ul class="z_tree">
+        <li>
+            <h3 class="">标题1 <a href="#">test</a></h3>
+            <div class="z_tree_info">
+                <dl>
+                    <dt>商品分类</dt>
+                    <dd><a href="#">GSM手机</a></dd>
+                    <dd><a href="#">商品类别八个字符</a></dd>
+                    <dd><a href="#">商品类别八个字符</a></dd>
+                    <dd><a href="#">商品类别八个字符</a></dd>
+                    <dd><a href="#">GSM手机</a></dd>
+                    <dd><a href="#">CDMA手机</a></dd>
+                    <dd><a href="#">GSM手机</a></dd>
+                </dl>
+            </div>
+        </li>
+    </ul>
+</div>
+
+<script src="http://www.jq22.com/jquery/jquery-1.10.2.js"></script>
+<script type="text/javascript">
+    $('.z_tree_div').on('mouseenter', '.z_tree>li', function() {//绑定鼠标进入事件
+        $(this).addClass('on');
+    }).on('mouseleave', 'li', function() {//绑定鼠标划出事件
+        $(this).removeClass('on');
+    });
+
+    // $(".z_tree>li").hover(function () {
+    //     $(this).addClass("on");
+    // }, function () {
+    //     $(this).removeClass("on");
+    // });
+</script>
+</body>
+</html>

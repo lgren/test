@@ -317,9 +317,11 @@ public class GuavaTest {
     }
 
     @Test
-    public void 计时器() {
+    public void 计时器() throws InterruptedException {
         Stopwatch watch1 = Stopwatch.createUnstarted();// 累计时间
         Stopwatch watch = Stopwatch.createStarted();
+        Thread.sleep(10000);
+        System.out.println(" 用时: " + watch.toString());
         System.out.println();
     }
 

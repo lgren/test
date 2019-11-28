@@ -38,3 +38,26 @@ Date.prototype.format = function(fmt) {
     }
     return fmt;
 };
+
+function getUrlDefaultIcon(url) {
+    var httpIndex = -1;
+    if (url.indexOf('http://') > -1) {
+        httpIndex = 7;
+    }
+    if (url.indexOf('https://') > -1) {
+        httpIndex = 8;
+    }
+    if (httpIndex > -1) {
+        var head = url.substr(0, httpIndex);
+        var ipAndPostAndParam = url.substr(httpIndex);
+        var s_index = ipAndPostAndParam.indexOf('/');
+        // var ipAndPost = ipAndPostAndParam.substr(0, (s_index > -1 ? s_index : (ipAndPostAndParam.length - 1)));
+        return url.substr(0, httpIndex + s_index) + '/favicon.ico';
+
+        // var m_index = ipAndPost.indexOf(':');
+        // var ip = ipAndPost.substr(0, (m_index > -1 ? m_index : (ipAndPost.length - 1)));
+        // var post = m_index > -1 ? ipAndPost.substr(m_index) : null;
+    }
+    return "";
+
+}
