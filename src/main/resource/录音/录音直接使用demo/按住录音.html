@@ -10,6 +10,11 @@
     <div>
         <a href="https://gitee.com/xiangyuecn/Recorder/tree/master/" target="_blank">码云项目地址</a>
     </div>
+
+    <div>
+        <div style="display: inline-block; width: 200px; height: 100px" class="recordWave"></div>
+        <div style="display: inline-block; width: 200px; height: 100px" class="holdVoice">按住说话</div>
+    </div>
     
     <div>
         <button onclick="openRecord()">开始录音</button>
@@ -22,12 +27,7 @@
         <button onclick="resumeRecord()">继续录制</button>
         <button onclick="stopRecord()">停止录制</button>
     </div>
-    <div>
-        <div style="float: left;width: 200px;height: 100px" class="recordWave"></div>
-        <div style="clear: both;"></div>
-    </div>
-    <hr>
-    
+
     <div>
         <input id="uploadUrl" type="text" value="http://localhost:8080/iApp2/answer/common/uploadTest.do" style="width: 100%;" placeholder="上传地址">
         <button onclick="uploadRecord($('#uploadUrl').val())">上传</button>
@@ -39,6 +39,13 @@
     <script type="text/javascript" src="recorder.wav.min.js"></script>
     <script type="text/javascript" src="waveview.js"></script>
     <script type="text/javascript">
+        $(function () {
+            $('.holdVoice').on('touchstart', function() {
+
+                }).on('touchend', function() {
+
+                });
+        });
         // mp3格式，指定采样率hz、比特率kbps，其他参数使用默认配置；注意：是数字的参数必须提供数字，不要用字符串；
         // 需要使用的type类型，需提前把格式支持文件加载进来，比如使用wav格式需要提前加载wav.js编码引擎
         var rec = Recorder({

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+    </style>
+</head>
+<body>
+    <img class="playImg" src="img2.png" height="50" width="50" alt="" data-time="200" data-init-img="img2.png" data-imgs="img0.png,img1.png,img2.png">
+
+    <button onclick="begin('.playImg')">开始</button>
+    <button onclick="end('.playImg')">结束</button>
+    
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript">
+
+        function begin(node) {
+            var $node = $(node);
+            var imgArr = $node.data('imgs').split(',');
+            $node.data('interval-id', fnPlayImg($node, imgArr))
+        }
+
+        function end(node) {
+            var $node = $(node);
+            var imgArr = $node.data('imgs').split(',');
+            clearInterval($node.data('interval-id'));
+            $node.attr("src", $node.data('init-img'));
+        }
+
+        function fnPlayImg(node, imgArr) {
+            var $node = $(node);
+            var imgCurrI = 0;
+            return setInterval(function() {
+                $node.attr("src", imgArr[imgCurrI++]);
+                if (imgCurrI > imgArr.length) {
+                    imgCurrI = 0;
+                }
+            }, $node.data('time'));
+        }
+    </script>
+</body>
+</html>
