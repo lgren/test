@@ -6,40 +6,99 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <style>
+        .playImg {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background-image: url('img2.png');
+            background-size: 50px 50px;
+        }
     </style>
 </head>
 <body>
-    <img class="playImg" src="img2.png" height="50" width="50" alt="" data-time="200" data-init-img="img2.png" data-imgs="img0.png,img1.png,img2.png">
+<div class="playImg" data-time="200" data-init-img="img2.png" data-imgs="img0.png,img1.png,img2.png"></div>
+<button onclick="begin('.playImg')">开始</button>
+<button onclick="end('.playImg')">结束</button>
 
-    <button onclick="begin('.playImg')">开始</button>
-    <button onclick="end('.playImg')">结束</button>
-    
-    <script type="text/javascript" src="jquery.min.js"></script>
-    <script type="text/javascript">
+<div class="playImg1"></div>
 
-        function begin(node) {
-            var $node = $(node);
-            var imgArr = $node.data('imgs').split(',');
-            $node.data('interval-id', fnPlayImg($node, imgArr))
-        }
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript">
+    function end(selector) {
+        var $node = $(selector);
+        clearInterval($node.data('interval-id'));
+        $node.css("background-image", "url(" + $node.data('init-img') + ")");
+    }
 
-        function end(node) {
-            var $node = $(node);
-            var imgArr = $node.data('imgs').split(',');
-            clearInterval($node.data('interval-id'));
-            $node.attr("src", $node.data('init-img'));
-        }
+    function begin(selector) {
+        var $node = $(selector);
+        var imgArr = $node.data('imgs').split(',');
+        var imgCurrI = 0;
+        var intervalId = setInterval(function () {
+            $node.css("background-image", "url(" + imgArr[imgCurrI++] + ")");
+            if (imgCurrI > imgArr.length - 1) {
+                imgCurrI = 0;
+            }
+        }, $node.data('time'));
+        $node.data('interval-id', intervalId);
+        return intervalId;
+    }
 
-        function fnPlayImg(node, imgArr) {
-            var $node = $(node);
+    // -----------------------------以下为新版--------------------------------
+    // 通过generatePlayImg({selector: selector, ...})配置
+    // $(selector).data('play-img-begin')(); 开始
+    // $(selector).data('play-img-end')(); 结束
+
+    generatePlayImg({selector: '.playImg1', imgArr: ['img2.png', 'img0.png', 'img1.png'],});
+
+    /**
+     * 生成闪烁标签
+     * @param config.selector
+     * @param config.initImg
+     * @param config.imgs
+     * @param config.imgArr
+     * @param config.width
+     * @param config.height
+     * @param config.time
+     * @param config.begin
+     * @param config.end
+     */
+    function generatePlayImg(config) {
+        config = config || {};
+        config.width = config.width || '50px';
+        config.height = config.height || '50px';
+        config.time = config.time || 200;
+        config.initImg = config.initImg || config.imgArr[0];
+        var $node = $(config.selector);
+        $node.css({
+            'display': 'inline-block',
+            'height': config.height,
+            'width': config.width,
+            'background-image': 'url(' + config.initImg + ')',
+            'background-size': config.width + ' ' + config.height,
+        });
+        $node.data('play-img-config', config);
+        $node.data('play-img-begin', function () {
+            var imgArr = config.imgArr;
             var imgCurrI = 0;
-            return setInterval(function() {
-                $node.attr("src", imgArr[imgCurrI++]);
-                if (imgCurrI > imgArr.length) {
+            var intervalId = setInterval(function () {
+                $node.css("background-image", "url(" + imgArr[imgCurrI++] + ")");
+                if (imgCurrI > imgArr.length - 1) {
                     imgCurrI = 0;
                 }
-            }, $node.data('time'));
-        }
-    </script>
+            }, config.time);
+            $node.data('interval-id', intervalId);
+            config.begin && config.begin();
+            return $node;
+        });
+        $node.data('play-img-end', function () {
+            clearInterval($node.data('interval-id'));
+            $node.css("background-image", "url(" + config.initImg + ")");
+            config.end && config.end();
+            return $node;
+        });
+    }
+
+</script>
 </body>
 </html>
