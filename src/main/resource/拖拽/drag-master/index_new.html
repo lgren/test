@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <title>拖拽 new</title>
+    <script type="text/javascript" src="../../js/jquery-3.2.1.min.js"></script>
+    <!--<script type="text/javascript" src="js/tbl.js"></script>-->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+    <b>types:</b>
+    <ul class="canDrag">
+        <li draggable="true" data-text="optimal">optimal</li>
+        <li draggable="true" data-text="good">good</li>
+        <li draggable="true" data-text="medium">medium</li>
+        <li draggable="true" data-text="badly">badly</li>
+    </ul>
+
+    <table class="dataTbl">
+        <thead>
+        <tr>
+            <th style="width: auto">section/weeks</th>
+            <th style="width: 16%">Monday</th>
+            <th style="width: 16%">Tuesday</th>
+            <th style="width: 16%">Wednesday</th>
+            <th style="width: 16%">Thursday</th>
+            <th style="width: 16%">Friday</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>section_one</td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+        </tr>
+        <tr>
+            <td>section_two</td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+        </tr>
+        <tr>
+            <td>section_three</td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+        </tr>
+        <tr>
+            <td>section_four</td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+        </tr>
+        <tr>
+            <td>section_five</td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+            <td draggable="true"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        //解决火狐弹出新选项卡的问题
+        $(".container").on('drop', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        });
+
+        //拖拽开始
+        var $canDrag = $('.canDrag');
+        $canDrag.on('dragstart', '>li', function () {
+            //firefox 必须添加
+            event.dataTransfer.setData("text", $(this).data('text') || '');
+
+            this.style.opacity = .5;
+
+        });
+
+        //拖拽过程中
+        $canDrag.on('drag', '>li', function () {});
+
+        //拖拽结束
+        $canDrag.on('dragend', '>li', function () {
+            this.style.opacity = 1;
+        });
+
+        // //拖拽开始时将被拖拽元素透明度设置为50%
+        // $('.dataTbl').on('dragstart', 'td', function () {
+        //     var dataText = $(this).data('text');
+        //     //firefox 必须添加
+        //     event.dataTransfer.setData("text", dataText);
+        // });
+        //
+        // //拖拽过程不执行任何操作。将会被持续触发
+        // $('.dataTbl').on('drag', 'td', function () {});
+        //
+        // //拖拽之后恢复被拖拽元素的透明度
+        // $('.dataTbl').on('dragend', 'td', function () {
+        //     //重置背景色
+        //     this.style.backgroundColor = '';
+        //     //添加拖拽元素的类型
+        //     $(this).removeClass();
+        //     $(this).text('');
+        // });
+
+
+        //将元素拖入当前元素
+        var $dataTbl = $('.dataTbl');
+        $dataTbl.on('dragenter', 'td', function () {
+            this.style.backgroundColor = '#efefef';
+        }).on("dragover", 'td', function () {//google chrome,opera需要添加
+            event.preventDefault();
+        });
+        //将元素拖离当前元素
+        $dataTbl.on('dragleave', 'td', function () {
+            this.style.backgroundColor = '';
+        });
+
+        //将元素释放到当前元素中
+        $dataTbl.on('drop', 'td', function () {
+            var text = event.dataTransfer.getData("text");
+            //重置背景色
+            this.style.backgroundColor = '';
+            //添加拖拽元素的类型
+            $(this).removeClass();
+            $(this).addClass(text);
+            $(this).text(text);
+            $(this).data('text', text);
+
+            event.preventDefault();
+            event.stopPropagation();
+        });
+    });
+</script>
+</body>
+</html>

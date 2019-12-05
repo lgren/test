@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+	<meta charset="UTF-8">
+	<title>拖拽</title>
+	<script type="text/javascript" src="../../js/jquery-3.2.1.min.js"></script>
+	<!--<script type="text/javascript" src="js/tbl.js"></script>-->
+	<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+	<div class="container">
+		<b>types:</b> <ul class="canDrag">
+			<li draggable="true" data-text="optimal">optimal</li>
+			<li draggable="true" data-text="good">good</li>
+			<li draggable="true" data-text="medium">medium</li>
+			<li draggable="true" data-text="badly">badly</li>
+		</ul>
+
+		<table class="dataTbl">
+			<thead>
+				<tr>
+					<th style="width: auto">section/weeks</th>
+					<th style="width: 16%">Monday </th>
+					<th style="width: 16%">Tuesday</th>
+					<th style="width: 16%">Wednesday </th>
+					<th style="width: 16%">Thursday</th>
+					<th style="width: 16%">Friday</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>section_one</td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+				</tr>
+				<tr>
+					<td>section_two</td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+				</tr>
+				<tr>
+					<td>section_three</td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+				</tr>
+				<tr>
+					<td>section_four</td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+				</tr>
+				<tr>
+					<td>section_five</td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+					<td draggable="true" ></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+    <script type="text/javascript">
+        $(function () {
+
+            //解决火狐弹出新选项卡的问题
+            $(".container").on('drop', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            });
+
+            //拖拽开始时将被拖拽元素透明度设置为50%
+            $('.canDrag > li').bind('dragstart', function (event) {
+                var event = event.originalEvent;
+                event.target.style.opacity = .5;
+                var dataText = $(event.target).attr('data-text');
+                //firefox 必须添加
+                event.dataTransfer.setData("text", dataText);
+            });
+
+            //拖拽过程不执行任何操作。将会被持续触发
+            $('.canDrag > li').bind('drag', function (event) {
+            });
+
+            //拖拽之后恢复被拖拽元素的透明度
+            $('.canDrag > li').bind('dragend', function (event) {
+                var event = event.originalEvent;
+                event.target.style.opacity = 1;
+            });
+
+            // //拖拽开始时将被拖拽元素透明度设置为50%
+            // $('.dataTbl').bind('dragstart', 'td', function (event) {
+            //     var event = event.originalEvent;
+            //     var dataText = $(event.target).data('text');
+            //     //firefox 必须添加
+            //     event.dataTransfer.setData("text", dataText);
+            // });
+            //
+            // //拖拽过程不执行任何操作。将会被持续触发
+            // $('.dataTbl').bind('drag', 'td', function (event) {});
+            //
+            // //拖拽之后恢复被拖拽元素的透明度
+            // $('.dataTbl').bind('dragend', 'td', function (event) {
+            //     var event = event.originalEvent;
+            //     //重置背景色
+            //     event.target.style.backgroundColor = '';
+            //     //添加拖拽元素的类型
+            //     $(event.target).removeClass();
+            //     $(event.target).text('');
+            // });
+
+
+            //将元素拖入当前元素
+            $('.dataTbl').bind('dragenter', 'td', function (event) {
+                var event = event.originalEvent;
+                event.target.style.backgroundColor = '#fdfdfd';
+            });
+            //google chrome,opera需要添加
+            $(".dataTbl").bind("dragover", 'td', function (e) {
+                e.originalEvent.preventDefault();
+            });
+            //将元素拖离当前元素
+            $('.dataTbl').bind('dragleave', 'td', function (event) {
+                var event = event.originalEvent;
+                event.target.style.backgroundColor = '';
+            });
+
+            //将元素释放到当前元素中
+            $('.dataTbl').bind('drop', 'td', function (event) {
+                var event = event.originalEvent;
+                var text = event.dataTransfer.getData("text");
+                //重置背景色
+                event.target.style.backgroundColor = '';
+                //添加拖拽元素的类型
+                $(event.target).removeClass();
+                $(event.target).addClass(text);
+                $(event.target).text(text);
+                $(event.target).data('text', text);
+
+                event.preventDefault();
+                event.stopPropagation();
+            });
+        });
+    </script>
+</body>
+</html>

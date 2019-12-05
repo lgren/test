@@ -6,56 +6,87 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <style>
-        .playImg {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            background-image: url('img2.png');
-            background-size: 50px 50px;
-        }
     </style>
 </head>
 <body>
-<div class="playImg" data-time="200" data-init-img="img2.png" data-imgs="img0.png,img1.png,img2.png"></div>
-<button onclick="begin('.playImg')">开始</button>
-<button onclick="end('.playImg')">结束</button>
+<p>
+    通过generatePlayImg({selector: selector, ...})配置<br>
+    $(selector).trigger('playImgBegin'); 开始<br>
+    $(selector).trigger('playImgEnd'); 结束<br>
+</p>
+<div>
+    <button onclick="generatePlayImg({selector: '.playImg1', imgArr: ['img2.png', 'img0.png', 'img1.png'],})">全部配置</button>
+    <button onclick="$('.playImg1').trigger('playImgBegin')">全部开始</button>
+    <button onclick="$('.playImg1').trigger('playImgEnd')">全部结束</button>
+</div>
+<div style="width: 500px;display: flex">
+    <div style="flex: 1">
+        <div class="playImg1"></div>
+        <br>
+        <button onclick="$(this).siblings('.playImg1').trigger('playImgBegin')">开始</button>
+        <button onclick="$(this).siblings('.playImg1').trigger('playImgEnd')">结束</button>
+    </div>
+    <div style="flex: 1">
+        <div class="playImg1"></div>
+        <br>
+        <button onclick="$(this).siblings('.playImg1').trigger('playImgBegin')">开始</button>
+        <button onclick="$(this).siblings('.playImg1').trigger('playImgEnd')">结束</button>
+    </div>
+    <div style="flex: 1">
+        <div class="playImg1"></div>
+        <br>
+        <button onclick="$(this).siblings('.playImg1').trigger('playImgBegin')">开始</button>
+        <button onclick="$(this).siblings('.playImg1').trigger('playImgEnd')">结束</button>
+    </div>
+    <div style="flex: 1">
+        <div class="playImg1"></div>
+        <br>
+        <button onclick="$(this).siblings('.playImg1').trigger('playImgBegin')">开始</button>
+        <button onclick="$(this).siblings('.playImg1').trigger('playImgEnd')">结束</button>
+    </div>
+    <div style="flex: 1">
+        <div class="playImg1"></div>
+        <br>
+        <button onclick="$(this).siblings('.playImg1').trigger('playImgBegin')">开始</button>
+        <button onclick="$(this).siblings('.playImg1').trigger('playImgEnd')">结束</button>
+    </div>
+</div>
+<hr>
+<div>
+    <div class="pressBeginImg"></div>
+    <button class="pressBeginBtn">按住开始松开结束</button>
+    <br>
+</div>
 
-<div class="playImg1"></div>
 
 <script type="text/javascript" src="../js/jquery.min.js"></script>
 <script type="text/javascript">
-    function end(selector) {
-        var $node = $(selector);
-        clearInterval($node.data('interval-id'));
-        $node.css("background-image", "url(" + $node.data('init-img') + ")");
-    }
+    $(function () {
+        var $pressBeginImg = $('.pressBeginImg');
+        generatePlayImg({selector: $pressBeginImg, imgArr: ['img2.png', 'img0.png', 'img1.png'],});
 
-    function begin(selector) {
-        var $node = $(selector);
-        var imgArr = $node.data('imgs').split(',');
-        var imgCurrI = 0;
-        var intervalId = setInterval(function () {
-            $node.css("background-image", "url(" + imgArr[imgCurrI++] + ")");
-            if (imgCurrI > imgArr.length - 1) {
-                imgCurrI = 0;
-            }
-        }, $node.data('time'));
-        $node.data('interval-id', intervalId);
-        return intervalId;
-    }
-
-    // -----------------------------以下为新版--------------------------------
-    // 通过generatePlayImg({selector: selector, ...})配置
-    // $(selector).data('play-img-begin')(); 开始
-    // $(selector).data('play-img-end')(); 结束
-
-    generatePlayImg({selector: '.playImg1', imgArr: ['img2.png', 'img0.png', 'img1.png'],});
+        $('.pressBeginBtn').off('mousedown').on('mousedown', function() {
+            $pressBeginImg.trigger('playImgBegin');
+        }).off('mouseup').on('mouseup', function() {
+            $pressBeginImg.trigger('playImgEnd');
+        });
+    });
 
     /**
      * 生成闪烁标签
+     *
+     * 使用如下
+     * 通过generatePlayImg({selector: selector, ...})配置
+     * $(selector).trigger('playImgBegin'); 开始
+     * $(selector).trigger('playImgEnd'); 结束
+     *
+     * 例如
+     * generatePlayImg({selector: '.playImg1', imgArr: ['img2.png', 'img0.png', 'img1.png'],})
+     * $('.playImg1').trigger('playImgBegin'); 开始
+     * $('.playImg1').trigger('playImgEnd'); 结束
+     *
      * @param config.selector
      * @param config.initImg
-     * @param config.imgs
      * @param config.imgArr
      * @param config.width
      * @param config.height
@@ -78,24 +109,30 @@
             'background-size': config.width + ' ' + config.height,
         });
         $node.data('play-img-config', config);
-        $node.data('play-img-begin', function () {
+        $node.bind("playImgBegin",function () {
+            var $this = $(this);
             var imgArr = config.imgArr;
             var imgCurrI = 0;
-            var intervalId = setInterval(function () {
-                $node.css("background-image", "url(" + imgArr[imgCurrI++] + ")");
-                if (imgCurrI > imgArr.length - 1) {
-                    imgCurrI = 0;
-                }
-            }, config.time);
-            $node.data('interval-id', intervalId);
-            config.begin && config.begin();
-            return $node;
+            var intervalId = $this.data('interval-id');
+            if (intervalId == null) {
+                intervalId = setInterval(function () {
+                    $this.css("background-image", "url(" + imgArr[imgCurrI++] + ")");
+                    if (imgCurrI > imgArr.length - 1) {
+                        imgCurrI = 0;
+                    }
+                }, config.time);
+                $this.data('interval-id', intervalId);
+            }
+            config.begin && config.begin($this);
+            return $this;
         });
-        $node.data('play-img-end', function () {
-            clearInterval($node.data('interval-id'));
-            $node.css("background-image", "url(" + config.initImg + ")");
-            config.end && config.end();
-            return $node;
+        $node.bind("playImgEnd", function () {
+            var $this = $(this);
+            clearInterval($this.data('interval-id'));
+            $this.data('interval-id', null);
+            $this.css("background-image", "url(" + config.initImg + ")");
+            config.end && config.end($this);
+            return $this;
         });
     }
 

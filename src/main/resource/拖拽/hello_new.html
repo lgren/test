@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .drag_div {
+            width: 100px;
+            min-width: 20px;
+            height: 100px;
+            min-height: 20px;
+            background-color: red;
+            /*margin: 50px;*/
+            position: fixed;
+            bottom: 0;
+            right: 0;
+        }
+
+    </style>
+</head>
+
+<body>
+<div style="height: 500px">
+    <div class="drag_div"></div>
+</div>
+
+
+<script>
+    window.onload = function () {
+        setDragBase({
+            selector: '.drag_div',
+            dragArr: ['lt', 't', 'rt', 'r', 'rb', 'b', 'lb', 'l'],
+            backgroundColor: "#FFFFFF",
+        });
+    };
+
+    /**
+     * setDragBase({selector: '.drag_div', dragArr: ['lt','t','rt','r','rb','b','lb','l']})
+     * @param config
+     * @param config.selector !!
+     * @param {String|Array} config.dragArr !! 'lt','t','rt','r','rb','b','lb','l'
+     * @param config.opacity
+     * @param config.backgroundColor
+     * @param config.width
+     */
+    function setDragBase(config) {
+        config = config || {};
+        if (!config.selector) {
+            return false;
+        }
+        config.dragArr = config.dragArr || config.dragArr === 'all' || ['lt', 't', 'rt', 'r', 'rb', 'b', 'lb', 'l'];
+        config.opacity = config.opacity || 0.5;
+        config.width = config.width || 5;
+        config.backgroundColor = config.backgroundColor || 'transparent';
+        // 获取需要改变的div对象
+        var dragDiv;
+        var selector = config.selector.trim();
+        if (selector.startsWith('.')) {
+            dragDiv = document.getElementsByClassName(selector.substring(1))[0];
+        } else if (selector.startsWith('#')) {
+            dragDiv = document.getElementById(selector.substring(1));
+        } else {
+            return false;
+        }
+        if (!dragDiv) {
+            return false;
+        }
+        // dragDiv.style.position = 'relative';
+        if (!window._dragTemplateMap) {
+            window._dragTemplateMap = {
+                'lt': '<div data-position="lt" style="position: absolute;opacity: {{ opacity }};background-color: {{ backgroundColor }};width: {{ width }}px;height: {{ width }}px;top: 0;left: 0;cursor: nwse-resize;"></div>',
+                't': '<div data-position="t" style="position: absolute;opacity: {{ opacity }};background-color: {{ backgroundColor }};width: calc(100% - {{ width }}px - {{ width }}px);height: 5px;top: 0;left: 5px;cursor: ns-resize;"></div>',
+                'rt': '<div data-position="rt" style="position: absolute;opacity: {{ opacity }};background-color: {{ backgroundColor }};width: {{ width }}px;height: {{ width }}px;top: 0;right: 0;cursor: nesw-resize;"></div>',
+                'r': '<div data-position="r" style="position: absolute;opacity: {{ opacity }};background-color: {{ backgroundColor }};width: 5px;height: calc(100% - {{ width }}px - {{ width }}px);top: 5px;right: 0;cursor: ew-resize;"></div>',
+                'rb': '<div data-position="rb" style="position: absolute;opacity: {{ opacity }};background-color: {{ backgroundColor }};width: {{ width }}px;height: {{ width }}px;bottom: 0;right: 0;cursor: nwse-resize;"></div>',
+                'b': '<div data-position="b" style="position: absolute;opacity: {{ opacity }};background-color: {{ backgroundColor }};width: calc(100% - {{ width }}px - {{ width }}px);height: 5px;bottom: 0;left: 5px;cursor: ns-resize;"></div>',
+                'lb': '<div data-position="lb" style="position: absolute;opacity: {{ opacity }};background-color: {{ backgroundColor }};width: {{ width }}px;height: {{ width }}px;bottom: 0;left: 0;cursor: nesw-resize;"></div>',
+                'l': '<div data-position="l" style="position: absolute;opacity: {{ opacity }};background-color: {{ backgroundColor }};width: 5px;height: calc(100% - {{ width }}px - {{ width }}px);top: 5px;left: 0;cursor: ew-resize;"></div>',
+            };
+        }
+        var html = "";
+        // 获取需要添加的边
+        if (config.dragArr.constructor === String) {
+            html += window._dragTemplateMap[config.dragArr]
+                .replace(/{{ opacity }}/g, config.opacity)
+                .replace(/{{ backgroundColor }}/g, config.backgroundColor)
+                .replace(/{{ width }}/g, config.width);
+        } else if (config.dragArr.constructor === Array) {
+            for(var dragI in config.dragArr) {
+                html += window._dragTemplateMap[config.dragArr[dragI]]
+                    .replace(/{{ opacity }}/g, config.opacity)
+                    .replace(/{{ backgroundColor }}/g, config.backgroundColor)
+                    .replace(/{{ width }}/g, config.width);;
+            }
+        }
+        var htmlNodeArr = new DOMParser().parseFromString(html, 'text/html').body.childNodes;
+        for (var i = 0, len = htmlNodeArr.length; i < len; i++) {
+            var htmlNodeVar = htmlNodeArr[0];
+            htmlNodeVar.onmousedown = function (e) {
+                dragBase(e, dragDiv, this);
+                return false;
+            };
+            dragDiv.appendChild(htmlNodeVar);
+        }
+    }
+
+    /** 拖拽基础方法 */
+    function dragBase(e, dragDiv, dragNode) {
+        var startX = e.clientX;
+        var startY = e.clientY;
+        var dragDivWidth = dragDiv.clientWidth;
+        var dragDivHeight = dragDiv.clientHeight;
+        // 鼠标移动
+        document.onmousemove = function (e) {
+            var endX = e.clientX;
+            var endY = e.clientY;
+
+            var moveX = dragDiv.parentElement.scrollLeft + (endX - startX);
+            var moveY = dragDiv.parentElement.scrollTop + (endY - startY);
+            if (moveX < 0 || moveY < 0) {
+                if (dragDiv.offsetLeft < 20 || dragDiv.offsetTop < 20) {
+                    return;
+                }
+            }
+            var dataPosition = dragNode.dataset['position'];
+            if (dataPosition) {
+                switch (dataPosition) {
+                    case 'lt': dragDiv.style.width = dragDivWidth + -moveX + "px";// 左
+                    case 't': dragDiv.style.height = dragDivHeight + -moveY + "px";// 上
+                        break;
+                    case 'rt': dragDiv.style.height = dragDivHeight + -moveY + "px";// 上
+                    case 'r': dragDiv.style.width = dragDivWidth + moveX + "px";// 右
+                        break;
+                    case 'rb': dragDiv.style.width = dragDivWidth + moveX + "px";// 右
+                    case 'b': dragDiv.style.height = dragDivHeight + moveY + "px";// 下
+                        break;
+                    case 'lb': dragDiv.style.height = dragDivHeight + moveY + "px";// 下
+                    case 'l': dragDiv.style.width = dragDivWidth + -moveX + "px";// 左
+                        break;
+                }
+            }
+        };
+        document.onmouseup = function (e) {
+            document.onmousemove = null;
+            document.onmouseup = null;
+            dragNode.releaseCapture && dragNode.releaseCapture();
+        };
+    }
+</script>
+</body>
+</html>

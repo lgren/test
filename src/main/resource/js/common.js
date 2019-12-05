@@ -9,8 +9,12 @@ function isNotEmpty(value) {
 }
 
 /** 先解除 在添加 */
-function onOnly($node, types, selector, fn) {
-    $node.off(types, selector).on(types, selector, fn);
+function onOnly($node, types, selectorOrFn, fn) {
+    if (!$.isFunction(selectorOrFn)) {
+        $node.off(types, selectorOrFn).on(types, selectorOrFn, fn);
+    } else {
+        $node.off(types).on(types, selectorOrFn);
+    }
 }
 
 /**

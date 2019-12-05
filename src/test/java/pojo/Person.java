@@ -87,21 +87,4 @@ public class Person implements Comparable<Person>,Cloneable,Component {
             }
         }).orElse("");
     }
-
-    public static void main(String[] args) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        Person person = new Person(1L, "test", new Date());
-        BeanMap.create(person);
-        System.out.println();
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", 3);
-        map.put("realName", "你猜");
-        map.put("birthday", new Date());
-        map.put("intArr", new Integer[]{1, 2, 3, 4, 5});
-        Person person1 = new Person();
-        // BeanMap.create(person1).putAll(map);
-        BeanUtils.populate(person1, map);
-        BeanUtils.getProperty(person1, "id");
-        System.out.println();
-
-    }
 }
