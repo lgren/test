@@ -84,10 +84,12 @@
         //拖拽开始
         var $canDrag = $('.canDrag');
         $canDrag.on('dragstart', '>li', function () {
+            $(this).data('self-opacity', this.style.opacity);
             this.style.opacity = .5;
             //firefox 必须添加
             event.dataTransfer.setData("text", $(this).text() || '');
             event.dataTransfer.setData("tdClass", $(this).data('td-class') || '');
+            window._drag_ori_node = this;
         });
 
         //拖拽过程中
@@ -95,7 +97,7 @@
 
         //拖拽结束
         $canDrag.on('dragend', '>li', function () {
-            this.style.opacity = 1;
+            this.style.opacity = $(this).data('self-opacity');
         });
 
         // ------------------------------------------table 部分-------------------------------------------

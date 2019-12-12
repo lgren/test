@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
  * @author Lgren
  * @create 2018-11-13 14:13
  **/
-public class 正则表达式测试 {
+public class RegexTest {
     @Test
     public void test1() {
         // 按指定模式在字符串查找
