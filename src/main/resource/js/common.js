@@ -65,3 +65,37 @@ function getUrlDefaultIcon(url) {
     return "";
 
 }
+
+/**
+ * 一个form提交
+ * 参数类似
+ * formSubmit({url: '', inputArr: [{name: 'name1', value: 'value1'},],});
+ * @param config
+ * @param config.url
+ * @param config.method
+ * @param config.target
+ * @param config.data
+ */
+function formSubmit(config) {
+    config = config || {};
+    var method = config.method || 'POST';
+    var url = config.url;
+    if (!url) throw 'url为空';
+    var $form = $("<form></form>");
+    $form.attr("style", "display:none");
+    if (config.data) {
+        $.each(config.data, function (k, v) {
+            var $input = $("<input/>");
+            $input.attr("type", "hidden");
+            $input.attr("name", k);
+            $input.attr("value", v);
+            $form.append($input);
+        });
+    }
+    url && $form.attr('action', url);
+    $form.attr("method", method);
+    config.target && $form.attr("target", config.target);
+    $("body").append($form);
+    $form.submit();
+    $form.remove();
+}

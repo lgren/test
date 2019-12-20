@@ -24,11 +24,11 @@ public class Common {
     @Test
     public void verification() {
         isTrue(AllSort::bubbleSort, "冒泡");
-        isTrue(AllSort::selectionSort, "选择");
-        isTrue(AllSort::insertionSort, "插入");
-        isTrue(AllSort::shellSort, "希尔");
-        isTrue(AllSort::mergeSort, "归元");
-        isTrue(AllSort::quickSort, "快速");
+        // isTrue(AllSort::selectionSort, "选择");
+        // isTrue(AllSort::insertionSort, "插入");
+        // isTrue(AllSort::shellSort, "希尔");
+        // isTrue(AllSort::mergeSort, "归元");
+        // isTrue(AllSort::quickSort, "快速");
     }
 
     @Test

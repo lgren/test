@@ -21,7 +21,7 @@ public class AllSort {
         int len = arr.length;
         for (int i = 0; i < len - 1; i++) {
             for (int j = 1; j < len - i; j++) {
-                if (arr[j - 1] > arr[j]) {
+                if (arr[j] < arr[j - 1]) {
                     Common.swap(arr, j - 1, j);
                 }
             }
