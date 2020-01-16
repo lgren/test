@@ -16,7 +16,8 @@ public class IbatisUseTest {
     @Test
     public void name1() {
         Map<String, String[]> allSqlMap = getIbatisSql("" +
-                "" +
+                "15:12:07.371 [RMI TCP Connection(2)-127.0.0.1] DEBUG java.sql.PreparedStatement - {pstm-100004} Executing Statement:      SELECT      a.yva001 AS yva001,      a.yve001 AS yve001,      a.yve002 AS yve002,      a.yva002 AS yva002,      a.yva003 AS yva003,      a.yva004 AS yva004,      a.yva005 AS yva005,      a.aae100 AS aae100,      a.aae011 AS aae011,      a.aae036 AS aae036,      a.yvk010 AS yvk010,      a.yva043 AS yva043,      a.yva006 AS yva006,      a.yva007 AS yva007,      a.yva008 AS yva008,      a.yva009 AS yva009,      a.yva010 AS yva010,      a.yva011 AS yva011         FROM      VA01 a          where       a.aae100 = ?                                                                                                                   a.yva009 = ?                              \n" +
+                "15:12:07.371 [RMI TCP Connection(2)-127.0.0.1] DEBUG java.sql.PreparedStatement - {pstm-100004} Parameters: [1, 1]" +
                 "" +
                 "" +
                 "" +

@@ -16,7 +16,12 @@ import java.util.Map;
  * Desc: 使用Aspose.Words将word文件转换为pdf文件
  */
 public class AsposePptTest {
-    // $('[fill=#FFD8CF]').remove();
+    // <script src="../js/jquery.min.js" type="text/javascript"></script>
+    // <script type="text/javascript">
+    //     $(function() {
+    //         $('[fill=#FFD8CF]').remove()
+    //     });
+    // </script>
 
     /**
      * word 转 pdf

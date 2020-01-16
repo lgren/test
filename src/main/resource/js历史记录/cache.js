@@ -59,6 +59,13 @@ function delCache(key) {
     return CacheUtil.del(cacheType, key);
 }
 
+// 最多为20的数列写法
+// var arr = [];
+// if (arr.length >= 20) {
+//     arr.shift();
+// }
+// arr.push("new value");
+
 //region cookie 方法
 /**
  * 写cookies

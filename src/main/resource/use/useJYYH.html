@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>测试</title>
+    <style type="text/css">
+        .use_html {
+            width: 50%;
+            min-width: 500px;
+            height: 50%;
+            min-height: 300px;
+        }
+    </style>
+</head>
+<body>
+
+<!--<iframe src="http://103sy.com/game/detail/qid/183/id/129.html" class="use_html"></iframe>-->
+<!--<iframe src="use1.html" class="use_html"></iframe>-->
+<!--<img style="width: 120px;height:40px;margin-left: 5px;margin-top: 10px"-->
+     <!--src="http://103sy.com/admin/public/verify.html"-->
+     <!--onclick="this.src = httpAddress + '/admin/public/verify/rand.html' + Math.random()">-->
+
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript">
+    const qid = '183';
+    const game_id = '129';
+    const httpAddress = 'http://103sy.com';
+    function getHistoryList() {
+        $.ajax({
+            url: "http://localhost:9001/iApp2/document/BusinessAreaController!getBusinessTree.do",
+            type: "POST",
+            // async: false,//使用同步的方式,true为异步方式
+            // contentType: "application/json;charset=utf-8",
+            data: {},
+            dataType: "json",
+            success: function(result) {
+                console.log(result);
+            },
+            error: function(result) {console.log(result.responseText);}
+        });
+    }
+
+    function getUserInfo() {
+        $.ajax({
+            url: httpAddress + '/Vip/gm/qid/' + qid + '/game_id/' + game_id + '.html',
+            type: 'get',
+            'data': {'qid': qid, 'game_id': game_id},
+            'cache': false,
+            'dataType': 'jsonp',
+            jsonp: 'jsonpCallback',
+            success: function (data) {
+                if (data.status == 0) {
+                    alert(data.msg);
+                } else if (data.status === -1) {
+                    window.location.href = '/mobile/unlr/login/qid/183.html';
+                } else {
+                    var role = document.getElementById('role');
+                    role.options.length = 0;
+                    let jdata = JSON.stringify(data.jdata);
+                    debugger;
+                    // localStorage.setItem('role', jdata);
+                    // let op;
+                    // for (var index in data.data) {
+                    //     op = new Option(data.data[index].name, data.data[index].id);
+                    //     role.options.add(op);
+                    // }
+                    // showLayer1('layer1', 300, 400);
+                    // selectRole();
+                }
+            },
+            error: function (data) {
+                alert('ajax发送错误');
+            }
+        });
+    }
+
+    const account = 'lgren123';
+    const password = '962464zhouyuan';
+    function login() {
+        // let xmlHttp;
+        // if (window.XMLHttpRequest) {
+        //     xmlHttp = new XMLHttpRequest();
+        // } else {
+        //     xmlHttp = new ActiveXObject("Microsoft.XMLHTTP");
+        // }
+        // xmlHttp.open("POST", "http://192.168.28.81:9001/iApp2/j_spring_security_check" ,true);
+        // xmlHttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        // xmlHttp.setRequestHeader("x-requested-with", "XMLHttpRequest");
+        // xmlHttp.setRequestHeader("Test1","test1");
+        // xmlHttp.setRequestHeader("Origin","*");
+        // xmlHttp.setRequestHeader("Access-Control-Allow-Methods","GET,POST");
+        // xmlHttp.onreadystatechange = function () {
+        //     console.log(xmlHttp);
+        // };
+        // const username = 'deleveper';
+        // const password = '1';
+        // xmlHttp.send("username=" + username +
+        //     "&password=" + password +
+        //     "&checkCode=" + password +
+        //     "&clientsystem="  + 'mactrue' +
+        //     "&clientscreensize=" + '1680,1050' +
+        //     "&clientbrowser=" + 'chrome65');
+        // ?username=developer&password=1&checkCode=&clientsystem=mactrue&clientscreensize=1680,1050&clientbrowser=chrome65
+        const username = 'deleveper';
+        const password = '1';
+        $.ajax({
+            // url: httpAddress + '/mobile/unlr/login/qid/183.html',
+            url: 'http://192.168.28.81:9001/iApp2/j_spring_security_check',
+            type: 'post',
+            data: {
+                username: username,//账号
+                password: password,// 密码
+                checkCode: '',// 验证码
+                clientsystem: 'mactrue',
+                clientscreensize: '1680,1050',
+                clientbrowser: 'chrome65',
+            },
+            /*星号表示所有的域都可以接受，*/
+            // headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST'},
+            beforeSend(request) {
+                request.setRequestHeader("Test1","test1");
+                request.setRequestHeader("Access-Control-Allow-Origin","*");
+                request.setRequestHeader("Access-Control-Allow-Methods","GET,POST");
+            },
+            success(data) {
+                console.log(data);
+            },
+            error(data) {
+                console.log(data);
+            }
+        });
+    }
+</script>
+</body>
+</html>

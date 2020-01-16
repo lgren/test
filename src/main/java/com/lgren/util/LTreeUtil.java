@@ -2,9 +2,11 @@ package com.lgren.util;
 
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +45,46 @@ public class LTreeUtil {
             if (pNode != null && !Objects.equals(id, pid)) {
                 //给当前这个父级map对象中添加key为children的ArrayList
                 List<Map<String, Object>> children = (List<Map<String, Object>>) pNode.computeIfAbsent(childrenField, k -> new ArrayList<>());
+                children.add(node);
+            } else {// 没有父节点或者自己ID等于父ID则为根节点
+                resultList.add(node);
+            }
+        }
+        return resultList;
+    }
+
+    /**
+     * 读取树结构 参考zTree源码 会对原有数据产生影响 会将data中的数据添加一个childrenField字段
+     * @param data       数据源
+     * @param getId      节点ID字段名
+     * @param getPId     父节点ID字段名
+     * @param excludeIds 需要排除的节点ID数组
+     * @return 通过data生成的树
+     * @author Lgren
+     * @since 2019/9/16 17:09
+     */
+    public static <T extends WithChildren> List<T> listToTree(List<T> data,
+                                                              Function<T, ?> getId, Function<T, ?> getPId,
+                                                              Object... excludeIds) {
+        List<T> resultList = new ArrayList<>();
+        Set<Object> excludeIdSet = Optional.ofNullable(excludeIds).filter(o -> o.length != 0).map(Sets::newHashSet).orElse(null);
+        // 将原数据放入一个Map中
+        Map<Object, T> tmpMap = data.stream().collect(Collectors.toMap(getId::apply, m -> m, (oldMap, newMap) -> oldMap));
+        for (T node : data) {
+            Object id = getId.apply(node);// 获取当前节点ID
+            Object pid = getPId.apply(node);// 获取当前节点父节点
+            // 如果当前节点属于被排除节点 则跳过
+            if (CollectionUtils.isNotEmpty(excludeIdSet) && excludeIdSet.contains(id)) {
+                continue;
+            }
+            T pNode = tmpMap.get(pid);// 获取父节点
+            //tmpMap存储的均为id为key的键值对，如果以pid为key可以取出对象，则表明该元素是父级元素
+            if (pNode != null && !Objects.equals(id, pid)) {
+                if (pNode.getChildren() == null) {
+                    pNode.setChildren(new ArrayList<>());
+                }
+                //给当前这个父级map对象中添加key为children的ArrayList
+                Collection<WithChildren> children = pNode.getChildren();
                 children.add(node);
             } else {// 没有父节点或者自己ID等于父ID则为根节点
                 resultList.add(node);
@@ -103,7 +145,7 @@ public class LTreeUtil {
     public static List<Map<String, Object>> filterList(List<Map<String, Object>> data,
                                                        String idField, String pidField, String childrenField,
                                                        Object... excludeIds) {
-        // 1.排除部分字段 然后将所有的数据转化为树 如果父节点不存在 则子节点也不存在 所以达到移除节点以及其子节点的目的
+        // 1.排除部分值 然后将所有的数据转化为树 如果父节点不存在 则子节点也不存在 所以达到移除节点以及其子节点的目的
         List<Map<String, Object>> tree = listToTree(data, idField, pidField, childrenField, excludeIds);
         // 2.将树转化为list
         List<Map<String, Object>> result = new ArrayList<>(data.size());
@@ -205,6 +247,18 @@ public class LTreeUtil {
             if (children != null && !children.isEmpty()) {
                 pNodeAndChildrenConsumer.accept(node, children);
             }
+        }
+    }
+
+    public static class WithChildren {
+        private Collection<WithChildren> children;
+
+        public Collection<WithChildren> getChildren() {
+            return children;
+        }
+
+        public void setChildren(Collection<WithChildren> children) {
+            this.children = children;
         }
     }
 }

@@ -25,10 +25,10 @@ public class AsposeExcelTest {
      * @param pdfPath   转换完成后输出的pdf文件路径
      */
     public static void excel2pdf(String excelPath,String pdfPath) {
-        if (!AsposeComm.getLicense()) {
-            System.out.println("获取凭证失败");
-            return;
-        }
+        // if (!AsposeComm.getLicense()) {
+        //     System.out.println("获取凭证失败");
+        //     return;
+        // }
         try {
             Workbook convertExcel = new Workbook(new FileInputStream(excelPath));
             convertExcel.save(pdfPath, SaveFormat.PDF);

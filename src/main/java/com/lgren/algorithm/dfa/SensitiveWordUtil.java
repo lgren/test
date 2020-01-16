@@ -1,9 +1,11 @@
 package com.lgren.algorithm.dfa;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 /**
  * 敏感词工具类
@@ -20,7 +22,12 @@ public class SensitiveWordUtil {
     private static final boolean NOT_END = false; // 不是最后
     private static final String IS_END_STR = "isEnd"; // 是否是最后的字段名
 
-    public static final Map<Object, Object> SENSITIVE_MAP = new ConcurrentHashMap<>(4096); // 敏感词DFA处理后的Map
+    private static final Map<Object, Object> SENSITIVE_MAP = new ConcurrentHashMap<>(4096); // 敏感词DFA处理后的Map
+
+    /** 清除map */
+    public static void clear() {
+        SENSITIVE_MAP.clear();
+    }
 
     /** 在map中增加词 */
     public static Map<Object, Object> addWordToMap(String keyword) {
@@ -37,6 +44,20 @@ public class SensitiveWordUtil {
         // 循环完毕后此map为最后一个char的属性map 将IS_END_STR设置为IS_END
         currCharInfo.put(IS_END_STR, IS_END);
         return SENSITIVE_MAP;
+    }
+
+    /** 将列表添加进敏感词 */
+    public static void addListToMap(Iterable<String> strIte) {
+        for (String word : strIte) {
+            addWordToMap(word);
+        }
+    }
+
+    /** 将列表添加进敏感词 */
+    public static <T>void addListToMap(Iterable<T> iterable, Function<T, String> getWordFunc) {
+        for (T obj : iterable) {
+            addWordToMap(getWordFunc.apply(obj));
+        }
     }
 
     /** 在map中移除词 */

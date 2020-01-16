@@ -1,8 +1,11 @@
 package util;
 
 import com.google.common.collect.Lists;
+import com.lgren.util.LTreeProcessor;
 import com.lgren.util.LTreeUtil;
 import com.lgren.util.LgrenUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -36,5 +39,34 @@ public class LTreeUtilTest {
         // 递归将树转为list
         LTreeUtil.treeToList(result, tree, "children");
         System.out.println();
+    }
+
+    List<Node> DATA2 = Lists.newArrayList(
+            new Node(1L, 1L, "节点_1"),
+
+            new Node(2L, 1L, "节点_1_1"),
+            new Node(3L, 1L, "节点_1_2"),
+
+            new Node(4L, 2L, "节点_1_1_1"),
+            new Node(5L, 2L, "节点_1_1_2"),
+            new Node(6L, 3L, "节点_1_2_1")
+    );
+
+    @Test
+    public void test2() {
+        LTreeProcessor<Node, Long> lTreeProcessor = LTreeProcessor.get(DATA2, Node::getId, Node::getPId);
+        List<Node> children = lTreeProcessor.getChildren(2L);
+        List<Node> parents = lTreeProcessor.getParents(2L);
+        List<Node> levelList = lTreeProcessor.getByMaxLevel(1, 1L);
+        List<Node> onlyLevelList = lTreeProcessor.getByOnlyLevel(1, 1L);
+        System.out.println();
+    }
+
+    @Data
+    @AllArgsConstructor
+    class Node {
+        private Long id;
+        private Long pId;
+        private String name;
     }
 }

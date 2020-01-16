@@ -221,4 +221,31 @@ public class CommonTest {
         // 也不是进入这里
         default: System.out.println("default");
     } }
+
+
+    @Test
+    public void name1() {
+        System.out.println(question2("10110", "01001", "11110", "00000", "01001"));
+    }
+
+    private int question2(String... teams) {
+        int result = 0;// 最终结果
+        int[] resultArr = new int[5];// 用于统计的
+        char[] charArr;
+        for (int i = 0; i < teams.length; i++) {// 循环输入的内容
+            charArr = teams[i].toCharArray();// 将输入的内容转为byte数组, 用于统计到resultArr中
+            for (int j = 0; j < 5; j++) {// 例如 10110 循环这里边的1,0,1,1,0
+                resultArr[j] += (charArr[j] - 48);// 给统计里边累加
+                if (i == teams.length - 1) {// 判断是不是最后一个数了, 如果是最后一个数则进行判断能够集齐多少套, 也就是判断最小的那个数
+                    if (j == 0) {// 如果是 1,0,1,1,0循环, 将第一个数字赋值给result
+                        result = resultArr[j];
+                    } else {
+                        result = resultArr[j] < result ? resultArr[j] : result;
+
+                    }
+                }
+            }
+        }
+        return result;
+    }
 }
