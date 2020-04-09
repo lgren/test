@@ -1,0 +1,44 @@
+.child_float > * {
+    float: left !important;
+}
+
+.child_float_l > * {
+    float: left !important;
+}
+
+.child_float_r > * {
+    float: right !important;
+}
+
+.fl {
+    float: left;
+}
+
+.fr {
+    float: right;
+}
+
+.after_clear:after, .child_float:after, .child_float_l:after, .child_float_r:after {
+    content: '';
+    display: block;
+    clear: both;
+    visibility: hidden;
+    height: 0;
+    line-height: 0;
+}
+
+.ml10 {
+    margin-left: 10px;
+}
+
+.ml20 {
+    margin-left: 20px;
+}
+
+.wd100px {
+    width: 100px;
+}
+
+.hidden {
+    display: none !important;
+}

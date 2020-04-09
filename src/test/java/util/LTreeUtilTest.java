@@ -1,14 +1,15 @@
 package util;
 
 import com.google.common.collect.Lists;
-import com.lgren.util.LTreeProcessor;
 import com.lgren.util.LTreeUtil;
 import com.lgren.util.LgrenUtil;
+import com.lgren.util.tree.LTreeProcessor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -41,32 +42,73 @@ public class LTreeUtilTest {
         System.out.println();
     }
 
-    List<Node> DATA2 = Lists.newArrayList(
-            new Node(1L, 1L, "节点_1"),
+    List<MyNode> DATA2 = Lists.newArrayList(
+            new MyNode(1L, 1L, "节点_1"),
 
-            new Node(2L, 1L, "节点_1_1"),
-            new Node(3L, 1L, "节点_1_2"),
+            new MyNode(2L, 1L, "节点_1_1"),
+            new MyNode(3L, 1L, "节点_1_2"),
 
-            new Node(4L, 2L, "节点_1_1_1"),
-            new Node(5L, 2L, "节点_1_1_2"),
-            new Node(6L, 3L, "节点_1_2_1")
+            new MyNode(4L, 2L, "节点_1_1_1"),
+            new MyNode(5L, 2L, "节点_1_1_2"),
+            new MyNode(6L, 3L, "节点_1_2_1")
     );
 
     @Test
     public void test2() {
-        LTreeProcessor<Node, Long> lTreeProcessor = LTreeProcessor.get(DATA2, Node::getId, Node::getPId);
-        List<Node> children = lTreeProcessor.getChildren(2L);
-        List<Node> parents = lTreeProcessor.getParents(2L);
-        List<Node> levelList = lTreeProcessor.getByMaxLevel(1, 1L);
-        List<Node> onlyLevelList = lTreeProcessor.getByOnlyLevel(1, 1L);
+        com.lgren.util.LTreeProcessor lTreeProcessor = com.lgren.util.LTreeProcessor.get(DATA2, MyNode::getId, MyNode::getPId);
+        List<MyNode> children = lTreeProcessor.getChildren(2L);
+        List<MyNode> parents = lTreeProcessor.getParents(2L);
+        List<MyNode> levelList = lTreeProcessor.getByMaxLevel(1, 1L);
+        List<MyNode> onlyLevelList = lTreeProcessor.getByOnlyLevel(1, 1L);
+        System.out.println();
+    }
+
+    List<MyWithChildrenNode3> DATA3 = Lists.newArrayList(
+            new MyWithChildrenNode3(1L, 1L, "节点_1"),
+
+            new MyWithChildrenNode3(2L, 1L, "节点_1_1"),
+            new MyWithChildrenNode3(3L, 1L, "节点_1_2"),
+
+            new MyWithChildrenNode3(4L, 2L, "节点_1_1_1"),
+            new MyWithChildrenNode3(5L, 2L, "节点_1_1_2"),
+            new MyWithChildrenNode3(6L, 3L, "节点_1_2_1")
+    );
+
+    @Test
+    public void test5() {
+        LTreeProcessor<MyWithChildrenNode3, Long, MyWithChildrenNode3> processor = LTreeProcessor.get(DATA3, MyWithChildrenNode3::getId, MyWithChildrenNode3::getPId, (o) -> o);
+        List<MyWithChildrenNode3> children = processor.getChildren(2L);
+        List<MyWithChildrenNode3> parents = processor.getParents(2L);
+        List<MyWithChildrenNode3> levelList = processor.getByMaxLevel(1, 1L);
+        List<MyWithChildrenNode3> onlyLevelList = processor.getByOnlyLevel(1, 1L);
         System.out.println();
     }
 
     @Data
     @AllArgsConstructor
-    class Node {
+    class MyNode {
         private Long id;
         private Long pId;
         private String name;
+    }
+
+    @Data
+    class MyWithChildrenNode3 implements LTreeProcessor._INode<MyWithChildrenNode3> {
+        private Long id;
+        private Long pId;
+        private String name;
+
+        private Collection<LTreeProcessor._INode<MyWithChildrenNode3>> children;
+
+        public MyWithChildrenNode3(Long id, Long pId, String name) {
+            this.id = id;
+            this.pId = pId;
+            this.name = name;
+        }
+
+        @Override
+        public MyWithChildrenNode3 getObj() {
+            return this;
+        }
     }
 }

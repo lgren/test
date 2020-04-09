@@ -14,6 +14,7 @@ import java.util.*;
  * @since 2019-05-22 15:21
  **/
 public class LReflectionUtil {
+    //region 字段
     /**
      * 寻找类下以及子类的所有字段
      * @param clazz 类
@@ -36,8 +37,8 @@ public class LReflectionUtil {
     /**
      * 寻找类下以及子类的所有字段
      * @param clazz 类
-     * @param withAnnotation 排除 不带有此注解的字段
-     * @param withoutAnnotation 排除 带有此注解排除的字段
+     * @param withAnnotation 条件: 带有此注解的字段
+     * @param withoutAnnotation 条件: 不带有此注解的字段
      * @return 所有满足的字段
      */
     public static <T extends Annotation> List<Field> findFields(Class<?> clazz, Class<T> withAnnotation, Class<T> withoutAnnotation) {
@@ -58,7 +59,7 @@ public class LReflectionUtil {
      * @param clazz 类
      * @param withAnnotation 排除 不带有此注解的字段
      * @param withoutAnnotation 排除 带有此注解排除的字段
-     * @param comparator 排序规则
+     * @param comparator 返回的set的排序规则
      * @return 所有满足的字段
      */
     public static <T extends Annotation, E extends Annotation> Set<Field> findFields(Class<?> clazz,
@@ -105,7 +106,9 @@ public class LReflectionUtil {
         }
         return fieldList;
     }
+    //endregion
 
+    //region 常规方法
     public static <T extends Annotation> List<Method> findMethods(Class<?> clazz, Class<T> annotationClass,  String... names) {
         List<Method> methodList = new ArrayList<>(names.length);
         for (String name : names) {
@@ -134,6 +137,32 @@ public class LReflectionUtil {
         }
         return method;
     }
+    //endregion
+
+    //region get/set方法
+    /**
+     * 获取get方法
+     * @param clazz 类
+     * @param fieldName 字段名
+     * @param isBool 字段类型是否是bool类型
+     * @return get方法
+     */
+    public static Method findGetMethod(Class<?> clazz, String fieldName, boolean isBool) {
+        if (fieldName.startsWith("is")) {
+            return ReflectionUtils.findMethod(clazz, fieldName);
+        }
+        return ReflectionUtils.findMethod(clazz, (isBool ? "is" : "get") + StringUtils.capitalize(fieldName));
+    }
+
+    /**
+     * 获取get方法
+     * @param clazz 类
+     * @param fieldName 字段名
+     * @return get方法
+     */
+    public static Method findGetMethod(Class<?> clazz, String fieldName) {
+        return findGetMethod(clazz, fieldName, false);
+    }
 
     /**
      * 获取get方法
@@ -155,4 +184,18 @@ public class LReflectionUtil {
 
         return ReflectionUtils.findMethod(clazz, head + StringUtils.capitalize(field.getName()));
     }
+
+    /**
+     * 获取set方法
+     * @param clazz 类
+     * @param fieldName 字段名
+     * @param paramTypes 参数
+     * @return get方法
+     */
+    public static Method findSetMethod(Class<?> clazz, String fieldName, Class<?>... paramTypes) {
+        return ReflectionUtils.findMethod(clazz, "set" + StringUtils.capitalize(fieldName), paramTypes);
+    }
+    //endregion
+
+
 }

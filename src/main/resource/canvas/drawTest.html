@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+</head>
+<body>
+<div style="width: 100%; height: 90vh">
+    <div style="width: 80%; height: calc(100% - 50px); float: left;background-color: rgba(60,136,255,0.32);">
+        <canvas id="canvas"></canvas>
+    </div>
+</div>
+</body>
+<!--<script type="text/javascript" src="js/jquery-3.4.1.js"></script>-->
+<script type="text/javascript" src="js/fabric-3.6.1.js"></script>
+<script type="text/javascript">
+    var canvasDraw;
+
+    window.onload = function () {
+        var canvasNode = document.getElementById('canvas');
+        canvasDraw = CanvasDrawBuilder.createNew(canvasNode.id, {
+            canvasWidth: canvasNode.parentElement.clientWidth,
+            canvasHeight: canvasNode.parentElement.clientHeight,
+        });
+    };
+
+
+    //region 画布处理类 极简版
+    /** 使用 快捷键: ctrl + 1(鼠标) 2(铅笔) 3(矩形) 4(箭头) 5(文本) 6(椭圆)
+     *  var canvasDraw = CanvasDrawBuilder.createNew('canvas', {
+            canvasWidth: $('#canvas').parent()[0].scrollWidth,
+            canvasHeight: $('#canvas').parent()[0].scrollHeight,
+        });
+     */
+    var CanvasDrawBuilder = {
+        //region 静态公共字段
+        pointer: 'pointer',
+        clear: 'clear',
+        pencil: 'pencil',
+        rect: 'rect',
+        circle: 'circle',
+        ellipse: 'ellipse',
+        line: 'line',
+        dottedLine: 'dottedLine',
+        arrow: 'arrow',
+        text: 'text',
+        undo: 'undo',// 撤回
+        redo: 'redo',// 复原
+        remove: 'remove',// 删除
+        //endregion
+        /**
+         *
+         * @param canvasId 画布ID
+         * @param config 配置
+         * @param config.canvasWidth 画布宽
+         * @param config.canvasHeight 画布高
+         * @param config.strokeColor 画笔颜色
+         * @param config.strokeWidths 画笔宽度
+         * @param config.color 图形边框等颜色
+         * @param config.width 图形边框等宽度
+         * @param config.fillColor 填充颜色
+         * @param config.fontSize 字体大小
+         * @param config.fontColor 字体颜色
+         * @param config.defaultToolStr 默认工具
+         * @param config.dottedLineStrokeDashArray 虚线间隔 [18,3]是每个18个像素，间隔3个像素  后面的参数是间隔数
+         */
+        createNew: function (canvasId, config) {
+            var canvasNode = document.getElementById(canvasId);
+            var canvasDraw = {};
+            config = config || {};
+            //region 私有变量
+            canvasDraw.toolConfig = {
+                canvasWidth: 300,   // 画布宽
+                canvasHeight: 150,  // 画布高
+
+                strokeColor: 'red', // 画笔颜色
+                strokeWidths: 2,    // 画笔宽度
+
+                color: 'red',       // 图形边框等颜色
+                width: 2,           // 图形边框等宽度
+                fillColor: '',      // 填充颜色
+
+                fontSize: 18,       // 字体大小
+                fontColor: 'black', // 字体颜色
+
+                defaultToolStr: CanvasDrawBuilder.pencil, // 默认工具
+
+                dottedLineStrokeDashArray: [18, 3],  //[18,3]是每个18个像素，间隔3个像素  后面的参数是间隔数
+
+                enableKeyMap: true,// 开启快捷键
+            };// 初始化工具参数
+            canvasDraw.canvas = null; // 生成的作画对象
+            canvasDraw.nowToolStr = canvasDraw.toolConfig.defaultToolStr;// 当前tool工具
+            //endregion
+
+            var _privateAttr = {
+                tempGraphEnable: false, // 用于展示图形过程中的形成过程 开启
+                tempGraph: null, // 用于展示图形过程中的形成过程使用
+                redo: [], //撤回 前进用的
+                nowToolFunc: null, // 当前tool的方法
+                writingText: null, // 正在写的文字框
+            };
+
+            //region 初始化区
+            for (var k in config) if (config.hasOwnProperty(k)) {
+                canvasDraw.toolConfig[k] = config[k];
+            }
+            // $.extend()
+            canvasNode.width = canvasDraw.toolConfig.canvasWidth;
+            canvasNode.height = canvasDraw.toolConfig.canvasHeight;
+
+            canvasDraw.canvas = new fabric.Canvas(canvasId);
+            // 鼠标按下
+            canvasDraw.canvas.on('mouse:down', function (options) {
+                // 如果是打算选中图形|| 没有画图工具方法 || 没有起始坐标 则退出此方法
+                if (options.transform
+                    || !_privateAttr.nowToolFunc
+                    || !canvasDraw.canvas._previousPointer) {
+                    return false;
+                }
+                // 实现图形完成中的动态展示
+                _privateAttr.tempGraphEnable = true;
+            });
+            // 鼠标抬起
+            canvasDraw.canvas.on('mouse:up', function (options) {
+                // 如果是移动中的放开鼠标 || 没有画图工具方法 || 没有起始坐标 则退出此方法
+                if (options.transform
+                    || !_privateAttr.nowToolFunc
+                    || !canvasDraw.canvas._previousPointer) {
+                    return false;
+                }
+                // 实现图形完成中的动态展示
+                _privateAttr.tempGraphEnable = false;
+                _privateAttr.tempGraph && canvasDraw.canvas.remove(_privateAttr.tempGraph);
+
+                var prevXY = canvasDraw.canvas._previousPointer;
+                var diffX = options.pointer.x - prevXY.x;
+                var diffY = options.pointer.y - prevXY.y;
+                var graph = _privateAttr.nowToolFunc(options, {
+                    x1: prevXY.x,
+                    y1: prevXY.y,
+                    x2: options.pointer.x,
+                    y2: options.pointer.y,
+                    top: diffY > 0 ? prevXY.y : options.pointer.y,
+                    left: diffX > 0 ? prevXY.x : options.pointer.x,
+                    width: diffX > 0 ? diffX : (-diffX),
+                    height: diffY > 0 ? diffY : (-diffY),
+                });
+            });
+            // 鼠标移动过程中 配合鼠标按下, 抬起 实现图形完成中的动态展示
+            canvasDraw.canvas.on('mouse:move', function (options) {
+                // 如果是移动中的放开鼠标 || 没有画图工具方法 || 没有起始坐标 则退出此方法
+                if (!_privateAttr.tempGraphEnable) {
+                    return false;
+                }
+                var prevXY = canvasDraw.canvas._previousPointer;
+                var diffX = options.pointer.x - prevXY.x;
+                var diffY = options.pointer.y - prevXY.y;
+                _privateAttr.tempGraph && canvasDraw.canvas.remove(_privateAttr.tempGraph);
+                _privateAttr.tempGraph = _privateAttr.nowToolFunc(options, {
+                    x1: prevXY.x,
+                    y1: prevXY.y,
+                    x2: options.pointer.x,
+                    y2: options.pointer.y,
+                    top: diffY > 0 ? prevXY.y : options.pointer.y,
+                    left: diffX > 0 ? prevXY.x : options.pointer.x,
+                    width: diffX > 0 ? diffX : (-diffX),
+                    height: diffY > 0 ? diffY : (-diffY),
+                });
+            });
+            // 添加图形后
+            canvasDraw.canvas.on('object:added', function () {
+            });
+            // 移动图形中
+            canvasDraw.canvas.on('object:moving', function (e) {
+                e.target.opacity = 0.3  //你绘画在画布上对象，移动它们的时候，让它们的透明度变成0.5
+            });
+            // 修改图形后
+            canvasDraw.canvas.on('object:modified', function (e) {
+                e.target.opacity = 1
+            });
+
+            // 开启文本编辑触发
+            canvasDraw.canvas.on('text:editing:entered', function (textDraw) {
+                _privateAttr.writingText = textDraw.target;
+            });
+            // 结束文本编辑触发
+            canvasDraw.canvas.on('text:editing:exited', function (textDraw) {
+                _privateAttr.writingText = null;
+            });
+
+            // 快捷键设置
+            document.addEventListener("keydown", function (e) {
+                // 没有正在进行文本框编辑的时候触发
+                if (!_privateAttr.writingText) {
+                    if (e.ctrlKey) {
+                        // ctrl + z
+                        if (e.keyCode === 90 && !e.shiftKey) {
+                            canvasDraw.controller(CanvasDrawBuilder.undo);
+                        }
+                        // ctrl + y || ctrl + shift + z
+                        if ((e.keyCode === 89 && !e.shiftKey) || (e.shiftKey && e.keyCode === 90)) {
+                            canvasDraw.controller(CanvasDrawBuilder.redo);
+                        }
+                    }
+                    // 苹果command 键 等同 ctrl
+                    if (e.metaKey) {
+                        // ctrl + z
+                        if (e.keyCode === 90 && !e.shiftKey) {
+                            canvasDraw.controller(CanvasDrawBuilder.undo);
+                        }
+                        // ctrl + y || ctrl + shift + z
+                        if ((e.keyCode === 89 && !e.shiftKey) || (e.shiftKey && e.keyCode === 90)) {
+                            canvasDraw.controller(CanvasDrawBuilder.redo);
+                        }
+                    }
+                    // backspace
+                    if (e.keyCode === 8 || e.keyCode === 46) {
+                        canvasDraw.controller(CanvasDrawBuilder.remove);
+                    }
+                }
+
+                // 13: enter 按了enter则结束输入框 如果是shift + enter则为换行
+                if (_privateAttr.writingText && (e.keyCode === 13) && !e.shiftKey) {
+                    var text = _privateAttr.writingText.text;
+                    if (text == null || text.trim().length === 0) {
+                        _privateAttr.writingText.exitEditing();
+                        canvasDraw.canvas.remove(_privateAttr.writingText);
+                        _privateAttr.writingText = null;
+                    } else {
+                        _privateAttr.writingText.exitEditing();
+                    }
+                }
+            });
+            document.addEventListener("keyup", function (e) {// ctrl + 1(鼠标) 2(铅笔) 3(矩形) 4(箭头) 5(文本) 6(椭圆)
+                // 没有正在进行文本框编辑的时候触发 && 开启了工具切换 && 按住了alt
+                if (!_privateAttr.writingText && canvasDraw.toolConfig.enableKeyMap && e.altKey) {
+                    var nowToolStr;
+                    switch (e.keyCode) {
+                        case 49:// 1
+                            nowToolStr = CanvasDrawBuilder.pointer;
+                            break;
+                        case 50:// 2
+                            nowToolStr = CanvasDrawBuilder.pencil;
+                            break;
+                        case 51:// 3
+                            nowToolStr = CanvasDrawBuilder.rect;
+                            break;
+                        case 52:// 4
+                            nowToolStr = CanvasDrawBuilder.arrow;
+                            break;
+                        case 53:// 5
+                            nowToolStr = CanvasDrawBuilder.text;
+                            break;
+                        case 54:// 6
+                            nowToolStr = CanvasDrawBuilder.ellipse;
+                            break;
+                        default:
+                            break;
+                    }
+                    canvasDraw && canvasDraw.controller(nowToolStr);
+                }
+            });
+
+            //endregion
+
+            //region 私有方法
+            // 选择工具时的初始化方法
+            var chooseToolInit = function () {
+                canvasDraw.canvas.isDrawingMode = false; //绘制设为false
+                canvasDraw.canvas.selectable = false; //
+                canvasDraw.canvas.selection = false; // true-可以多选其他团 false-不能(选了这个的话框也不会出现)
+                canvasDraw.canvas.skipTargetFind = true; // true-不能单选其他团 false-可以选择
+            };
+            var allToolMap = {
+                // 鼠标
+                pointer: function (options, optionsExtend) {
+                    canvasDraw.canvas.isDrawingMode = false; //绘制设为false
+                    canvasDraw.canvas.selectable = true; //
+                    canvasDraw.canvas.selection = true; // true-可以多选其他团 false-不能(选了这个的话框也不会出现)
+                    canvasDraw.canvas.skipTargetFind = false; // true-不能单选其他团 false-可以选择
+                },
+                // 画笔
+                pencil: function (options, optionsExtend) {
+                    canvasDraw.canvas.isDrawingMode = true; //绘制设为true
+                    canvasDraw.canvas.freeDrawingBrush.color = canvasDraw.toolConfig.strokeColor; //画笔颜色
+                    canvasDraw.canvas.freeDrawingBrush.width = canvasDraw.toolConfig.strokeWidths; //画笔宽度
+                },
+                // 矩形
+                rect: function (options, optionsExtend) {
+                    var draw = new fabric.Rect({
+                        top: optionsExtend.top,
+                        left: optionsExtend.left,
+                        width: optionsExtend.width,
+                        height: optionsExtend.height,
+                        stroke: canvasDraw.toolConfig.color,   //画笔颜色
+                        fill: canvasDraw.toolConfig.fillColor,   //填充颜色
+                        strokeWidth: canvasDraw.toolConfig.width,   //画笔宽度
+                    });
+                    canvasDraw.canvas.add(draw);
+                    return draw;
+                },
+                // 圆形
+                circle: function (options, optionsExtend) {
+                    var draw = new fabric.Circle({
+                        top: optionsExtend.top,
+                        left: optionsExtend.left,
+                        radius: Math.min(optionsExtend.width, optionsExtend.height) / 2,
+                        stroke: canvasDraw.toolConfig.color,   //画笔颜色
+                        fill: canvasDraw.toolConfig.fillColor,   //填充颜色
+                        strokeWidth: canvasDraw.toolConfig.width,   //画笔宽度
+                    });
+                    canvasDraw.canvas.add(draw);
+                    return draw;
+                },
+                // 椭圆
+                ellipse: function (options, optionsExtend) {
+                    var draw = new fabric.Ellipse({
+                        top: optionsExtend.top,
+                        left: optionsExtend.left,
+                        rx: optionsExtend.width / 2,
+                        ry: optionsExtend.height / 2,
+                        stroke: canvasDraw.toolConfig.color,   //画笔颜色
+                        fill: canvasDraw.toolConfig.fillColor,   //填充颜色
+                        strokeWidth: canvasDraw.toolConfig.width,   //画笔宽度
+                        // originX: 'center',    //从X轴中心点绘制
+                        // originY: 'center',    //从Y轴中心点绘制
+                    });
+                    canvasDraw.canvas.add(draw);
+                    return draw;
+                },
+                // 线段
+                line: function (options, optionsExtend) {
+                    var draw = new fabric.Line([
+                        optionsExtend.x1,
+                        optionsExtend.y1,
+                        optionsExtend.x2,
+                        optionsExtend.y2], {
+                        //fabric.Line是fabric封装的方法 直接用就好了
+                        stroke: canvasDraw.toolConfig.color,   //画笔颜色
+                        strokeWidth: canvasDraw.toolConfig.width,   //画笔宽度
+                    });
+                    canvasDraw.canvas.add(draw);
+                    return draw;
+                },
+                // 虚线
+                dottedLine: function (options, optionsExtend) {
+                    var draw = new fabric.Line([
+                        optionsExtend.x1,
+                        optionsExtend.y1,
+                        optionsExtend.x2,
+                        optionsExtend.y2], {
+                        //fabric.Line是fabric封装的方法 直接用就好了
+                        strokeDashArray: canvasDraw.toolConfig.dottedLineStrokeDashArray,  //[3,3]是每个3个像素，间隔3个像素  后面的参数是间隔数
+                        stroke: canvasDraw.toolConfig.color,   //画笔颜色
+                        strokeWidth: canvasDraw.toolConfig.width,   //画笔宽度
+                    });
+                    canvasDraw.canvas.add(draw);
+                    return draw;
+                },
+                // 箭头
+                arrow: function (options, optionsExtend) {
+                    var draw = new fabric.Path(drawArrow(
+                        optionsExtend.x1,
+                        optionsExtend.y1,
+                        optionsExtend.x2,
+                        optionsExtend.y2,
+                        17.5, 17.5), {
+                        stroke: canvasDraw.toolConfig.color,   //画笔颜色
+                        fill: canvasDraw.toolConfig.color,   //画笔颜色
+                        strokeWidth: canvasDraw.toolConfig.width,   //画笔宽度
+                    });
+
+                    canvasDraw.canvas.add(draw);
+                    return draw;
+                },
+                // 文本
+                text: function (options, optionsExtend) {
+                    var draw = new fabric.Textbox('', {
+                        top: optionsExtend.top,
+                        left: optionsExtend.left,
+                        fill: canvasDraw.toolConfig.fontColor,   //填充颜色
+
+                        width: 150,
+                        fontSize: canvasDraw.toolConfig.fontSize,
+                        // hasControls: false,
+                    });
+                    // 获取已有的文本框
+                    var existsTexts = canvasDraw.canvas._iTextInstances;
+                    // 把已有的文本为空的输入框删除了
+                    if (existsTexts) {
+                        for (var i = 0; i < existsTexts.length; i++) {
+                            var obj = existsTexts[i];
+                            obj.selected = false;
+                            if (obj.isEditing) {
+                                obj.exitEditing();
+                                return false;
+                            }
+                            var text = obj.text;
+                            if (text == null || text.trim().length === 0) {
+                                canvasDraw.canvas.remove(obj);
+                                _privateAttr.writingText = null;
+                            }
+                        }
+                    }
+                    canvasDraw.canvas.add(draw);
+                    draw.enterEditing();
+                    return draw;
+                },
+                // 清空画布
+                clear: function (options, optionsExtend) {
+                    canvasDraw.canvas.clear();
+                },
+                // 撤回 撤销
+                undo: function () {
+                    if (canvasDraw.canvas._objects.length > 0) {
+                        _privateAttr.redo.push(canvasDraw.canvas._objects.pop());
+                        canvasDraw.canvas.renderAll();
+                    }
+                },
+                // 前进 复原撤销
+                redo: function () {
+                    if (_privateAttr.redo.length > 0) {
+                        canvasDraw.canvas.add(_privateAttr.redo.pop());
+                        canvasDraw.canvas.renderAll();
+                    }
+                },
+                // 移除
+                remove: function () {
+                    var activeObjects = canvasDraw.canvas.getActiveObjects();
+                    if (activeObjects.length > 0) {
+                        for (var i = 0; i < activeObjects.length; i++) {
+                            canvasDraw.canvas.remove(activeObjects[i]);
+                        }
+                    }
+                },
+            };
+            var drawArrow = function (fromX, fromY, toX, toY, theta, headlen) {
+                theta = typeof theta !== 'undefined' ? theta : 30
+                headlen = typeof theta !== 'undefined' ? headlen : 10
+                // 计算各角度和对应的P2,P3坐标
+                var angle = Math.atan2(fromY - toY, fromX - toX) * 180 / Math.PI,
+                    angle1 = (angle + theta) * Math.PI / 180,
+                    angle2 = (angle - theta) * Math.PI / 180,
+                    topX = headlen * Math.cos(angle1),
+                    topY = headlen * Math.sin(angle1),
+                    botX = headlen * Math.cos(angle2),
+                    botY = headlen * Math.sin(angle2)
+                var arrowX = fromX - topX,
+                    arrowY = fromY - topY;
+                var path = ' M ' + fromX + ' ' + fromY;
+                path += ' L ' + toX + ' ' + toY;
+                arrowX = toX + topX;
+                arrowY = toY + topY;
+                path += ' M ' + arrowX + ' ' + arrowY;
+                path += ' L ' + toX + ' ' + toY;
+                arrowX = toX + botX;
+                arrowY = toY + botY;
+                path += ' L ' + arrowX + ' ' + arrowY;
+                return path
+            };
+            //endregion
+
+            //region 公有方法
+            canvasDraw.controller = function (toolStr) {
+                canvasDraw.nowToolStr = toolStr;
+                var thisToolFunc = allToolMap[toolStr];
+                // 1-实时类(pointer, pencil)
+                // 2-功能类(clear, remove, undo, redo)
+                // 3-画具类
+                switch (toolStr) {
+                    case CanvasDrawBuilder.pointer:
+                    case CanvasDrawBuilder.pencil:
+                        _privateAttr.nowToolFunc = null;
+                        thisToolFunc();
+                        break;
+                    case CanvasDrawBuilder.clear:
+                    case CanvasDrawBuilder.remove:
+                    case CanvasDrawBuilder.undo:
+                    case CanvasDrawBuilder.redo:
+                        thisToolFunc();
+                        canvasDraw.canvas.renderAll();    //重新渲染
+                        break;
+                    default:
+                        chooseToolInit();
+                        _privateAttr.nowToolFunc = thisToolFunc;
+                        break;
+                }
+                return toolStr;
+            };
+
+            //endregion
+
+            canvasDraw.controller(canvasDraw.nowToolStr);
+            return canvasDraw;
+        }
+    };
+    //endregion
+</script>
+</html>

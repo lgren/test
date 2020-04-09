@@ -1,6 +1,6 @@
 package com.lgren.poi.poi3_17.new_read;
 
-import com.lgren.util.反射.LReflectionUtils;
+import com.lgren.util.反射.LReflectionUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -37,7 +37,7 @@ public class LRowCommon {
 
     public static <R> R getRowV(Sheet sheet, int rowIndex, int whichRowToCellKey, Class<R> rClass, int... skipColArr) throws IllegalAccessException, InstantiationException, InvocationTargetException {
         R result = rClass.newInstance();
-        Field[] fields = LReflectionUtils.findFields(rClass);
+        Field[] fields = LReflectionUtil.findFields(rClass);
         if (fields.length > 0) {
             Map<String, Object> rowV = getRowV(sheet, rowIndex, whichRowToCellKey, skipColArr);
             for (Field field : fields) {

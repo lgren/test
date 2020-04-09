@@ -20,9 +20,8 @@ public class LTreeProcessor<T, K> {
     private Collection<T> data;// 源数据
     private Function<T, K> getId;// 获取ID的方法
     private Function<T, K> getPId;// 获取PID的方法
-    private Map<K, Node> tmpDataMap;// ID作为KEY 解析后的所有节点
-    @Getter
-    private Map<K, Node> tmpDataTree;// ID作为KEY 解析后的所有节点
+    private Map<K, _Node> tmpDataMap;// ID作为KEY 解析后的所有节点
+    Map<K, _Node> tmpDataTree;// ID作为KEY 解析后的所有节点
 
     //region 获取解析树对象
     /**
@@ -40,21 +39,21 @@ public class LTreeProcessor<T, K> {
         this.getId = getId;
         this.getPId = getPId;
         // 将原数据放入一个Map中
-        Map<K, Node> tmpMap = data.stream().filter(Objects::nonNull).collect(Collectors.toMap(getId, Node::new, (oldMap, newMap) -> oldMap));
+        Map<K, _Node> tmpMap = data.stream().filter(Objects::nonNull).collect(Collectors.toMap(getId, _Node::new, (oldMap, newMap) -> oldMap));
         this.tmpDataTree = new HashMap<>(16);
         for (T oriNode : data) {
             K id = getId.apply(oriNode);// 获取当前节点ID
             Objects.requireNonNull(id, "树ID不能为空");
-            Node node = tmpMap.get(id);
+            _Node node = tmpMap.get(id);
             K pid = getPId.apply(oriNode);// 获取当前节点父节点
-            Node pNode = tmpMap.get(pid);// 获取父节点
+            _Node pNode = tmpMap.get(pid);// 获取父节点
             //tmpMap存储的均为id为key的键值对，如果以pid为key可以取出对象，则表明该元素是父级元素
             if (pNode != null && !Objects.equals(id, pid)) {
                 if (pNode.getChildren() == null) {
                     pNode.setChildren(new ArrayList<>());
                 }
                 //给当前这个父级map对象中添加key为children的ArrayList
-                Collection<Node> children = pNode.getChildren();
+                Collection<_Node> children = pNode.getChildren();
                 children.add(node);
             } else {
                 this.tmpDataTree.put(id, node);
@@ -84,7 +83,7 @@ public class LTreeProcessor<T, K> {
      * @return 节点列表
      */
     public List<T> getParents(K id) {
-        Node node = tmpDataMap.get(id);
+        _Node node = tmpDataMap.get(id);
         if (node == null) {
             return Collections.emptyList();
         }
@@ -98,7 +97,7 @@ public class LTreeProcessor<T, K> {
      * @return 节点ID列表
      */
     public List<K> getParentsId(K id) {
-        Node node = tmpDataMap.get(id);
+        _Node node = tmpDataMap.get(id);
         if (node == null) {
             return Collections.emptyList();
         }
@@ -115,8 +114,8 @@ public class LTreeProcessor<T, K> {
      * @param <R> 返回类型
      * @return 返回 result
      */
-    private <RT, R extends Collection<RT>> R getParentsBase(R result, Node node, Function<T, RT> returnFunc) {
-        Node tmpNode = node;
+    private <RT, R extends Collection<RT>> R getParentsBase(R result, _Node node, Function<T, RT> returnFunc) {
+        _Node tmpNode = node;
         T t;
         K k, pk;
         do {
@@ -150,7 +149,7 @@ public class LTreeProcessor<T, K> {
     }
 
     /**
-     * 获取此ID下的包含自己的所有父节点的
+     * 获取此ID下的包含自己的所有子节点的
      * @param ids 节点ID数组
      * @return 节点ID列表
      */
@@ -158,7 +157,7 @@ public class LTreeProcessor<T, K> {
         if (ids.length == 0) {
             return resultTypeFunc.get();
         }
-        Set<Node> nodeSet = new LinkedHashSet<>(ids.length);
+        Set<_Node> nodeSet = new LinkedHashSet<>(ids.length);
         for (K id : ids) {
             nodeSet.add(tmpDataMap.get(id));
         }
@@ -186,12 +185,12 @@ public class LTreeProcessor<T, K> {
     }
 
     /**
-     * 获取此ID下的包含自己的所有父节点的
+     * 获取此ID下的包含自己的所有子节点的
      * @param ids 节点ID数组
      * @return 节点ID列表
      */
     public <RT, R extends Collection<RT>> R getChildrenByLevel(Supplier<R> resultTypeFunc, Function<T, RT> returnFunc, int level, boolean isOnlyLevel, K... ids) {
-        Set<Node> nodeSet = new LinkedHashSet<>(ids.length);
+        Set<_Node> nodeSet = new LinkedHashSet<>(ids.length);
         if (ids.length == 0) {
             tmpDataTree.forEach((id, v) -> nodeSet.add(v));
         } else {
@@ -203,7 +202,7 @@ public class LTreeProcessor<T, K> {
     }
 
     /**
-     * 获取此ID下的包含自己的所有父节点
+     * 获取此ID下的包含自己的所有子节点
      * @param result 结果集
      * @param nodeColl 需要查询的节点集合
      * @param returnFunc 返回列表的类型方法
@@ -213,7 +212,7 @@ public class LTreeProcessor<T, K> {
      * @param <R> 返回类型
      * @return 返回 result
      */
-    private <RT, R extends Collection<RT>> R getChildrenBase(R result, Collection<Node> nodeColl, Function<T, RT> returnFunc, int level, int nowLevel, boolean isOnlyLevel) {
+    private <RT, R extends Collection<RT>> R getChildrenBase(R result, Collection<_Node> nodeColl, Function<T, RT> returnFunc, int level, int nowLevel, boolean isOnlyLevel) {
         Objects.requireNonNull(result, "结果集不能为空!");
         if (level > -1 && nowLevel > level) {
             return result;
@@ -221,7 +220,7 @@ public class LTreeProcessor<T, K> {
         if (nodeColl == null || nodeColl.isEmpty()) {
             return result;
         }
-        for (Node node : nodeColl) {
+        for (_Node node : nodeColl) {
             if (!isOnlyLevel || Objects.equals(nowLevel, level)) {
                 result.add(returnFunc.apply(node.getObj()));
             }
@@ -231,13 +230,17 @@ public class LTreeProcessor<T, K> {
     }
     //endregion
 
+    public Map<K, Map<String, Object>> getTreeMap() {
+        return null;
+    }
+
     @Data
-    private class Node {
+    class _Node {
         private T obj;
 
-        private Collection<Node> children;
+        private Collection<_Node> children;
 
-        public Node(T obj) {
+        public _Node(T obj) {
             this.obj = obj;
         }
     }
