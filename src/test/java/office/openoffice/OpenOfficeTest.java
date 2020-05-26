@@ -1,6 +1,6 @@
 package office.openoffice;
 
-import com.lgren.office.openoffice.lgren.OfficeConvert;
+import com.lgren.office.openoffice.old.OfficeConvert;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.Test;
 

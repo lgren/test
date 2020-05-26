@@ -1,4 +1,4 @@
-package com.lgren.office.openoffice.lgren;
+package com.lgren.office.openoffice.old;
 
 import com.artofsolving.jodconverter.*;
 import com.artofsolving.jodconverter.openoffice.connection.OpenOfficeConnection;

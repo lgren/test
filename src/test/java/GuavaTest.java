@@ -10,6 +10,7 @@ import sun.misc.BASE64Encoder;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
@@ -247,15 +248,15 @@ public class GuavaTest {
     public void 加密() {
         String input = "hello, world";
         // 计算MD5
-        System.out.println(Hashing.md5().hashBytes(input.getBytes()).toString());
+        System.out.println(Hashing.md5().hashBytes(input.getBytes()));
         // 计算sha256
-        System.out.println(Hashing.sha256().hashBytes(input.getBytes()).toString());
+        System.out.println(Hashing.sha256().hashBytes(input.getBytes()));
         // 计算sha512
-        System.out.println(Hashing.sha512().hashBytes(input.getBytes()).toString());
+        System.out.println(Hashing.sha512().hashBytes(input.getBytes()));
         // 计算crc32
-        System.out.println(Hashing.crc32().hashBytes(input.getBytes()).toString());
+        System.out.println(Hashing.crc32().hashBytes(input.getBytes()));
 
-        System.out.println(Hashing.md5().hashUnencodedChars(input).toString());
+        System.out.println(Hashing.md5().hashUnencodedChars(input));
     }
 
     @Test
@@ -282,8 +283,8 @@ public class GuavaTest {
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         BASE64Encoder base64en = new BASE64Encoder();
         //加密后的字符串
-        String newHouseMD5 = base64en.encode(md5.digest("你好哇".getBytes("utf-8")));
-        String newPreferenceMD5 = base64en.encode(md5.digest("我不好".getBytes("utf-8")));
+        String newHouseMD5 = base64en.encode(md5.digest("你好哇".getBytes(StandardCharsets.UTF_8)));
+        String newPreferenceMD5 = base64en.encode(md5.digest("我不好".getBytes(StandardCharsets.UTF_8)));
 
         System.out.println(newHouseMD5);
         System.out.println(newPreferenceMD5);
@@ -322,6 +323,12 @@ public class GuavaTest {
         Stopwatch watch = Stopwatch.createStarted();
         Thread.sleep(10000);
         System.out.println(" 用时: " + watch.toString());
+        System.out.println();
+    }
+
+    @Test
+    public void 范围() {
+        Range<Integer> range = Range.open(1, 5);
         System.out.println();
     }
 

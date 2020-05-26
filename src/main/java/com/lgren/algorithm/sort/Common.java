@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -20,6 +21,28 @@ public class Common {
         arr[l] = arr[r];
         arr[r] = lv;
     }
+
+    public static int[] getArr(int length) {
+        int[] arr = new int[length];
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        for (int i = 0; i < length; i++) {
+            arr[i] = random.nextInt(0, 1000);
+        }
+        return arr;
+    }
+
+    public static boolean verify(Consumer<int[]> sortFunc) {
+        int[] arr = Common.getArr(10);
+        int[] copyArr = Arrays.copyOf(arr, arr.length);
+        sortFunc.accept(arr);
+        Arrays.sort(copyArr);
+        boolean result = Arrays.equals(arr, copyArr);
+        if (!result) {
+            System.out.println(Arrays.toString(arr));
+        }
+        return result;
+    }
+
 
     @Test
     public void verification() {

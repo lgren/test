@@ -15,6 +15,7 @@ import static java.util.Optional.ofNullable;
  * @create 2018-10-11 10:07
  **/
 public class StringFormatTest {
+    // https://www.cnblogs.com/fsjohnhuang/p/4094777.html#a2
     @Test
     public void StringFormat格式化() {
         // String类型
@@ -58,6 +59,12 @@ public class StringFormatTest {
         System.out.println(String.format(Locale.JAPAN, "日文星期简称：%ta 全称：%<tA", LocalDate.of(2018, 10, 13)));
 
 
+    }
+
+    @Test
+    public void name() {
+        // 选择位置
+        System.out.println(String.format("%1$s, %3$s, %1$s", "test1", "test2", "test3"));
     }
 
     @Test
@@ -113,5 +120,10 @@ public class StringFormatTest {
             System.out.println("NO MATCH");
         }
         System.out.println(value.replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2"));
+    }
+
+    @Test
+    public void 按照序号获取测试() {
+        System.out.println(String.format("这是%s,这是%3$s,这是%1$s", "一", "二", "三"));
     }
 }

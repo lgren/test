@@ -99,3 +99,50 @@ function formSubmit(config) {
     $form.submit();
     $form.remove();
 }
+
+// string转dom节点
+function parseDom(str){
+    var div = document.createElement("div");
+    div.innerHTML = str;
+    return div.childNodes[0];
+}
+
+// 图片转Base64
+function getBase64 (img, callback) {
+    const reader = new FileReader()
+    reader.addEventListener('load', () => callback(reader.result))
+    reader.readAsDataURL(img)
+}
+
+/**
+ * 一个form提交
+ * 参数类似
+ * formSubmit({url: 'url', data: {'test': 1,},});
+ * @param url 地址
+ * @param method 方法
+ * @param target 打开方式
+ * @param data 数据
+ */
+function formSubmit1 ({ method = 'POST', url, target, data }) {
+    if (!url) { throw Error('url为空') }
+    const form = document.createElement('form')
+    form.action = url
+    form.method = method
+    form.style.display = 'none'
+    target && (form.target = target)
+    if (data) {
+        for (const k in data) {
+            if (Object.prototype.hasOwnProperty.call(data, k)) {
+                const v = data[k]
+                const input = document.createElement('input')
+                input.type = 'hidden'
+                input.name = k
+                input.value = v
+                form.appendChild(input)
+            }
+        }
+    }
+    document.getElementsByTagName('body')[0].appendChild(form)
+    form.submit()
+    form.remove()
+}

@@ -1,5 +1,7 @@
 package com.lgren.util;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -362,34 +364,45 @@ public class LgrenUtil {
     //        return resultMap;
     //    }
 
+    /**
+     * HashMap初始化容量计算
+     * @param expectedSize 预计需要存放的个数
+     * @return 实际HashMap的容量
+     */
+    public static int capacity(int expectedSize) {
+        if (expectedSize < 0) {
+            throw new IllegalArgumentException("容量值不能小于0");
+        }
+        if (expectedSize < 3) {
+            return expectedSize + 1;
+        }
+        return expectedSize < 1073741824 ? (int)((float)expectedSize / 0.75F + 1.0F) : 2147483647;
+    }
 
     /** 创建HashMap */
     public static <K, V> Map<K, V> newHashMap(K k1, V v1) {
-        Map<K, V> map = new HashMap<>(1);
+        Map<K, V> map = new HashMap<>(2);
         map.put(k1, v1);
         return map;
     }
 
-    /** 创建HashMap */
     public static <K, V> Map<K, V> newHashMap(K k1, V v1, K k2, V v2) {
-        Map<K, V> map = new HashMap<>(2);
+        Map<K, V> map = new HashMap<>(3);
         map.put(k1, v1);
         map.put(k2, v2);
         return map;
     }
 
-    /** 创建HashMap */
     public static <K, V> Map<K, V> newHashMap(K k1, V v1, K k2, V v2, K k3, V v3) {
-        Map<K, V> map = new HashMap<>(3);
+        Map<K, V> map = new HashMap<>(5);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);
         return map;
     }
 
-    /** 创建HashMap */
     public static <K, V> Map<K, V> newHashMap(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
-        Map<K, V> map = new HashMap<>(4);
+        Map<K, V> map = new HashMap<>(6);
         map.put(k1, v1);
         map.put(k2, v2);
         map.put(k3, v3);

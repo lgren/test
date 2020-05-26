@@ -102,7 +102,7 @@
         //将元素拖入当前元素
         var $dataTbl = $('.dataTbl');
         //拖拽开始
-        $dataTbl.on('dragstart', 'td', function () {
+        $dataTbl.on('dragstart', 'td', function (e) {
             this.style.opacity = .5;
             //firefox 必须添加
             event.dataTransfer.setData("text", $(this).text() || '');
@@ -111,7 +111,6 @@
 
         //拖拽过程中
         $dataTbl.on('drag', 'td', function () {});
-
         //拖拽结束
         $dataTbl.on('dragend', 'td', function () {
             //添加拖拽元素的类型

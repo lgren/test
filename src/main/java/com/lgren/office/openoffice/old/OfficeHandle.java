@@ -1,4 +1,4 @@
-package com.lgren.office.openoffice.lgren;
+package com.lgren.office.openoffice.old;
 
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -19,9 +19,13 @@ public class OfficeHandle {
     private static final int OPENOFFICE_MINIDLE = 5;// openoffice.minIdle
 
     private static class Holder {
-        private static final OfficeHandle DEFAULT_POOL = new OfficeHandle(getDefaultConfig());
+        private static final OfficeHandle DEFAULT_POOL = new OfficeHandle();
     }
     private GenericObjectPool<OfficeConnection> officePool;
+
+    private OfficeHandle() {
+        officePool = new GenericObjectPool<>(new OfficeConnPoolFactory(HOST, PORT), getDefaultConfig());
+    }
 
     private OfficeHandle(GenericObjectPoolConfig<OfficeConnection> config) {
         officePool = new GenericObjectPool<>(new OfficeConnPoolFactory(HOST, PORT), config);
@@ -52,7 +56,7 @@ public class OfficeHandle {
     }
 
     /** 获取默认连接池配置 */
-    private static GenericObjectPoolConfig<OfficeConnection> getDefaultConfig() {
+    private GenericObjectPoolConfig<OfficeConnection> getDefaultConfig() {
         // 设置对象池的相关参数
         GenericObjectPoolConfig<OfficeConnection> poolConfig = new GenericObjectPoolConfig<>();
         // 最大空闲连接数

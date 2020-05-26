@@ -1,5 +1,11 @@
 package com.lgren.util;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Arrays;
+import java.util.HashSet;
+
 /**
  * TODO
  * @author lgren
@@ -15,6 +21,7 @@ public class StringUtil {
      */
     public static final char UNDERLINE = '_';
 
+    // 下划线转驼峰
     public static String underlineToCamel(String param) {
         if (isBlank(param)) {
             return EMPTY;
@@ -26,6 +33,31 @@ public class StringUtil {
             if (c == UNDERLINE) {
                 if (++i < len) {
                     sb.append(Character.toUpperCase(param.charAt(i)));
+                }
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+    // 其他格式转驼峰
+    public static String convertToCamel(String s, char... delimiter) {
+        if (s == null || s.length() == 0 || delimiter.length == 0) {
+            return s;
+        }
+        int len = s.length();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            char c = s.charAt(i);
+            boolean isContain = false;
+            for (char wd : delimiter) {
+                if (isContain = (wd == c)) {
+                    break;
+                }
+            }
+            if (isContain) {
+                if (++i < len) {
+                    sb.append(Character.toUpperCase(s.charAt(i)));
                 }
             } else {
                 sb.append(c);
@@ -54,8 +86,9 @@ public class StringUtil {
     }
 
     public static void main(String[] args) {
-        String str = "niHaoYa_test";
-        System.out.println(underlineToCamel(str));
+        String str = "ni_hao-ya-wo_hai-keYiDe";
+        System.out.println(StringUtils.abbreviate("like", 4));// 展示l...  必须>=4
+        System.out.println(convertToCamel(str, '-', '_'));
         System.out.println();
     }
 }

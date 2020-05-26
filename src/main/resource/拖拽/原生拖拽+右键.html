@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style type="text/css">
+        ul,li{ padding:0;margin:0;list-style:none}
+        .generate-html-wrapper {
+            display: flex;
+            height: 80vh;
+        }
+        .generate-html-wrapper>.left {
+            width: 80px;
+            height: 100%;
+            background-color: aqua;
+        }
+        .generate-html-wrapper>.right {
+            flex: 1;
+            height: 100%;
+            background-color: aquamarine;
+        }
+
+        #templateConfigContextMenu {
+            position: absolute;
+            min-width: 180px;
+            border: 1px solid rgb(207, 207, 207);
+            border-radius: 8px;
+            background-color: rgb(242, 242, 242);
+            box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 11px;
+            padding: 5px 0px;
+        }
+        #templateConfigContextMenu>li {
+            padding: 0 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="generate-html-wrapper">
+        <ul class="left">
+            <li class="canDrag" data-template="type1" draggable="true">div</li>
+            <li class="canDrag" data-template="type2" draggable="true">a</li>
+        </ul>
+        <div class="right">
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    window.onload = function() {
+        const generateHtmlWrapperNode = document.querySelector('.generate-html-wrapper');
+
+        on(generateHtmlWrapperNode, '.canDrag', {
+            // 拖动开始
+            dragstart(node, e) {
+                node.style.opacity = .5;
+                // 只能在dragstart中setData, drop和dragstart里边getData
+                e.dataTransfer.setData('text', '试一下吧');
+            },
+            // 拖动结束
+            dragend(node, e) {
+                node.style.opacity = 1;
+            },
+            // 拖动中
+            drag(node, e) {
+                // 解决火狐弹出新选项卡的问题
+                e.preventDefault();
+                e.stopPropagation();
+            },
+            contextmenu(node, e) {
+                const menuNode = openContextMenu(e.clientX, e.clientY);
+                menuNode.innerHTML = `<li>test</li>`;
+                e.returnValue=false;
+                e.cancelBubble=true;
+                return false
+            }
+
+        })
+
+        on(generateHtmlWrapperNode, '.right', {
+            // 将元素拖入当前元素
+            dragenter(node, e) {},
+            // 将元素拖离当前元素
+            dragleave(node, e) {},
+            dragover(node, e) {// 被释放的地方 google chrome,opera需要添加
+                // 进入，就设置可以拖放进来（设置不执行默认：【默认的是不可以拖动进来】）
+                e.preventDefault();
+                e.stopPropagation();
+                // --05--设置具体效果
+                e.dataTransfer.dropEffect="copy";
+            },
+            // 将元素释放到当前元素中
+            drop(node, e) {
+                e.target.appendChild(parseDom('<div>testttt</div>'));
+            },
+        })
+    }
+
+    // 打开右键菜单
+    function openContextMenu(x, y) {
+        let menuNode = document.getElementById('templateConfigContextMenu')
+        if (menuNode == null) {
+            menuNode = parseDom(`<ul id="templateConfigContextMenu"></ul>`)
+            document.body.addEventListener('click', (e) => {
+            if (e.path.indexOf(menuNode) < 0) {
+                menuNode.style.display = 'none';
+            }
+        })
+        }
+        menuNode.style.display = 'initial';
+        menuNode.style.left = (x + 1) + 'px';
+        menuNode.style.top = (y - 5) + 'px';
+
+        document.body.appendChild(menuNode)
+        return menuNode;
+    }
+
+    // string转dom节点
+    function parseDom(str){
+        var div = document.createElement("div");
+        div.innerHTML = str;
+        return div.childNodes[0];
+    }
+
+    // 事件委托
+    function on(proxySelector, selector, typeOrMap, fn) {
+        let proxyNodes;
+        if (typeof proxySelector === 'object') {
+            proxyNodes = [proxySelector]
+        } else {
+            proxyNodes = document.querySelectorAll(proxySelector)
+        }
+        proxyNodes.forEach(proxyNode => {
+            if (typeof typeOrMap === 'string') {
+                const thisType = typeOrMap
+                typeOrMap = {}
+                typeOrMap[thisType] = fn
+            }
+            for (const type in typeOrMap) {
+                if (typeOrMap.hasOwnProperty(type)) {
+                    const typeFunc = typeOrMap[type];
+                    proxyNode.addEventListener(type, function(e) {
+                        let isNeed = false
+                        const thisNode = e.target
+                        const childrenNodes = proxyNode.querySelectorAll(selector)
+                        for (const childrenNodeI in childrenNodes) {
+                            if ((isNeed = (childrenNodes.item(childrenNodeI)) === thisNode)) {
+                                break
+                            }
+                        }
+                        if (isNeed) {
+                            typeFunc && typeFunc(thisNode, e)
+                        }
+                    });
+                }
+            }
+        })
+    }
+</script>
+</html>
+

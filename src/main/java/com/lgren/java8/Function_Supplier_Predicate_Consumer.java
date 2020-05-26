@@ -24,14 +24,15 @@ public class Function_Supplier_Predicate_Consumer {
         // Function<返回值类型> 无参数 有返回值
         Supplier<Integer> s1 = () -> 5;
 
-        // Predicate<参数类型> 有参数 有返回值(true/false)
-        Predicate<Integer> p1 = i -> i > 0;
-
         // BiConsumer<参数类型, 参数类型> 有参数 无返回值
         BiConsumer<Integer, Integer> bc1 = (i1, i2) -> {
             i1 <<= 1;
             i2 <<= 2;
         };
+
+        // Predicate<参数类型> 有参数 有返回值(true/false)
+        Predicate<Integer> p1 = i -> i > 0;
+
         System.out.println(f1.apply(10));
         System.out.println(f2.apply(10));
         System.out.println(f3.apply(10));
