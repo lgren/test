@@ -1,4 +1,4 @@
-package com.lgren.office.openoffice.simple;
+package com.lgren.office.openoffice.simpleNew;
 
 import com.artofsolving.jodconverter.openoffice.connection.OpenOfficeConnection;
 import com.artofsolving.jodconverter.openoffice.connection.SocketOpenOfficeConnection;
@@ -52,12 +52,10 @@ public class OpenOfficeConnectionFactory implements PooledObjectFactory<OpenOffi
     // 重新激活一个对象
     @Override
     public void activateObject(PooledObject<OpenOfficeConnection> pooledObject) {
-
     }
 
     // 钝化一个对象
     @Override
     public void passivateObject(PooledObject<OpenOfficeConnection> pooledObject) {
-
     }
 }

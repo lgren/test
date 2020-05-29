@@ -23,8 +23,8 @@ import org.apache.commons.pool2.impl.DefaultPooledObject;
  * @since 2020-04-17 11:14 上午
  */
 public class SimpleConnectionFactory implements PooledObjectFactory<SimpleConnection> {
-    private String host;// openoffice.ip
-    private Integer port;// openoffice.port
+    private String host;
+    private Integer port;
 
     public SimpleConnectionFactory(String host, Integer post) {
         this.host = host;

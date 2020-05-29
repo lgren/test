@@ -1,6 +1,6 @@
 package office.openoffice;
 
-import com.lgren.office.openoffice.old.OfficeConvert;
+import com.lgren.office.openoffice.simpleNew.OpenOfficeHandle;
 import org.apache.commons.io.FilenameUtils;
 import org.junit.Test;
 
@@ -102,7 +102,9 @@ public class OpenOfficeTest {
     private static void convertBase(String ori, String target) throws FileNotFoundException {
         InputStream in = new FileInputStream(FILEPATH + ori);
         OutputStream out = new FileOutputStream(HTML_OUT_FILEPATH + ori + "." + target);
-        // OfficeConvert.setConnType(OfficeConvert.CONN_TYPE_POOL);
-        OfficeConvert.convert(in, FilenameUtils.getExtension(ori), out, target);
+
+        OpenOfficeHandle handle = new OpenOfficeHandle().connect("192.168.79.34", 8100);
+        handle.convert(in, FilenameUtils.getExtension(ori), out, target);
+        handle.destroy();
     }
 }

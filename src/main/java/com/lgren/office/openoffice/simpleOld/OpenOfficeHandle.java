@@ -1,12 +1,14 @@
-package com.lgren.office.openoffice.old;
+package com.lgren.office.openoffice.simpleOld;
 
-import com.artofsolving.jodconverter.*;
+import com.artofsolving.jodconverter.DefaultDocumentFormatRegistry;
+import com.artofsolving.jodconverter.DocumentConverter;
+import com.artofsolving.jodconverter.DocumentFamily;
+import com.artofsolving.jodconverter.DocumentFormat;
 import com.artofsolving.jodconverter.openoffice.connection.OpenOfficeConnection;
 import com.artofsolving.jodconverter.openoffice.converter.StreamOpenOfficeDocumentConverter;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import java.io.File;
 import java.io.InputStream;
@@ -16,23 +18,32 @@ import java.util.*;
 /**
  * 将office转化为PDF;
  */
-@Slf4j
-public class OfficeConvert {
-    // 获取连接的方式 1.直接连接 2.通过线程池 默认1
-    public static final int CONN_TYPE_LINK = 1;
-    public static final int CONN_TYPE_POOL = 2;
-    @Getter@Setter
-    private static int connType = CONN_TYPE_LINK;
+public class OpenOfficeHandle {
+    @Getter
+    private OpenOfficePool pool;
+
+    private void init() {
+        GenericObjectPoolConfig<OpenOfficeConnection> poolConfig = new GenericObjectPoolConfig<>();
+        // 最大连接数
+        poolConfig.setMaxTotal(8);// openoffice.maxTotal
+        // 最大空闲连接数
+        poolConfig.setMaxIdle(8);// openoffice.maxIdle
+        // 最小空闲连接数
+        poolConfig.setMinIdle(1);// openoffice.minIdle
+        pool = new OpenOfficePool(new OpenOfficeConnectionFactory("192.168.79.34", 8100));
+    }
+
+    public OpenOfficeHandle() {
+        this.init();
+    }
+
     /**
      * office文档转html, pdf等
      * @param sourceFile office文档绝对路径
      * @param destFile   pdf文件绝对路径
      */
-    public static void convert(String sourceFile, String destFile) {
-        OfficeConnection officeConnection = Objects.equals(connType, CONN_TYPE_POOL)
-                ? OfficeHandle.getPool().getConnection()
-                : new OfficeConnection(OfficeHandle.HOST, OfficeHandle.PORT);
-        OpenOfficeConnection connection = officeConnection.getConnection();
+    public void convert(String sourceFile, String destFile) {
+        OpenOfficeConnection connection = pool.borrowObject();
         File inputFile = new File(sourceFile);
         if (!inputFile.exists()) {
             throw new RuntimeException("找不到源文件");
@@ -51,12 +62,7 @@ public class OfficeConvert {
         } catch (Exception e) {
             throw new RuntimeException("文件转换错误", e);
         } finally {
-            // 关闭连接和服务
-            if (Objects.equals(connType, CONN_TYPE_POOL)) {
-                OfficeHandle.getPool().returnConnection(officeConnection);
-            } else {
-                officeConnection.destroy();
-            }
+            pool.returnObject(connection);
         }
     }
 
@@ -67,11 +73,8 @@ public class OfficeConvert {
      * @param out 目标输出流
      * @param outExtension 目标类型 例如: html, pdf
      */
-    public static void convert(InputStream in, String inExtension, OutputStream out, String outExtension) {
-        OfficeConnection officeConnection = Objects.equals(connType, CONN_TYPE_POOL)
-                ? OfficeHandle.getPool().getConnection()
-                : new OfficeConnection(OfficeHandle.HOST, OfficeHandle.PORT);
-        OpenOfficeConnection connection = officeConnection.getConnection();
+    public void convert(InputStream in, String inExtension, OutputStream out, String outExtension) {
+        OpenOfficeConnection connection = pool.borrowObject();
         if (in == null) {
             throw new RuntimeException("源数据流为空");
         }
@@ -89,13 +92,13 @@ public class OfficeConvert {
         } catch (Exception e) {
             throw new RuntimeException("文件转换错误", e);
         } finally {
-            // 关闭连接和服务
-            if (Objects.equals(connType, CONN_TYPE_POOL)) {
-                OfficeHandle.getPool().returnConnection(officeConnection);
-            } else {
-                officeConnection.destroy();
-            }
+            pool.returnObject(connection);
         }
+    }
+
+    private DocumentFormat getDocumentFormat(File file) {
+        String extension = FilenameUtils.getExtension(file.getName());
+        return Holder.FORMAT_MAP.get(extension);
     }
 
     private static class Holder extends DefaultDocumentFormatRegistry {
@@ -118,8 +121,11 @@ public class OfficeConvert {
         }
     }
 
-    private static DocumentFormat getDocumentFormat(File file) {
-        String extension = FilenameUtils.getExtension(file.getName());
-        return Holder.FORMAT_MAP.get(extension);
+    public static void main(String[] args) {
+        OpenOfficeHandle handle = new OpenOfficeHandle();
+        handle.convert(
+                "/Users/lgren/Desktop/文档管理计划.xlsx",
+                "/Users/lgren/Project/Java/My/AGit/test/src/main/resource/office/out/OpenOffice/pdf/文档管理计划.pdf");
+        handle.getPool().clear();
     }
 }

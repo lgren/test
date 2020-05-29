@@ -1,10 +1,9 @@
-package com.lgren.office.openoffice.simple;
+package com.lgren.office.openoffice.simpleOld;
 
 import com.artofsolving.jodconverter.openoffice.connection.OpenOfficeConnection;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.AbandonedConfig;
-import org.apache.commons.pool2.impl.BaseObjectPoolConfig;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 

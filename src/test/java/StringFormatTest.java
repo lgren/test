@@ -7,8 +7,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.util.Optional.ofNullable;
-
 /**
  * 使用的模板测试等
  * @author Lgren

@@ -91,8 +91,26 @@ public class CommonTest {
     @Test
     public void name3() {
         System.out.println(Integer.toBinaryString(0x00000001));
+        System.out.println(Integer.toBinaryString(0x00000002));
         System.out.println(Integer.toBinaryString(0x00000004));
+        System.out.println(Integer.toBinaryString(0x00000008));
         System.out.println(Integer.toBinaryString(0x00000010));
+        System.out.println(Integer.toBinaryString(0x00000020));
         System.out.println(Integer.toBinaryString(0x00000040));
+        System.out.println(Integer.toBinaryString(0x00000080));
+    }
+
+    @Test
+    public void feature() {
+        int view = 0x00000001;
+        int add = 0x00000002;
+        int remove = 0x00000004;
+        int edit = 0x00000008;
+
+        int one = view;
+        int two = view | edit;
+        int three = view | add | remove;
+        int four = view | add | remove | edit;
+        System.out.println();
     }
 }
