@@ -112,5 +112,6 @@ public class CommonTest {
         int three = view | add | remove;
         int four = view | add | remove | edit;
         System.out.println();
+
     }
 }
