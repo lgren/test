@@ -22,22 +22,22 @@ function onOnly($node, types, selectorOrFn, fn) {
  * 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，
  * 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
  */
-Date.prototype.format = function(fmt) {
+Date.prototype.format = function (fmt) {
     var o = {
-        "M+" : this.getMonth()+1,                 //月份
-        "d+" : this.getDate(),                    //日
-        "h+" : this.getHours(),                   //小时
-        "m+" : this.getMinutes(),                 //分
-        "s+" : this.getSeconds(),                 //秒
-        "q+" : Math.floor((this.getMonth()+3)/3), //季度
-        "S"  : this.getMilliseconds()             //毫秒
+        "M+": this.getMonth() + 1,                 //月份
+        "d+": this.getDate(),                    //日
+        "h+": this.getHours(),                   //小时
+        "m+": this.getMinutes(),                 //分
+        "s+": this.getSeconds(),                 //秒
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+        "S": this.getMilliseconds()             //毫秒
     };
-    if(/(y+)/.test(fmt)) {
-        fmt=fmt.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
+    if (/(y+)/.test(fmt)) {
+        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
     }
-    for(var k in o) {
-        if(new RegExp("("+ k +")").test(fmt)){
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+    for (var k in o) {
+        if (new RegExp("(" + k + ")").test(fmt)) {
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
         }
     }
     return fmt;
@@ -69,80 +69,45 @@ function getUrlDefaultIcon(url) {
 /**
  * 一个form提交
  * 参数类似
- * formSubmit({url: '', inputArr: [{name: 'name1', value: 'value1'},],});
- * @param config
- * @param config.url
- * @param config.method
- * @param config.target
- * @param config.data
- */
-function formSubmit(config) {
-    config = config || {};
-    var method = config.method || 'POST';
-    var url = config.url;
-    if (!url) throw 'url为空';
-    var $form = $("<form></form>");
-    $form.attr("style", "display:none");
-    if (config.data) {
-        $.each(config.data, function (k, v) {
-            var $input = $("<input/>");
-            $input.attr("type", "hidden");
-            $input.attr("name", k);
-            $input.attr("value", v);
-            $form.append($input);
-        });
-    }
-    url && $form.attr('action', url);
-    $form.attr("method", method);
-    config.target && $form.attr("target", config.target);
-    $("body").append($form);
-    $form.submit();
-    $form.remove();
-}
-
-// string转dom节点
-function parseDom(str){
-    var div = document.createElement("div");
-    div.innerHTML = str;
-    return div.childNodes[0];
-}
-
-// 图片转Base64
-function getBase64 (img, callback) {
-    const reader = new FileReader()
-    reader.addEventListener('load', () => callback(reader.result))
-    reader.readAsDataURL(img)
-}
-
-/**
- * 一个form提交
- * 参数类似
  * formSubmit({url: 'url', data: {'test': 1,},});
  * @param url 地址
  * @param method 方法
  * @param target 打开方式
  * @param data 数据
  */
-function formSubmit1 ({ method = 'POST', url, target, data }) {
-    if (!url) { throw Error('url为空') }
+function formSubmit({method = 'POST', url, target = '_blank', data}) {
+    if (!url) {
+        throw Error('url为空')
+    }
     const form = document.createElement('form')
     form.action = url
     form.method = method
     form.style.display = 'none'
-    target && (form.target = target)
+    form.target = target
     if (data) {
-        for (const k in data) {
-            if (Object.prototype.hasOwnProperty.call(data, k)) {
-                const v = data[k]
-                const input = document.createElement('input')
-                input.type = 'hidden'
-                input.name = k
-                input.value = v
-                form.appendChild(input)
-            }
+        for (const [k, v] in Object.entries(data)) {
+            const input = document.createElement('input')
+            input.type = 'hidden'
+            input.name = k
+            input.value = v
+            form.appendChild(input)
         }
     }
     document.getElementsByTagName('body')[0].appendChild(form)
     form.submit()
     form.remove()
+}
+
+// string转dom节点
+function parseDom(str) {
+    var div = document.createElement("div");
+    div.innerHTML = str;
+    return div.childNodes[0];
+}
+
+// 图片转Base64
+function getBase64(img, callback) {
+    const reader = new FileReader()
+    reader.addEventListener('load', () => callback(reader.result))
+    reader.readAsDataURL(img)
 }

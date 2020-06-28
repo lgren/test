@@ -29,11 +29,6 @@ import java.util.Optional;
 public class OpenOfficeHandle {
     @Getter
     private final GenericObjectPoolConfig<OpenOfficeConnection> poolConfig = new GenericObjectPoolConfig<>();
-    {
-        poolConfig.setMaxTotal(5);// 最大连接数
-        poolConfig.setMaxIdle(5);// 最大空闲连接数
-        poolConfig.setMinIdle(1);// 最小空闲连接数
-    }
     private GenericObjectPool<OpenOfficeConnection> pool;
 
     /**

@@ -1,7 +1,9 @@
 package com.lgren.util;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -462,6 +465,40 @@ public class LgrenUtil {
             e.printStackTrace();
         }
         return getInterval(date, type);
+    }
+
+    /**
+     * 比较两个列表 l1, l2
+     * 对两个列表相同和不同的部分采用不同处理方式
+     *
+     * @param leftI 左侧数据
+     * @param rightI 右侧数据
+     * @param equalsFunc 判断数据相同的方法
+     * @param leftOverFunc 处理左侧数据多出的数据
+     * @param rightOverFunc 处理右侧数据多出的数据
+     * @param sameFunc 处理两侧相同的数据
+     * @param <L> 左侧数据类型
+     * @param <R> 右侧数据类型
+     */
+    public static <L, R> void diffHandle(Iterable<L> leftI, Iterable<R> rightI,
+                                         BiPredicate<L, R> equalsFunc,
+                                         Consumer<L> leftOverFunc,
+                                         Consumer<R> rightOverFunc,
+                                         BiConsumer<L, R> sameFunc) {
+        Set<L> leftS = leftI instanceof Set ? (Set<L>) leftI : Sets.newHashSet(leftI);
+        Set<R> rightS = Sets.newHashSet(rightI);
+        l1For:
+        for (L l1 : leftS) {
+            for (R l2 : rightS) {
+                if (equalsFunc.test(l1, l2)) {
+                    Optional.ofNullable(sameFunc).ifPresent(sf -> sf.accept(l1, l2));
+                    rightS.remove(l2);
+                    continue l1For;
+                }
+            }
+            Optional.ofNullable(leftOverFunc).ifPresent(lof -> lof.accept(l1));
+        }
+        Optional.ofNullable(rightOverFunc).ifPresent(rightS::forEach);
     }
 
 }

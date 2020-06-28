@@ -39,7 +39,7 @@ public class OpenOfficeSimpleTest {
         Optional.of(new File(HTML_OUT_FILEPATH)).filter(f -> !f.exists()).ifPresent(File::mkdirs);
         Optional.of(new File(PDF_OUT_FILEPATH)).filter(f -> !f.exists()).ifPresent(File::mkdirs);
     }
-    private OpenOfficeHandle handle = new OpenOfficeHandle().connect("192.168.79.34", 8100);
+    private OpenOfficeHandle handle;
 
     private void convertBase(String ori, String target) {
         convertBase(ori, target, true);
@@ -64,7 +64,7 @@ public class OpenOfficeSimpleTest {
         handle = new OpenOfficeHandle();
         GenericObjectPoolConfig<OpenOfficeConnection> poolConfig = handle.getPoolConfig();
         poolConfig.setMaxTotal(8);// 最大连接数
-        handle.connect("192.168.79.34", 8100);
+        handle.connect("192.168.8.138", 8100);
 
         Map<String, Set<String>> map = new HashMap<>(3);
         map.put(TARGET_HTML, Sets.newHashSet(XLS, XLSX, DOC, DOCX));

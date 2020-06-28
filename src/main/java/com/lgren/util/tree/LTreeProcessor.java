@@ -1,12 +1,14 @@
 package com.lgren.util.tree;
 
+import com.lgren.util.LgrenUtil;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * 树的工具类
@@ -15,249 +17,283 @@ import java.util.stream.Collectors;
  * @author Lgren
  * @since 2020/1/3 15:56
  */
-public class LTreeProcessor<T, K, N extends LTreeProcessor._INode<T>> {
+public class LTreeProcessor<T, K, N extends LTreeProcessor.INode<N>> {
+    // 特征 默认
+    public static final int FEATURE_DEFAULT = 0;
+    // 特征 只需要此层
+    public static final int FEATURE_THIS_DEEP = 0x0000_0001;
+    // 需要寻找的深度
+    public static final int DEEP_ALL = 0;
+    @Getter
+    @Setter
+    private Consumer<K> pIdNotFindNode;
     @Getter
     private Collection<T> data;// 源数据
     private Function<T, K> getId;// 获取ID的方法
     private Function<T, K> getPId;// 获取PID的方法
-    private Map<K, N> tmpDataMap;// ID作为KEY 解析后的所有节点
+
+    private Function<T, N> oriToNode;// 源文件转节点方法
+    private Function<N, T> nodeGetOri;// 节点获取源文件方法
+
+    private Map<K, T> sourceMap;// ID作为KEY 解析后的所有节点
+    private Map<K, N> nodeMap;// ID作为KEY 解析后的所有节点
     @Getter
-    private Map<K, N> tmpDataTree;// ID作为KEY 解析后的所有节点
+    private Map<K, N> nodeTree;// ID作为KEY 解析后的所有节点
 
-    //region 获取解析树对象
 
     /**
      * 获取一个解析树对象
-     * @param data   源数据
-     * @param getId  获取ID的方法
-     * @param getPId 获取PID的方法
+     * @param sourceColl 源数据
+     * @param getId      获取ID的方法
+     * @param getPId     获取PID的方法
      */
-    private LTreeProcessor(Collection<T> data, Function<T, K> getId, Function<T, K> getPId, Function<T, N> oriToNode) {
-        Objects.requireNonNull(data, "数据源不能为空!");
-        Objects.requireNonNull(getId, "获取ID的方法不能为空!");
-        Objects.requireNonNull(getPId, "获取父ID的方法不能为空!");
+    public LTreeProcessor(Collection<T> sourceColl, Function<T, K> getId, Function<T, K> getPId,
+                          Function<T, N> oriToNode, Function<N, T> nodeGetOri) {
+        this.data = Objects.requireNonNull(sourceColl, "数据源不能为空!");
+        this.getId = Objects.requireNonNull(getId, "获取ID的方法不能为空!");
+        this.getPId = Objects.requireNonNull(getPId, "获取父ID的方法不能为空!");
+        this.oriToNode = Objects.requireNonNull(oriToNode, "源文件转节点方法不能为空!");
+        this.nodeGetOri = Objects.requireNonNull(nodeGetOri, "节点获取源文件方法不能为空!");
 
-        this.data = data;
-        this.getId = getId;
-        this.getPId = getPId;
+        int defaultSize = 22;// 子节点个数默认数量
+
         // 将原数据放入一个Map中
-        Map<K, N> tmpMap = data.stream().filter(Objects::nonNull).collect(Collectors.toMap(getId, oriToNode, (oldMap, newMap) -> oldMap));
-        this.tmpDataTree = new LinkedHashMap<>(16);
-        for (T or_INode : data) {
-            K id = getId.apply(or_INode);// 获取当前节点ID
-            Objects.requireNonNull(id, "树ID不能为空");
-            N node = tmpMap.get(id);
-            K pid = getPId.apply(or_INode);// 获取当前节点父节点
-            _INode<T> pNode = tmpMap.get(pid);// 获取父节点
-            //tmpMap存储的均为id为key的键值对，如果以pid为key可以取出对象，则表明该元素是父级元素
-            if (pNode != null && !Objects.equals(id, pid)) {
-                if (pNode.getChildren() == null) {
-                    pNode.setChildren(new ArrayList<>());
-                }
-                //给当前这个父级map对象中添加key为children的ArrayList
-                Collection<_INode<T>> children = pNode.getChildren();
-                children.add(node);
+        int capacity = LgrenUtil.capacity(sourceColl.size());
+        this.sourceMap = new HashMap<>(capacity);
+        this.nodeMap = new HashMap<>(capacity);
+        for (T t : sourceColl) {
+            this.sourceMap.put(getId.apply(t), t);
+            this.nodeMap.put(getId.apply(t), oriToNode.apply(t));
+        }
+
+        // 数据ID都不能为空
+        this.nodeTree = new LinkedHashMap<>(defaultSize);
+        for (T sourceItem : sourceColl) {
+            K id = Objects.requireNonNull(getId.apply(sourceItem), "树ID不能为空");// 获取当前节点ID
+            N node = this.nodeMap.get(id);// 当前节点
+            K pid = getPId.apply(sourceItem);// 获取当前节点父节点
+
+            // 自己是根节点 pid为空 或 自身id和pid相同
+            if (pid == null || Objects.equals(id, pid)) {
+                this.nodeTree.put(id, node);
             } else {
-                this.tmpDataTree.put(id, node);
+                N pNode = this.nodeMap.get(pid);
+                if (pNode == null) {
+                    if (pIdNotFindNode != null) {
+                        pIdNotFindNode.accept(pid);
+                    }
+                    continue;
+                }
+                pNode.addChild(node);
             }
         }
-        this.tmpDataMap = tmpMap;
     }
 
     /**
      * 获取一个解析树对象
-     * @param data   源数据
-     * @param getId  获取ID的方法
-     * @param getPId 获取PID的方法
-     * @param <T>    每个节点的类型
-     * @param <K>    ID和PID的类型
-     * @return 解析树对象
+     * @param sourceColl 源数据
+     * @param getId      获取ID的方法
+     * @param getPId     获取PID的方法
      */
-    public static <T, K> LTreeProcessor<T, K, Node<T>> get(Collection<T> data, Function<T, K> getId, Function<T, K> getPId) {
-        return new LTreeProcessor<>(data, getId, getPId, Node::new);
+    public static <T, K> LTreeProcessor<T, K, Node<T>> get(Collection<T> sourceColl, Function<T, K> getId, Function<T, K> getPId) {
+        return new LTreeProcessor<>(sourceColl, getId, getPId, Node::new, Node::getSource);
     }
 
-    public static <T, K, N extends _INode<T>> LTreeProcessor<T, K, N> get(Collection<T> data, Function<T, K> getId, Function<T, K> getPId, Function<T, N> oriToNode) {
-        return new LTreeProcessor<>(data, getId, getPId, oriToNode);
+    public T get(K id) {
+        return sourceMap.get(id);
     }
-    //endregion
 
-    //region 查询所有父节点
+    public N getNode(K id) {
+        return nodeMap.get(id);
+    }
 
-    /**
-     * 获取此ID下的包含自己的所有子节点
-     * @param id 节点ID
-     * @return 节点列表
-     */
+    //region 获取父
     public List<T> getParents(K id) {
-        _INode<T> node = tmpDataMap.get(id);
-        if (node == null) {
-            return Collections.emptyList();
-        }
-        List<T> result = new ArrayList<>(4);
-        return getParentsBase(result, node, o -> o);
+        return getParents(id, FEATURE_DEFAULT, DEEP_ALL);
     }
 
-    /**
-     * 获取此ID下的包含自己的所有子节点的ID
-     * @param id 节点ID
-     * @return 节点ID列表
-     */
     public List<K> getParentsId(K id) {
-        _INode<T> node = tmpDataMap.get(id);
+        return getParentsId(id, FEATURE_DEFAULT, DEEP_ALL);
+    }
+
+    public List<N> getParentsNode(K id) {
+        return getParentsNode(id, FEATURE_DEFAULT, DEEP_ALL);
+    }
+
+    public List<T> getParents(K id, int feature, int deep) {
+        return getParentsBase(id, feature, deep, o -> o);
+    }
+
+    public List<K> getParentsId(K id, int feature, int deep) {
+        return getParentsBase(id, feature, deep, getPId);
+    }
+
+    public List<N> getParentsNode(K id, int feature, int deep) {
+        return getParentsBase(id, feature, deep, oriToNode);
+    }
+
+    private <R> List<R> getParentsBase(K id, int feature, int deep, Function<T, R> returnConvert) {
+        List<R> result = new ArrayList<>(6);
+        int nowDeep = 0;
+        T source = get(id);
+        // 获取父节点id
+        K pid = getPId.apply(source);
+        // 获取父节点
+        T parentSource;
+        // 当父节点不为空
+        while ((deep < 1 || deep > nowDeep) && pid != null && !Objects.equals(id, pid) && (parentSource = sourceMap.get(pid)) != null) {
+            if ((feature & FEATURE_THIS_DEEP) == 0) {
+                result.add(returnConvert.apply(parentSource));
+            } else if (deep == nowDeep) {
+                result.add(returnConvert.apply(parentSource));
+                break;
+            }
+            nowDeep++;
+            // 节点获取源文件
+            source = parentSource;
+            // 获取当前节点id
+            id = getId.apply(source);
+            // 获取父节点id
+            pid = getPId.apply(source);
+        }
+        return result;
+    }
+    //endregion
+
+    //region 获取子节点
+    public List<T> getChildren(K id) {
+        return getChildren(id, FEATURE_DEFAULT, DEEP_ALL);
+    }
+
+    public List<K> getChildrenId(K id) {
+        return getChildrenId(id, FEATURE_DEFAULT, DEEP_ALL);
+    }
+
+    public List<N> getChildrenNode(K id) {
+        return getChildrenNode(id, FEATURE_DEFAULT, DEEP_ALL);
+    }
+
+    public List<T> getChildren(K id, int feature, int deep) {
+        return getChildrenBase(id, feature, deep, o -> nodeGetOri.apply(o));
+    }
+
+    public List<K> getChildrenId(K id, int feature, int deep) {
+        return getChildrenBase(id, feature, deep, o -> getId.apply(nodeGetOri.apply(o)));
+    }
+
+    public List<N> getChildrenNode(K id, int feature, int deep) {
+        return getChildrenBase(id, feature, deep, o -> o);
+    }
+
+    public <R> List<R> getChildrenBase(K id, int feature, int deep, Function<N, R> returnConvert) {
+        N node = nodeMap.get(id);
         if (node == null) {
             return Collections.emptyList();
         }
-        List<K> result = new ArrayList<>(4);
-        return getParentsBase(result, node, getId);
+        return getChildrenBaseCallback(new ArrayList<>(22), node.getChildren(), feature, deep, returnConvert, 1);
     }
 
-    /**
-     * 获取此ID下的包含自己的所有子节点
-     * @param result     结果集
-     * @param node       需要查询的节点
-     * @param returnFunc 返回列表的类型方法
-     * @param <RT>       返回列表的类型
-     * @param <R>        返回类型
-     * @return 返回 result
-     */
-    private <RT, R extends Collection<RT>> R getParentsBase(R result, _INode<T> node, Function<T, RT> returnFunc) {
-        _INode<T> tmpNode = node;
-        T t;
-        K k, pk;
-        do {
-            t = tmpNode.getObj();
-            k = getId.apply(t);
-            result.add(returnFunc.apply(t));
-            pk = getPId.apply(t);
-            tmpNode = Objects.equals(k, pk) ? null : tmpDataMap.get(pk);
-        } while (tmpNode != null);
-        return result;
-    }
-    //endregion
-
-    //region 查询所有子节点
-
-    /**
-     * 获取此ID下的包含自己的所有子节点的
-     * @param ids 节点ID数组
-     * @return 节点列表
-     */
-    public List<T> getChildren(K... ids) {
-        return getChildren(ArrayList::new, o -> o, ids);
-    }
-
-    /**
-     * 获取此ID下的包含自己的所有子节点的ID
-     * @param ids 节点ID数组
-     * @return 节点ID列表
-     */
-    public List<K> getChildrenId(K... ids) {
-        return getChildren(ArrayList::new, getId, ids);
-    }
-
-    /**
-     * 获取此ID下的包含自己的所有子节点的
-     * @param ids 节点ID数组
-     * @return 节点ID列表
-     */
-    public <RT, R extends Collection<RT>> R getChildren(Supplier<R> resultTypeFunc, Function<T, RT> returnFunc, K... ids) {
-        if (ids.length == 0) {
-            return resultTypeFunc.get();
-        }
-        Set<_INode<T>> nodeSet = new LinkedHashSet<>(ids.length);
-        for (K id : ids) {
-            nodeSet.add(tmpDataMap.get(id));
-        }
-        return getChildrenBase(resultTypeFunc.get(), nodeSet, returnFunc, -1, 0, false);
-    }
-
-    /**
-     * 获取此ID下的包含自己的所有子节点的 会有层数限制
-     * @param maxLevel 最多到多少层 0开始计数
-     * @param ids      节点ID数组
-     * @return 节点列表
-     */
-    public List<T> getByMaxLevel(int maxLevel, K... ids) {
-        return getChildrenByLevel(ArrayList::new, o -> o, maxLevel, false, ids);
-    }
-
-    /**
-     * 获取此ID下的包含自己的所有子节点的 会有层数限制
-     * @param onlyLevel 只要多少层 0开始计数
-     * @param ids       节点ID数组
-     * @return 节点列表
-     */
-    public List<T> getByOnlyLevel(int onlyLevel, K... ids) {
-        return getChildrenByLevel(ArrayList::new, o -> o, onlyLevel, true, ids);
-    }
-
-    /**
-     * 获取此ID下的包含自己的所有子节点的
-     * @param ids 节点ID数组
-     * @return 节点ID列表
-     */
-    public <RT, R extends Collection<RT>> R getChildrenByLevel(Supplier<R> resultTypeFunc, Function<T, RT> returnFunc, int level, boolean isOnlyLevel, K... ids) {
-        Set<_INode<T>> nodeSet = new LinkedHashSet<>(ids.length);
-        if (ids.length == 0) {
-            tmpDataTree.forEach((id, v) -> nodeSet.add(v));
-        } else {
-            for (K id : ids) {
-                nodeSet.add(tmpDataMap.get(id));
-            }
-        }
-        return getChildrenBase(resultTypeFunc.get(), nodeSet, returnFunc, level, 0, isOnlyLevel);
-    }
-
-    /**
-     * 获取此ID下的包含自己的所有子节点
-     * @param result     结果集
-     * @param nodeColl   需要查询的节点集合
-     * @param returnFunc 返回列表的类型方法
-     * @param level      只显示某一层
-     * @param nowLevel   回调用的当前层数
-     * @param <RT>       返回列表的类型
-     * @param <R>        返回类型
-     * @return 返回 result
-     */
-    private <RT, R extends Collection<RT>> R getChildrenBase(R result, Collection<_INode<T>> nodeColl, Function<T, RT> returnFunc, int level, int nowLevel, boolean isOnlyLevel) {
+    private <R, C extends Collection<R>> C getChildrenBaseCallback(C result, Collection<N> nodeColl, int feature, int deep, Function<N, R> returnConvert, int nowDeep) {
         Objects.requireNonNull(result, "结果集不能为空!");
-        if (level > -1 && nowLevel > level) {
+        if ((deep > 0 && nowDeep > deep) || nodeColl == null || nodeColl.isEmpty()) {
             return result;
         }
-        if (nodeColl == null || nodeColl.isEmpty()) {
-            return result;
-        }
-        for (_INode<T> node : nodeColl) {
-            if (!isOnlyLevel || Objects.equals(nowLevel, level)) {
-                result.add(returnFunc.apply(node.getObj()));
+        for (N node : nodeColl) {
+            if ((feature & FEATURE_THIS_DEEP) == 0) {
+                result.add(returnConvert.apply(node));
+            } else if (deep == nowDeep) {
+                result.add(returnConvert.apply(node));
+                continue;
             }
-            getChildrenBase(result, node.getChildren(), returnFunc, level, nowLevel + 1, isOnlyLevel);
+            getChildrenBaseCallback(result, node.getChildren(), feature, deep, returnConvert, nowDeep + 1);
         }
         return result;
     }
     //endregion
 
-    public interface _INode<T> {
-        T getObj();
-
-        Collection<_INode<T>> getChildren();
-
-        void setChildren(Collection<_INode<T>> children);
-
-        // void addChild(_INode<T> node);
+    public List<T> treeToList() {
+        return treeToList(FEATURE_DEFAULT, DEEP_ALL);
     }
 
-    public static class Node<T> implements _INode<T> {
-        @Getter
-        private T obj;
+    public List<K> treeToIdList() {
+        return treeToIdList(FEATURE_DEFAULT, DEEP_ALL);
+    }
 
-        @Getter
-        @Setter
-        private Collection<_INode<T>> children;
+    public List<N> treeToNodeList() {
+        return treeToNodeList(FEATURE_DEFAULT, DEEP_ALL);
+    }
 
-        public Node(T obj) {
-            this.obj = obj;
+    public List<T> treeToList(int feature, int deep) {
+        return treeToListBase(feature, deep, o -> nodeGetOri.apply(o));
+    }
+
+    public List<K> treeToIdList(int feature, int deep) {
+        return treeToListBase(feature, deep, o -> getId.apply(nodeGetOri.apply(o)));
+    }
+
+    public List<N> treeToNodeList(int feature, int deep) {
+        return treeToListBase(feature, deep, o -> o);
+    }
+
+    private <R> List<R> treeToListBase(int feature, int deep, Function<N, R> returnConvert) {
+        List<R> result = new ArrayList<>(22);
+        int nowDeep = 1;
+        List<Collection<N>> tmpNodeChildrenCollList = new LinkedList<>();
+        List<Collection<N>> tmpNodeCollList = new LinkedList<>();
+        tmpNodeCollList.add(nodeTree.values());
+        // 是否结束循环
+        boolean isBreak;
+        while ((deep < 1 || deep >= nowDeep) && !tmpNodeCollList.isEmpty()) {
+            tmpNodeChildrenCollList.clear();
+            isBreak = false;
+            for (Collection<N> nodeColl : tmpNodeCollList) {
+                for (N node : nodeColl) {
+                    if ((feature & FEATURE_THIS_DEEP) == 0 || deep == nowDeep) {
+                        // 只需要当前深度 且 达到了当前深度
+                        if ((feature & FEATURE_THIS_DEEP) != 0) {
+                            result.add(returnConvert.apply(node));
+                            isBreak = true;
+                            // 不仅仅需要当前深度
+                        } else {
+                            result.add(returnConvert.apply(node));
+                            Optional.ofNullable(node.getChildren()).filter(c -> !c.isEmpty()).ifPresent(tmpNodeChildrenCollList::add);
+                        }
+                        // 只需要当前深度 且 未达到当前深度
+                    } else {
+                        Optional.ofNullable(node.getChildren()).filter(c -> !c.isEmpty()).ifPresent(tmpNodeChildrenCollList::add);
+                    }
+                }
+            }
+            if (isBreak) {
+                break;
+            }
+            tmpNodeCollList.clear();
+            tmpNodeCollList.addAll(tmpNodeChildrenCollList);
+            nowDeep++;
+        }
+        return result;
+    }
+
+    @Data
+    public static class Node<T> implements INode<Node<T>> {
+        private T source;
+        private Collection<Node<T>> children;
+
+        public Node(T source) {
+            this.source = source;
+        }
+    }
+
+    public interface INode<This> {
+        Collection<This> getChildren();
+
+        void setChildren(Collection<This> children);
+
+        default void addChild(This node) {
+            if (getChildren() == null) {
+                setChildren(new ArrayList<>(22));
+            }
+            getChildren().add(node);
         }
     }
 

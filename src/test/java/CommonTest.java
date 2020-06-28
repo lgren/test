@@ -1,13 +1,14 @@
 import com.google.common.collect.Lists;
+import com.lgren.util.LgrenUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-
-import static java.util.Optional.ofNullable;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 
 
 public class CommonTest {
@@ -17,6 +18,7 @@ public class CommonTest {
         numbers.parallelStream()
                 .forEachOrdered(System.out::println);
     }
+
     @Test
     public void test7() {
         System.out.println(new DecimalFormat(",###").format(432.232432D));
@@ -26,7 +28,8 @@ public class CommonTest {
     @Test
     public void test10() {
         int i = 10;
-        flag1 : while (i > 0) {
+        flag1:
+        while (i > 0) {
             int j = 10;
             while (j > 0) {
                 System.out.println(j);
@@ -51,6 +54,7 @@ public class CommonTest {
         5 0
          */
     }
+
     // 求最大公约数
     public int gcd(int x, int y) {
         return y > 0 ? gcd(y, x % y) : x;
@@ -65,7 +69,7 @@ public class CommonTest {
         formatStr[10] = '日';
         for (int i = 0, ti = 0; i < timeStr.length(); i++, ti++) {
             if (ti == 4 || ti == 7 || ti == 10) {
-                ti ++;
+                ti++;
             }
             formatStr[ti] = timeStr.charAt(i);
         }
@@ -112,6 +116,22 @@ public class CommonTest {
         int three = view | add | remove;
         int four = view | add | remove | edit;
         System.out.println();
+    }
+
+
+    public static void main(String[] args) {
+        List<String> list1 = Lists.newArrayList("1", "2", "3", "4", "5", "6");
+        List<Integer> list2 = Lists.newArrayList(4, 5, 6, 7, 8);
+        LgrenUtil.diffHandle(list1, list2,
+                (l, r) -> Objects.equals(l, String.valueOf(r)),
+                l -> System.out.printf("这个是左边多的: %s\n", l),
+                r -> System.out.printf("这个是左边多的: %s\n", r),
+                (l, r) -> System.out.printf("这个是相同的: 左-%s 右-%s\n", l, r)
+        );
+    }
+
+    @Test
+    public void name4() {
 
     }
 }
