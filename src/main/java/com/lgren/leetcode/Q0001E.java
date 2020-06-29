@@ -1,10 +1,9 @@
-package com.lgren.leetCode;
+package com.lgren.leetcode;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 1. 两数之和
@@ -28,7 +27,7 @@ public class Q0001E {
 
     @Test
     public void test() {
-        System.out.println(Arrays.toString(twoSum(new int[]{-3,4,3,90}, 0)));
+        Assert.assertArrayEquals(twoSum(new int[]{-3,4,3,90}, 0), new int[]{0, 2});
     }
 
 }

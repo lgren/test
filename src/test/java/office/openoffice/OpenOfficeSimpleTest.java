@@ -3,7 +3,6 @@ package office.openoffice;
 import com.artofsolving.jodconverter.openoffice.connection.OpenOfficeConnection;
 import com.google.common.collect.Sets;
 import com.lgren.office.openoffice.simpleNew.OpenOfficeHandle;
-import com.lgren.pool.Simple.SimpleConnection;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.Test;

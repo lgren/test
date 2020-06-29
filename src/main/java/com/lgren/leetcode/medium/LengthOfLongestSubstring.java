@@ -1,7 +1,6 @@
-package com.lgren.leetCode.medium;
+package com.lgren.leetcode.medium;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 /**

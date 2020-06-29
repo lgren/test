@@ -1,4 +1,4 @@
-package com.lgren.leetCode.index;
+package com.lgren.leetcode.index;
 
 /**
  * https://leetcode-cn.com/problems/single-number/solution/zhi-chu-xian-yi-ci-de-shu-zi-by-leetcode/

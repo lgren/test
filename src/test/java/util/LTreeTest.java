@@ -2,7 +2,6 @@ package util;
 
 import com.google.common.collect.Lists;
 import com.lgren.util.tree.LTreeProcessor;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.junit.Test;
 
@@ -41,7 +40,7 @@ public class LTreeTest {
     @Test
     public void test2() {
         LTreeProcessor<MyWithChildrenNode, Long, LTreeProcessor.Node<MyWithChildrenNode>> tree
-                = LTreeProcessor.get(DATA1, MyWithChildrenNode::getId, MyWithChildrenNode::getPId);
+                = LTreeProcessor.build(DATA1, MyWithChildrenNode::getId, MyWithChildrenNode::getPId);
         List<MyWithChildrenNode> children2 = tree.getChildren(1L);
         List<MyWithChildrenNode> parents = tree.getParents(8L);
         List<MyWithChildrenNode> allList = tree.treeToList();

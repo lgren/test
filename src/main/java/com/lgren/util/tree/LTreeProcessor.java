@@ -95,7 +95,7 @@ public class LTreeProcessor<T, K, N extends LTreeProcessor.INode<N>> {
      * @param getId      获取ID的方法
      * @param getPId     获取PID的方法
      */
-    public static <T, K> LTreeProcessor<T, K, Node<T>> get(Collection<T> sourceColl, Function<T, K> getId, Function<T, K> getPId) {
+    public static <T, K> LTreeProcessor<T, K, Node<T>> build(Collection<T> sourceColl, Function<T, K> getId, Function<T, K> getPId) {
         return new LTreeProcessor<>(sourceColl, getId, getPId, Node::new, Node::getSource);
     }
 
@@ -106,6 +106,13 @@ public class LTreeProcessor<T, K, N extends LTreeProcessor.INode<N>> {
     public N getNode(K id) {
         return nodeMap.get(id);
     }
+
+    // public <R> List<R> filterBase(K id, Function<T, R> returnConvert) {
+    //     N thisNode = getNode(id);
+    //     Collection<N> children = thisNode.getChildren();
+    //     treeToListBase(children, FEATURE_DEFAULT, DEEP_ALL, nodeGetOri);
+    //
+    // }
 
     //region 获取父
     public List<T> getParents(K id) {
@@ -211,6 +218,7 @@ public class LTreeProcessor<T, K, N extends LTreeProcessor.INode<N>> {
     }
     //endregion
 
+    //region 树转List
     public List<T> treeToList() {
         return treeToList(FEATURE_DEFAULT, DEEP_ALL);
     }
@@ -224,7 +232,7 @@ public class LTreeProcessor<T, K, N extends LTreeProcessor.INode<N>> {
     }
 
     public List<T> treeToList(int feature, int deep) {
-        return treeToListBase(feature, deep, o -> nodeGetOri.apply(o));
+        return treeToListBase(feature, deep, nodeGetOri);
     }
 
     public List<K> treeToIdList(int feature, int deep) {
@@ -236,11 +244,15 @@ public class LTreeProcessor<T, K, N extends LTreeProcessor.INode<N>> {
     }
 
     private <R> List<R> treeToListBase(int feature, int deep, Function<N, R> returnConvert) {
+        return treeToListBase(nodeTree.values(), feature, deep, returnConvert);
+    }
+
+    private <R> List<R> treeToListBase(Collection<N> data, int feature, int deep, Function<N, R> returnConvert) {
         List<R> result = new ArrayList<>(22);
         int nowDeep = 1;
         List<Collection<N>> tmpNodeChildrenCollList = new LinkedList<>();
         List<Collection<N>> tmpNodeCollList = new LinkedList<>();
-        tmpNodeCollList.add(nodeTree.values());
+        tmpNodeCollList.add(data);
         // 是否结束循环
         boolean isBreak;
         while ((deep < 1 || deep >= nowDeep) && !tmpNodeCollList.isEmpty()) {
@@ -273,6 +285,7 @@ public class LTreeProcessor<T, K, N extends LTreeProcessor.INode<N>> {
         }
         return result;
     }
+    //endregion
 
     @Data
     public static class Node<T> implements INode<Node<T>> {

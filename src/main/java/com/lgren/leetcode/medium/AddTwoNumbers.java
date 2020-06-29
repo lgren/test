@@ -1,4 +1,4 @@
-package com.lgren.leetCode.medium;
+package com.lgren.leetcode.medium;
 
 /**
  * 2.两数相加
