@@ -11,7 +11,7 @@ import java.util.function.ToDoubleBiFunction;
  * @since 2020/6/29 4:08 下午
  * @author Lgren
  */
-public class Q0004H {
+public class Q0004H_NO {
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
 
         return 2.0;

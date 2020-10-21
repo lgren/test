@@ -3,7 +3,7 @@ package com.lgren.common;
 import java.io.Serializable;
 
 public class CommResult<T> implements Serializable{
-	
+
 	private static final long serialVersionUID = -1L;
 	// 结果
 	private boolean success;
@@ -15,7 +15,7 @@ public class CommResult<T> implements Serializable{
 	private T data;
 
 	public CommResult() {}
-	
+
 	public boolean isSuccess() {
 		return success;
 	}

@@ -1,24 +1,19 @@
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
+package hutool;
+
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
-import cn.hutool.core.lang.Singleton;
-import cn.hutool.core.lang.tree.Tree;
-import cn.hutool.core.lang.tree.TreeNode;
-import cn.hutool.core.lang.tree.TreeUtil;
-import cn.hutool.core.math.MathUtil;
-import cn.hutool.core.thread.GlobalThreadPool;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.ReUtil;
-import cn.hutool.cron.CronUtil;
-import cn.hutool.extra.emoji.EmojiUtil;
+import cn.hutool.core.util.XmlUtil;
 import cn.hutool.extra.ftp.Ftp;
-import cn.hutool.http.HtmlUtil;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
-import cn.hutool.setting.dialect.Props;
+import cn.hutool.http.webservice.SoapClient;
+import cn.hutool.json.JSONUtil;
 import org.junit.Test;
+import org.w3c.dom.Document;
 
+import javax.xml.namespace.QName;
+import javax.xml.xpath.XPathConstants;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -26,9 +21,9 @@ import java.util.List;
 /**
  * TODO
  * @author lgren
- * @since 2020-06-19 4:06 下午
+ * @since 2020-09-08 10:40 上午
  */
-public class HuToolTest {
+public class HutoolNetworkTest {
     @Test
     public void httpGet() {
         String result = HttpUtil.get("http://192.168.8.137:9001/iApp2/answer/api/question.do?question=哈哈哈&questionFlag=2&questionLevel=1&channel=3&systemId=100000000000000006");
@@ -49,6 +44,13 @@ public class HuToolTest {
     }
 
     @Test
+    public void 爬虫1() {
+        // 请求列表页
+        String listContent = HttpUtil.get("http://rst.qinghai.gov.cn/");
+        System.out.println(listContent);
+    }
+
+    @Test
     public void httpPost() {
         //POST请求
         HashMap<String, Object> paramMap = new HashMap<>();
@@ -64,63 +66,18 @@ public class HuToolTest {
 
     @Test
     public void download() {
-        HttpUtil.downloadFile("http://game.ali.cdn.ledu.com/rxsg/1.16.0/res/things/armor/8101408.png",
-                "/Users/lgren/测试/httpTest");
+        // HttpUtil.downloadFile("http://game.ali.cdn.ledu.com/rxsg/1.16.0/res/things/armor/8101408.png",// 装备地址
+        //         "/Users/lgren/Downloads/0test");
+        HttpUtil.downloadFile("http://game.ali.cdn.ledu.com/rxsg/1.20.0/res/images/hero/face/hero_boy_12.jpg",// 英雄地址
+                "/Users/lgren/Downloads/0test");
+        // HttpUtil.downloadFile("http://game.ali.cdn.ledu.com/rxsg/1.20.0/res/face/player_male_3.jpg",// 登陆界面玩家地址 female
+        //         "/Users/lgren/Downloads/0test");
 
-    }
-
-    @Test
-    public void tree() {
-        // 构建node列表
-        List<TreeNode<String>> nodeList = CollUtil.newArrayList();
-
-        nodeList.add(new TreeNode<>("1", "0", "系统管理", 5));
-        nodeList.add(new TreeNode<>("11", "1", "用户管理", 222222));
-        nodeList.add(new TreeNode<>("111", "11", "用户添加", 0));
-        nodeList.add(new TreeNode<>("2", "0", "店铺管理", 1));
-        nodeList.add(new TreeNode<>("21", "2", "商品管理", 44));
-        nodeList.add(new TreeNode<>("221", "2", "商品管理2", 2));
-
-        // 0表示最顶层的id是0
-        List<Tree<String>> treeList = TreeUtil.build(nodeList, "0");
-        System.out.println();
-
-    }
-
-    @Test
-    public void console() {
-        Console.log("你好呀 {}", "小伙子");
-    }
-
-    @Test
-    public void exception() {
-        ExceptionUtil.wrapRuntime(new RuntimeException());
-    }
-
-    @Test
-    public void thread() {
-    }
-
-    @Test
-    public void properties() {
-        Props props = new Props("test.properties");
-        String user = props.getProperty("user");
-        String driver = props.getStr("driver");
-    }
-
-    @Test
-    public void html() {
-        HtmlUtil.escape("");
     }
 
     @Test
     public void httpStatus() {
         System.out.println(HttpStatus.HTTP_NOT_FOUND);
-    }
-
-    @Test
-    public void cron() {
-        CronUtil.start();
     }
 
     @Test

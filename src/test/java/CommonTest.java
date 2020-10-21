@@ -4,6 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
@@ -132,6 +137,33 @@ public class CommonTest {
 
     @Test
     public void name4() {
+        System.out.println("Nihaoya".equalsIgnoreCase(null));
+    }
 
+    @Test
+    public void name5() {
+        // // 格式解析
+        // DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
+        // // 数据库查询的时间
+        // TemporalAccessor parse = df.parse("2020-10-13 16:05:00");
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate nowDate = now.toLocalDate();
+        // 昨天19:30
+        LocalDateTime yesterday = LocalDateTime.of(nowDate.minusDays(1L), LocalTime.of(19, 30));
+        // 今天9:00
+        LocalDateTime today = LocalDateTime.of(nowDate, LocalTime.of(9, 0));
+        System.out.println(now.isAfter(yesterday) && now.isBefore(today));
+        System.out.println();
+
+    }
+
+
+    @Test
+    public void name6() {
+        test(null);
+    }
+
+    private void test(Integer... intArr) {
+        System.out.println(Arrays.toString(intArr));
     }
 }

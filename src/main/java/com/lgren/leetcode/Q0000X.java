@@ -3,6 +3,7 @@ package com.lgren.leetcode;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.function.Function;
 import java.util.function.IntFunction;
 
 /**
