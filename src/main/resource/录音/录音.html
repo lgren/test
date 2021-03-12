@@ -10,7 +10,7 @@
     <div>
         <a href="https://gitee.com/xiangyuecn/Recorder/tree/master/" target="_blank">码云项目地址</a>
     </div>
-    
+
     <div>
         <button onclick="openRecord()">开始录音</button>
         <button onclick="closeRecord()">关闭录音</button>
@@ -27,7 +27,7 @@
         <div style="clear: both;"></div>
     </div>
     <hr>
-    
+
     <div>
         <input id="uploadUrl" type="text" value="http://localhost:8080/iApp2/answer/common/uploadTest.do" style="width: 100%;" placeholder="上传地址">
         <button onclick="uploadRecord($('#uploadUrl').val())">上传</button>
@@ -46,11 +46,15 @@
             sampleRate: 16000,
             bitRate: 16,
             onProcess: function (buffers, level, time, sampleRate) {
+              if (level > 0) {
+                debugger
+              }
+              console.log(buffers[buffers.length - 1], level, sampleRate)
                 window._wave.input(buffers[buffers.length - 1], level, sampleRate);//输入音频数据，更新显示波形
             }
         });
         var currBlobObj = {blob: null, time: null};
-    
+
         /** 打开录音 */
         function openRecord() {
             rec.open(function () {
@@ -61,7 +65,7 @@
                 console.log((isUserNotAllow ? "UserNotAllow，" : "") + "打开失败：" + e);
             });
         }
-    
+
         /**
          * 判断是否打开录音录音
          * @param openCallback 打开录音后的回调
@@ -73,7 +77,7 @@
             }
             openCallback && openCallback();
         }
-    
+
         /** 关闭录音 */
         function closeRecord() {
             isOpenRecord(function () {
@@ -83,7 +87,7 @@
                 });
             });
         }
-    
+
         /** 开始录制 */
         function startRecord() {
             isOpenRecord(function () {
@@ -91,8 +95,8 @@
                 console.log("录制中：" + rec.set.type + " " + rec.set.sampleRate + "hz " + rec.set.bitRate + "kbps");
             });
         }
-    
-    
+
+
         /** 结束录制 */
         function stopRecord() {
             isOpenRecord(function () {
@@ -106,7 +110,7 @@
                 });
             });
         }
-    
+
         /**
          * 上传录音
          * @param uploadUrl 上传地址
@@ -131,7 +135,7 @@
                 }
             });
         }
-    
+
         /** 播放录音 */
         function playRecord() {
             if (!currBlobObj.blob) {
@@ -145,7 +149,7 @@
             audio.src=(window.URL||webkitURL).createObjectURL(currBlobObj.blob);
             audio.play();
         }
-    
+
         /** 暂停录制 */
         function pauseRecord() {
             isOpenRecord(function () {
@@ -153,7 +157,7 @@
                 console.log("已暂停");
             });
         }
-    
+
         /** 继续录制 */
         function resumeRecord() {
             isOpenRecord(function () {

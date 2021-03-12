@@ -11,11 +11,11 @@ import java.util.concurrent.*;
  **/
 public class ThreadCommonTest {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        testMyThread();
-        testThreadRunnable();
-        testThreadCallable();
+        // testMyThread();
+        // testThreadRunnable();
+        // testThreadCallable();
         testExecutorService();
-        testExecutorServiceSimple();
+        // testExecutorServiceSimple();
 
     }
 

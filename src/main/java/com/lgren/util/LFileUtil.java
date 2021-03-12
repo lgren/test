@@ -1,8 +1,12 @@
 package com.lgren.util;
 
+import cn.hutool.core.io.FileUtil;
+
+import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 通过文件流获取文件后缀
@@ -112,6 +116,13 @@ public class LFileUtil {
             return stringBuilder.toString();
         } else {
             return null;
+        }
+    }
+
+    public static void getOrCreateFile(String fileName, String notExistsDefaultContent) {
+        File file = Optional.of(new File(fileName)).filter(f -> f.getParentFile().exists()).orElseThrow(() -> new RuntimeException("目录不存在"));
+        if (!file.exists()) {
+            FileUtil.writeUtf8String(notExistsDefaultContent, file);
         }
     }
 }

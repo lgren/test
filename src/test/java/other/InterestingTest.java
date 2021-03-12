@@ -3,6 +3,7 @@ package other;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 /**
  * TODO
@@ -12,8 +13,27 @@ import java.util.concurrent.TimeUnit;
 public class InterestingTest {
     static int maxIndex = 50;    //控制输出的进度条宽度
 
-    public static void main(String[] args) {
-        begin();
+    public static void main(String[] args) throws InterruptedException {
+        IntStream.range(0, 2).parallel().forEach(i -> {
+            System.out.print("123456");
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            IntStream.range(0, 5).forEach(ii -> System.out.print('\b'));
+        });
+
+        // System.out.print("123456");
+        // TimeUnit.SECONDS.sleep(1);
+        // IntStream.range(0, 6).forEach(i -> System.out.print('\b'));
+        //
+        // System.out.println("123456");
+        // TimeUnit.SECONDS.sleep(1);
+        // IntStream.range(0, 7).forEach(i -> System.out.print('\b'));
+        //
+        // System.out.println("完成");
+        // begin();
     }
 
     private static void begin() {

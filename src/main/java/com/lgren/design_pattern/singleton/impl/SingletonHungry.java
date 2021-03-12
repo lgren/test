@@ -11,7 +11,9 @@ package com.lgren.design_pattern.singleton.impl;
 public class SingletonHungry {
     private static SingletonHungry singletonHungry = new SingletonHungry();
 
-    private SingletonHungry() {}
+    private SingletonHungry() {
+        System.out.println("12345");
+    }
 
     public static SingletonHungry getInstance() {
         return singletonHungry;
@@ -20,4 +22,5 @@ public class SingletonHungry {
     public String method() {
         return "饿汉模式";
     }
+
 }

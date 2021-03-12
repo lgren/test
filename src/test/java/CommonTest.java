@@ -2,6 +2,10 @@ import com.google.common.collect.Lists;
 import com.lgren.util.LgrenUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+import pojo.Component;
+import pojo.ITest;
+import pojo.ITest2;
+import pojo.Person;
 
 import java.text.DecimalFormat;
 import java.time.LocalDate;
@@ -14,6 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 
 
 public class CommonTest {
@@ -130,7 +135,7 @@ public class CommonTest {
         LgrenUtil.diffHandle(list1, list2,
                 (l, r) -> Objects.equals(l, String.valueOf(r)),
                 l -> System.out.printf("这个是左边多的: %s\n", l),
-                r -> System.out.printf("这个是左边多的: %s\n", r),
+                r -> System.out.printf("这个是右边多的: %s\n", r),
                 (l, r) -> System.out.printf("这个是相同的: 左-%s 右-%s\n", l, r)
         );
     }
@@ -166,4 +171,31 @@ public class CommonTest {
     private void test(Integer... intArr) {
         System.out.println(Arrays.toString(intArr));
     }
+
+
+    @Test
+    public void name7() {
+        System.out.println(~(-1 << 31));
+        System.out.println(Integer.MAX_VALUE);
+
+    }
+
+    // @Test
+    // public void name8() {
+    //     typeTestMethod(Lists.newArrayList(new Person1(), new Person1()));
+    //     typeTestMethod(Lists.newArrayList(new Person2(), new Person2()));
+    //     typeTestMethod(Lists.newArrayList(new Person12(), new Person12()));
+    // }
+    //
+    //
+    // private <T extends Person & ITest & ITest2> void typeTestMethod(final Collection<T> values){
+    //     System.out.println(values);
+    // }
+    //
+    // class Person1 extends Person implements ITest {}
+    //
+    // class Person2 extends Person implements ITest2 {}
+    //
+    // class Person12 extends Person implements ITest, ITest2 {}
+
 }

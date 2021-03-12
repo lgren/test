@@ -9,28 +9,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * TODO
- *
  * @author Lgren
  * @create 2018-10-27 14:19
  **/
 public class MainTest {
     public static List<String> buildIntRange() {
-        List<String> numbers = new ArrayList<>(5);
-        for (int i = 0; i < 10_0000; i++)
+        List<String> numbers = new ArrayList<>(1334);
+        for (int i = 0; i < 1000; i++)
             numbers.add(i + "");
-//        return Collections.unmodifiableList(numbers);
+        // return Collections.unmodifiableList(numbers);
         return numbers;
     }
 
     @Test
-    public void test() {
+    public void java8Stream() {
         List<String> source = buildIntRange();
         // 多管道parallelStream
         long start = System.currentTimeMillis();
         source.parallelStream().forEach(r -> {
             try {
-                TimeUnit.MILLISECONDS.sleep(35);
-            } catch (Exception e) {
+                TimeUnit.MILLISECONDS.sleep(10);
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         });
@@ -38,8 +37,31 @@ public class MainTest {
         System.out.println("number:" + source.size());
 
     }
+
+    @Test
+    public void executorService() {
+        ExecutorService checkUserExecutor = Executors.newFixedThreadPool(8);
+        List<String> source = buildIntRange();
+        // 多管道parallelStream
+        long start = System.currentTimeMillis();
+        source.forEach(r -> checkUserExecutor.submit(() -> {
+            try {
+                TimeUnit.MILLISECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }));
+        checkUserExecutor.shutdown();
+        try {
+            if (checkUserExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                System.out.println("parallelStream : " + (System.currentTimeMillis() - start) + "ms");
+                System.out.println("number:" + source.size());
+            }
+        } catch (InterruptedException ignored) { }
+    }
+
     private Boolean 模拟等待接口(String value) throws InterruptedException {
-//        Random random = new Random();
+        //        Random random = new Random();
         TimeUnit.MILLISECONDS.sleep(50);
         return value.indexOf("1") > 0;
     }
@@ -48,7 +70,7 @@ public class MainTest {
     public void 多线程复杂测试() {
         ExecutorService checkUserExecutor = Executors.newCachedThreadPool();
         List<String> list = buildIntRange();
-        for (int i = 0; i < 2000 ; i++) {
+        for (int i = 0; i < 2000; i++) {
             list.add("12000");
         }
         Set<String> testList = ConcurrentHashMap.newKeySet();
@@ -59,21 +81,21 @@ public class MainTest {
         List<Future<Integer>> checkResultList = new ArrayList<>(codeNum);
         AtomicInteger x = new AtomicInteger();
         LgrenUtil.partition(list, getPageSize).forEach(listVar ->
-            checkResultList.add(checkUserExecutor.submit(() -> {
-                x.getAndIncrement();
-                int failNumVar = 0;
-                for (String value : listVar) {
-                    if (testList.contains(value)) {
-//                        failNumVar++;
-                    } else {
-                        if (模拟等待接口(value)) {
-                            testList.add(value);
-                            failNumVar++;
+                checkResultList.add(checkUserExecutor.submit(() -> {
+                    x.getAndIncrement();
+                    int failNumVar = 0;
+                    for (String value : listVar) {
+                        if (testList.contains(value)) {
+                            //                        failNumVar++;
+                        } else {
+                            if (模拟等待接口(value)) {
+                                testList.add(value);
+                                failNumVar++;
+                            }
                         }
                     }
-                }
-                return failNumVar;
-            }))
+                    return failNumVar;
+                }))
         );
 
         int failNum = 0;

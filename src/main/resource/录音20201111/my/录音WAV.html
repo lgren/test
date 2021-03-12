@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<div>
+    <a href="https://gitee.com/xiangyuecn/Recorder/tree/master/" target="_blank">码云项目地址</a>
+</div>
+
+<div>
+    <button onclick="thisRec.openRec()">开始录音</button>
+    <button onclick="thisRec.closeRec()">关闭录音</button>
+</div>
+<hr>
+<div>
+    <button onclick="thisRec.startRec()">录制</button>
+    <button onclick="thisRec.pauseRec()">暂停录制</button>
+    <button onclick="thisRec.resumeRec()">继续录制</button>
+    <button onclick="thisRec.stopRec()">停止录制</button>
+</div>
+<div>
+    <div style="float: left;width: 200px;height: 100px" class="recordWave"></div>
+    <div style="clear: both;"></div>
+</div>
+<hr>
+
+<div>
+    <input id="uploadUrl" type="text" value="http://localhost:8080/iApp2/answer/common/uploadTest.do"
+           style="width: 100%;" placeholder="上传地址">
+    <button onclick="thisRec.uploadRec($('#uploadUrl').val())">上传</button>
+    <button onclick="thisRec.playRec()">播放</button>
+    <div class="playWrapper"></div>
+</div>
+
+<script type="text/javascript" src="../../js/jquery.min.js"></script>
+<script type="text/javascript" src="../recorder.wav.min.js"></script>
+<script type="text/javascript" src="../waveview.js"></script>
+<script type="text/javascript">
+  const LGRecordBuilder = {
+    /**
+     *
+     * @param type |mp3: 类型
+     *      看自己需求 https://gitee.com/xiangyuecn/Recorder/tree/master/ 结合网站使用
+     * @param bitRate |16: 比特率
+     *      必须是数字，wav格式（8位）文件大小=sampleRate*时间；mp3此项对低比特率文件大小有影响，高比特率几乎无影响。
+     *      wav任意值，mp3取值范围：48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000
+     * @param sampleRate |16000: 采样率
+     *      必须是数字，wav格式（8位）文件大小=sampleRate*时间；mp3此项对低比特率文件大小有影响，高比特率几乎无影响。
+     *      wav任意值，mp3取值范围：48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000
+     * @param onProcess |NULL: 接收到录音数据时的回调函数：fn(buffers,powerLevel,bufferDuration,bufferSampleRate,newBufferIdx,asyncEnd)
+     *      接收到录音数据时的回调函数：fn(buffers,powerLevel,bufferDuration,bufferSampleRate,newBufferIdx,asyncEnd)
+     *      返回值：onProcess如果返回true代表开启异步模式，在某些大量运算的场合异步是必须的，必须在异步处理完成时调用asyncEnd(不能真异步时需用setTimeout包裹)；返回其他值或者不返回为同步模式（需避免在回调内执行耗时逻辑）；如果开启异步模式，在onProcess执行后新增的buffer会全部替换成空数组，因此本回调开头应立即将newBufferIdx到本次回调结尾位置的buffer全部保存到另外一个数组内，处理完成后写回buffers中本次回调的结尾位置。
+     *      buffers=[[Int16,...],...]：缓冲的PCM数据，为从开始录音到现在的所有pcm片段，每次回调可能增加0-n个不定量的pcm片段。
+     *      powerLevel：当前缓冲的音量级别0-100。
+     *      bufferDuration：已缓冲时长。
+     *      bufferSampleRate：缓冲使用的采样率（当type支持边录边转码(Worker)时，此采样率和设置的采样率相同，否则不一定相同）。
+     *      newBufferIdx:本次回调新增的buffer起始索引。
+     *      asyncEnd：fn() 如果onProcess是异步的(返回值为true时)，处理完成时需要调用此回调，如果不是异步的请忽略此参数，此方法回调时必须是真异步（不能真异步时需用setTimeout包裹）。
+     *      如果需要绘制波形之类功能，需要实现此方法即可，使用以计算好的powerLevel可以实现音量大小的直观展示，使用buffers可以达到更高级效果
+     *      注意，buffers数据的采样率和set.sampleRate不一定相同，可能为浏览器提供的原始采样率rec.srcSampleRate，也可能为已转换好的采样率set.sampleRate；如需浏览器原始采样率的数据，请使用rec.buffers原始数据，而不是本回调的参数；如需明确和set.sampleRate完全相同采样率的数据，请在onProcess中自行连续调用采样率转换函数Recorder.SampleData()，配合mock方法可实现实时转码和压缩语音传输；修改或替换buffers内的数据将会改变最终生成的音频内容（注意不能改变第一维数组长度），比如简单有限的实现实时静音、降噪、混音等处理，详细参考下面的rec.buffers
+     */
+    createNew ({ type, bitRate, sampleRate, onProcess, waveSelector }) {
+      const LGRecord = {
+        //region 字段
+        rec: undefined,
+        wave: undefined,
+        lastObj: {
+          blob: undefined,
+          time: undefined,
+        },
+        //endregion
+        // 开启录音
+        openRec () {
+          // 新建录音对象
+          const rec = Recorder({
+            type: "wav",
+            onProcess (buffers, level, time, sampleRate) {
+              _pri.inputWave(buffers, level, time, sampleRate)
+            }
+          });
+          // 打开录音
+          rec.open(function () {
+              console.log("打开录音成功")
+              LGRecord.rec = rec
+              LGRecord.wave = _pri.getWave()
+              _pri.restoreWave()
+            },
+            function (e, isUserNotAllow) {
+              console.log(`打开录音失败: ${isUserNotAllow && '用户拒绝录音, '}${e}`)
+            }
+          );
+        },
+        // 是否打开录音
+        hasOpenRec (openBack) {
+          if (!LGRecord.rec)
+            console.log("未打开录音, 请打开录音后重试")
+          else
+            openBack && openBack()
+          return !!LGRecord.rec
+        },
+        // 是否打开录音
+        isOpenRes () {
+          if (!LGRecord.rec) {
+            console.log("未打开录音, 请打开录音后重试");
+          }
+          return !!LGRecord.rec;
+        },
+        // 关闭录音
+        closeRec () {
+          LGRecord.hasOpenRec(function () {
+            LGRecord.rec.close(function () {
+              console.log("关闭成功");
+              _pri.restoreWave();
+            });
+          })
+        },
+        // 开始录制
+        startRec () {
+          LGRecord.hasOpenRec(function () {
+            LGRecord.rec.start();
+            console.log(`开始录制: ${LGRecord.rec.set.type} ${LGRecord.rec.set.sampleRate}hz ${LGRecord.rec.set.bitRate}kbps`);
+          })
+        },
+        // 结束录制
+        stopRec () {
+          LGRecord.hasOpenRec(function () {
+            console.log(`正在编码${LGRecord.rec.set.type}...`);
+            LGRecord.rec.stop(function (blob, time) {
+              _pri.restoreWave();
+              LGRecord.lastObj.blob = blob;
+              LGRecord.lastObj.time = time;
+            }, function (s) {
+              console.log(s);
+            });
+          })
+        },
+        // 暂停录制
+        pauseRec () {
+          LGRecord.hasOpenRec(function () {
+            LGRecord.rec.pause();
+            console.log("已暂停");
+          })
+        },
+        // 继续录制
+        resumeRec () {
+          LGRecord.hasOpenRec(function () {
+            LGRecord.rec.resume();
+            console.log("继续录音...");
+          })
+        },
+        // 播放录音
+        playRec () {
+          if (!LGRecord.lastObj.blob) {
+            console.log("未有录制文件");
+            return;
+          }
+          // 立即播放
+          var audio = document.createElement("audio");
+          audio.controls = true;
+          document.getElementsByClassName("playWrapper")[0].appendChild(audio);
+          //简单的一哔，注意不用了时需要revokeObjectURL，否则霸占内存
+          audio.src = (window.URL || webkitURL).createObjectURL(LGRecord.lastObj.blob);
+          audio.play();
+        },
+        // 上传录音
+        uploadRec (uploadUrl) {
+          // if (!currBlobObj.blob) {
+          //   console.log("未有录制文件");
+          // }
+          // var form = new FormData();
+          // form.append("audioData", currBlobObj.blob, "recorder.wav"); //和普通form表单并无二致，后端接收到upfile参数的文件，文件名为recorder.mp3//...其他表单参数
+          // $.ajax({
+          //   url: uploadUrl, //上传接口地址
+          //   type: "POST",
+          //   contentType: false, //让xhr自动处理Content-Type header，multipart/form-data需要生成随机的boundary
+          //   processData: false, //不要处理data，让xhr自动处理
+          //   data: form,
+          //   success: function (v) {
+          //     console.log("上传成功", v);
+          //   },
+          //   error: function (s) {
+          //     console.error("上传失败", s);
+          //   }
+          // });
+        }
+
+      };
+
+      // 私有方法
+      const _pri = {
+        hasOpenWave (openBack) {
+          waveSelector && openBack && openBack()
+          return !!waveSelector
+        },
+        inputWave (buffers, level, time, sampleRate) {
+          _pri.hasOpenWave(function () {
+            LGRecord.wave.input(buffers[buffers.length - 1], level, sampleRate);//输入音频数据，更新显示波形
+          })
+        },
+        getWave () {
+          return waveSelector ? _pri.hasOpenWave(function () {
+            Recorder.WaveView({ elem: waveSelector })
+          }): undefined;
+        },
+        // 还原wave
+        restoreWave () {
+          _pri.hasOpenWave(function () {
+            LGRecord.wave && LGRecord.wave.input([], 0, 1);// 复原成一条直线
+          })
+        }
+      }
+
+      return LGRecord
+    }
+  }
+  const thisRec = LGRecordBuilder.createNew({ type: "wav", waveSelector: ".recordWave" })
+
+</script>
+
+</body>
+</html>

@@ -12,7 +12,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * 树的工具类
+ * 树的工具类 基础使用{@link Node}
  * @param <T> 每个节点的类型
  * @param <K> ID和PID的类型
  * @author Lgren
@@ -139,13 +139,6 @@ public class LTree<T, K, N> {
         return nodeMap.get(id);
     }
 
-    // public <R> List<R> filterBase(K id, Function<T, R> returnConvert) {
-    //     N thisNode = getNode(id);
-    //     Collection<N> children = thisNode.getChildren();
-    //     treeToListBase(children, FEATURE_DEFAULT, DEEP_ALL, nodeGetOri);
-    //
-    // }
-
     //region 获取子节点
     public List<T> getChildren(K id) {
         return getChildren(id, FEATURE_DEFAULT, DEEP_ALL);
@@ -227,7 +220,7 @@ public class LTree<T, K, N> {
     }
 
     public List<K> getParentsId(K id, int feature, int deep) {
-        return getParentsBase(id, feature, deep, getPId);
+        return getParentsBase(id, feature, deep, getId);
     }
 
     public List<N> getParentsNode(K id, int feature, int deep) {

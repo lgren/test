@@ -370,6 +370,11 @@ public class GuavaTest {
     public void 公共测试3() {
         System.out.println(LocalDate.now().minusDays(10));
     }
+
+    @Test
+    public void 公共测试4() {
+
+    }
 }
 
 

@@ -2,7 +2,7 @@ package thread;
 
 public class SellTicket implements Runnable {
     private byte[] lock = new byte[0]; // 特殊的instance变量
-    private int totalTickets = 100;
+    private int totalTickets = 100;// 票总数
     @Override
     public void run() {
         while (totalTickets > 0){

@@ -43,12 +43,13 @@ public class IOTest {
              InputStreamReader isr = new InputStreamReader(in, StandardCharsets.UTF_8);
              BufferedReader bf = new BufferedReader(isr);
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            String newLine = "";
+            String newLine;
             bf.mark(11);
             while((newLine = bf.readLine()) != null){
                 System.out.println(newLine.length() + newLine+"\n");
             }
             bf.reset();
+            bf.mark(8);
             while((newLine = bf.readLine()) != null){
                 System.out.println(newLine+"\n");
             }

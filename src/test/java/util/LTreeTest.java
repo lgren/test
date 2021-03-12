@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * LTreeUtil 测试
+ * LTree 测试
  * @author lgren
  * @since 2019-11-12 16:30
  */

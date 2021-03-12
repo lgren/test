@@ -1,5 +1,10 @@
 package com.lgren.algorithm.algorithmsnowflake;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+
 /**
  * Twitter_Snowflake<br>
  * SnowFlake的结构如下(每部分用-分开):<br>
@@ -17,7 +22,8 @@ public class Snowflake {
     // ==============================Fields===========================================
     /** 开始时间截 (2015-01-01) 最好直接是当前时间 从现在起可以用69年 */
     // private static final long BEGIN_TIMESTAMP = 1420041600000L;
-    private static final long BEGIN_TIMESTAMP = 1602816217121L;
+    // 2020-10-23 12:00:00
+    private static final long BEGIN_TIMESTAMP = 1603425600000L;
 
     /** 机器id所占的位数 */
     private static final long WORKER_ID_BITS = 5L;
@@ -59,9 +65,10 @@ public class Snowflake {
     private long lastTimestamp = -1L;
 
     //==============================Constructors=====================================
+
     /**
      * 构造函数
-     * @param workerId 工作ID (0~31)
+     * @param workerId     工作ID (0~31)
      * @param dataCenterId 数据中心ID (0~31)
      */
     public Snowflake(long workerId, long dataCenterId) {
@@ -76,6 +83,7 @@ public class Snowflake {
     }
 
     // ==============================Methods==========================================
+
     /**
      * 获得下一个ID (该方法是线程安全的)
      * @return SnowflakeId
@@ -135,23 +143,17 @@ public class Snowflake {
     }
 
     //==============================Test=============================================
+
     /** 测试 */
     public static void main(String[] args) {
-        Snowflake idWorker = new Snowflake(0, 0);
-        Snowflake idWorker01 = new Snowflake(0, 1);
-        System.out.println(Long.toBinaryString(idWorker.nextId()));
-        System.out.println(Long.toBinaryString(idWorker.nextId()));
-        System.out.println(idWorker.nextId());
-        System.out.println(Long.toBinaryString(idWorker01.nextId()));
-        System.out.println(Long.toBinaryString(idWorker01.nextId()));
-        // UUID uuid1 = UUID.randomUUID();
-        // UUID uuid2 = UUID.randomUUID();
-        // UUID uuid3 = UUID.randomUUID();
-        // UUID uuid4 = UUID.randomUUID();
-        // System.out.println(uuid1);
-        // System.out.println(uuid2);
-        // System.out.println(uuid3);
-        // System.out.println(uuid4);
+        System.out.println(LocalDateTime.of(2020, 10, 23, 12, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+        // Snowflake idWorker = new Snowflake(0, 0);
+        // Snowflake idWorker01 = new Snowflake(0, 1);
+        // System.out.println(Long.toBinaryString(idWorker.nextId()));
+        // System.out.println(Long.toBinaryString(idWorker.nextId()));
+        // System.out.println(idWorker.nextId());
+        // System.out.println(Long.toBinaryString(idWorker01.nextId()));
+        // System.out.println(Long.toBinaryString(idWorker01.nextId()));
 
     }
 }
