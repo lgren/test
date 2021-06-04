@@ -1,3 +1,4 @@
+import cn.hutool.core.io.FileUtil;
 import com.google.common.collect.Lists;
 import com.lgren.util.LgrenUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -198,4 +199,10 @@ public class CommonTest {
     //
     // class Person12 extends Person implements ITest, ITest2 {}
 
+
+    @Test
+    public void name8() {
+        byte[] bytes = FileUtil.readBytes("/Users/lgren/Downloads/com.baidu.searchbox/files/com.baidu.searchbox.novel/download_chapter_cache/0d6adcddf1bc06fbbb19eb82b3f9e636/4345120507/1568683669");
+        System.out.println();
+    }
 }

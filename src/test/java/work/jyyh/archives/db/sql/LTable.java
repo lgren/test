@@ -1,7 +1,6 @@
 package work.jyyh.archives.db.sql;
 
 import lombok.Data;
-import org.junit.Test;
 
 import java.util.*;
 import java.util.function.BiConsumer;

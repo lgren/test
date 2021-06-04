@@ -500,5 +500,14 @@ public class LgrenUtil {
         }
         Optional.ofNullable(rightOverFunc).ifPresent(rightS::forEach);
     }
+    // 添加特征
+    public static int addFeature(int... features) {
+        return features.length == 0 ? 0 : Arrays.stream(features).collect(() -> new int[1], (r, n) -> r[0] |= n, (r1, r2) -> r1[0] |= r2[0])[0];
+    }
+
+    // 检查特征 待检测数需要满足所有特征才会返回true
+    public static boolean hasFeature(int waitCheck, int... features) {
+        return features.length == 0 || Arrays.stream(features).allMatch(f -> (waitCheck & f) != 0);
+    }
 
 }

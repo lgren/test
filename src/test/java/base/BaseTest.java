@@ -1,9 +1,12 @@
 package base;
 
+import cn.hutool.core.util.RandomUtil;
 import com.google.common.collect.Lists;
 import org.junit.Test;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * TODO
@@ -70,5 +73,47 @@ public class BaseTest {
         System.out.println((feature ^ (UPLOAD_FEATURE_NOT_SAVE_SOURCE | UPLOAD_FEATURE_COMPUTE_MD5)) == 0);// 全等特征则true
         System.out.println((feature & (UPLOAD_FEATURE_CONVERT_HTML_RETURN | UPLOAD_FEATURE_COMPUTE_MD5)) != 0);// 包含特征则true
         System.out.println((feature ^ (UPLOAD_FEATURE_CONVERT_HTML_RETURN | UPLOAD_FEATURE_NOT_SAVE_SOURCE | UPLOAD_FEATURE_COMPUTE_MD5)) == 0);// 全等特征则true
+    }
+
+    @Test
+    public void name3() {
+        System.out.println(0x00000010);
+    }
+
+    public static final int ANSWER_TYPE_NOT_MATCH = 0;// 未找到
+    public static final int ANSWER_TYPE_ONLY = 0x00000001;// 只有一条数据
+    public static final int ANSWER_TYPE_MORE = 0x00000002;// 多条数据
+
+    public static final int ANSWER_TYPE_PRECISE = 0x00000010;// 直接匹配
+    public static final int ANSWER_TYPE_MULTI_LAYER = 0x00000020;// 多级回复（办事指南）
+    public static final int ANSWER_TYPE_LIST = 0x00000040;// 列表引导回复
+    public static final int ANSWER_TYPE_DYNAMIC = 0x00000080;// 动态问答回复
+
+
+
+    // 添加特征
+    public static int addFeature(int... features) {
+        return features.length == 0 ? 0 : Arrays.stream(features).collect(() -> new int[1], (r, f) -> r[0] |= f, (r1, r2) -> r1[0] |= r2[0])[0];
+    }
+
+    // 检查特征 待检测数需要满足所有特征才会返回true
+    public static boolean hasFeature(int waitCheck, int... features) {
+        return features.length == 0 || Arrays.stream(features).allMatch(f -> (waitCheck & f) != 0);
+    }
+
+    // // JS写法
+    // function addFeature (...features) {
+    //     return !features.length ? 0 : features.reduce((r, f) => (r |= f), 0)
+    // }
+
+    // function hasFeature(waitCheck, ...features) {
+    //     return !features.length || features.every(f => waitCheck & f)
+    // }
+
+    @Test
+    public void name4() {
+        System.out.println(addFeature(ANSWER_TYPE_ONLY));
+        System.out.println(hasFeature(addFeature(ANSWER_TYPE_ONLY, ANSWER_TYPE_MORE, ANSWER_TYPE_PRECISE), ANSWER_TYPE_DYNAMIC, ANSWER_TYPE_MORE));
+        System.out.println(RandomUtil.randomEle(Lists.<Integer>newArrayList(1)));
     }
 }
