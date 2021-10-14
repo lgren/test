@@ -19,11 +19,11 @@ import java.util.concurrent.Executors;
  * @since 2020-04-09 9:29 上午
  */
 public class OpenOfficeSimpleTest {
-    private static final String FILEPATH = "/Users/lgren/Project/Java/My/AGit/test/src/main/resource/office/";
+    private static final String FILEPATH = "/Users/lgren/Project/Java/0My/test/src/main/resource/office/";
     private static final String TARGET_HTML = "html";
     private static final String TARGET_PDF = "pdf";
-    private static final String HTML_OUT_FILEPATH = "/Users/lgren/Project/Java/My/AGit/test/src/main/resource/office/out/OpenOffice/" + TARGET_HTML + "/";
-    private static final String PDF_OUT_FILEPATH = "/Users/lgren/Project/Java/My/AGit/test/src/main/resource/office/out/OpenOffice/" + TARGET_PDF + "/";
+    private static final String HTML_OUT_FILEPATH = "/Users/lgren/Project/Java/0My/test/src/main/resource/office/out/OpenOffice208/" + TARGET_HTML + "/";
+    private static final String PDF_OUT_FILEPATH = "/Users/lgren/Project/Java/0My/test/src/main/resource/office/out/OpenOffice208/" + TARGET_PDF + "/";
 
     private static final String DOC = "doc.doc";
     private static final String DOCX = "docx.docx";
@@ -78,6 +78,31 @@ public class OpenOfficeSimpleTest {
         }));
         run.await();
         exe.shutdown();
+        handle.destroy();
+    }
+
+    @Test
+    public void control1() throws InterruptedException {
+        handle = new OpenOfficeHandle();
+        GenericObjectPoolConfig<OpenOfficeConnection> poolConfig = handle.getPoolConfig();
+        poolConfig.setMaxTotal(8);// 最大连接数
+        handle.connect("172.20.21.208", 8100);
+
+        convertBase("txt.txt", TARGET_PDF, false);
+
+        // Map<String, Set<String>> map = new HashMap<>(3);
+        // map.put(TARGET_HTML, Sets.newHashSet(XLS, XLSX, DOC, DOCX));
+        // map.put(TARGET_PDF, Sets.newHashSet(XLS, XLSX, DOC, DOCX));
+        // ExecutorService exe = Executors.newFixedThreadPool(8);
+        // CountDownLatch run = new CountDownLatch(8);
+        // map.forEach((target, set) -> set.forEach(type -> {
+        //     exe.submit(() -> {
+        //         convertBase(type, target, false);
+        //         run.countDown();
+        //     });
+        // }));
+        // run.await();
+        // exe.shutdown();
         handle.destroy();
     }
 }

@@ -1,3 +1,4 @@
+import lombok.Data;
 import org.junit.Test;
 
 import java.util.regex.Matcher;

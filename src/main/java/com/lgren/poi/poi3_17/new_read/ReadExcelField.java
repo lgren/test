@@ -9,4 +9,16 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 public @interface ReadExcelField {
     String value() default "";
+    int[] substring1() default {};
+
+    String split2() default "";
+
+    String strFormat3() default "";
+
+    /**
+     * 规则是 例如 "01-学生,02-教师" 左侧是映射值, 右侧是现在值
+     */
+    String mapping4() default "";
+
+    String dateFormat99() default "yyyy-MM-dd HH:mm:ss";
 }

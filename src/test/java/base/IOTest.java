@@ -74,7 +74,7 @@ public class IOTest {
     public void name3() throws IOException {
         String str = "nihaoya, womeixiangdaishizheyangzide.";
         try (BufferedInputStream bis = new BufferedInputStream(new ByteArrayInputStream(str.getBytes()), 24)) {
-            bis.mark(4);
+            bis.mark(38);
             System.out.println(new String(LIOUtil.readBytes(bis, false)));
             System.out.println("----------------------------------------");
             bis.reset();

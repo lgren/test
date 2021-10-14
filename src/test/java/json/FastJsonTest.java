@@ -8,7 +8,6 @@ import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -19,7 +18,7 @@ import java.util.Optional;
 public class FastJsonTest {
     @Test
     public void format() {
-        TestEntity entity = new TestEntity();
+        FastJsonEntity entity = new FastJsonEntity();
         entity.setId(1);
         entity.setAge(21);
         entity.setName("张三");
@@ -28,8 +27,8 @@ public class FastJsonTest {
 
     @Test
     public void partFieldFormat() {
-        SimplePropertyPreFilter filter = new SimplePropertyPreFilter(TestEntity.class, "id", "age");
-        TestEntity entity = new TestEntity();
+        SimplePropertyPreFilter filter = new SimplePropertyPreFilter(FastJsonEntity.class, "id", "age");
+        FastJsonEntity entity = new FastJsonEntity();
         entity.setId(1);
         entity.setAge(21);
         entity.setName("张三");
@@ -38,10 +37,10 @@ public class FastJsonTest {
 
     @Test
     public void myPartFieldFormat() {
-        boolean classValue = Optional.ofNullable((Boolean)AnnotationUtil.getAnnotationValue(TestEntity.class, EsFormat.class))
+        boolean classValue = Optional.ofNullable((Boolean)AnnotationUtil.getAnnotationValue(FastJsonEntity.class, EsFormat.class))
                 .orElse(false);
         if (classValue) {
-            Field[] fields = ReflectUtil.getFields(TestEntity.class);
+            Field[] fields = ReflectUtil.getFields(FastJsonEntity.class);
             for (Field field : fields) {
                 Boolean value = AnnotationUtil.getAnnotationValue(field, EsFormat.class);
                 System.out.println(value);

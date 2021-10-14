@@ -3,23 +3,17 @@ import com.google.common.collect.Lists;
 import com.lgren.util.LgrenUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
-import pojo.Component;
-import pojo.ITest;
-import pojo.ITest2;
-import pojo.Person;
 
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.BiConsumer;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.IntSupplier;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 
 public class CommonTest {
@@ -205,4 +199,36 @@ public class CommonTest {
         byte[] bytes = FileUtil.readBytes("/Users/lgren/Downloads/com.baidu.searchbox/files/com.baidu.searchbox.novel/download_chapter_cache/0d6adcddf1bc06fbbb19eb82b3f9e636/4345120507/1568683669");
         System.out.println();
     }
+
+    @Test
+    public void name9() {
+        int b = 127;
+        b = b++;
+        System.out.println(b);
+    }
+
+    @Test
+    public void name10() {
+        int b = 127;
+        int b1 = b++;
+        System.out.println(b);
+        System.out.println(b1);
+    }
+
+    @Test
+    public void name11() {
+        int b = 127;
+        b = ++b;
+        System.out.println(b);
+    }
+
+    @Test
+    public void name12() {
+        System.out.println(UUID.randomUUID().toString());
+    }
 }
+// i++
+// 第一步将原来的值赋值给一个var1
+// 第二步将i+1赋值给另一个var2
+// 第三步将var1给外部计算 如果
+//

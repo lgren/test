@@ -1,5 +1,6 @@
 package com.lgren.poi.poi3_17.readExcel;
 
+import lombok.SneakyThrows;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Test;
 
@@ -16,8 +17,7 @@ import java.util.Map;
 public class ReadExcelTest {
     public ReadExcelTest() throws IOException {}
 
-    Workbook wb = LReadCommon.getWorkbook(new FileInputStream("E:\\usr\\测试1.xlsx"));
-    Workbook wb2 = LReadCommon.getWorkbook(new FileInputStream("E:\\usr\\测试2.xlsx"));
+    Workbook wb = LReadCommon.getWorkbook(new FileInputStream("/Users/lgren/Library/Containers/com.tencent.xinWeChat/Data/Library/Application Support/com.tencent.xinWeChat/2.0b4.0.9/5ef3fa66b2442390ec9dffee99161d94/Message/MessageTemp/dca27640183ac028139490ab47fd1a79/File/政策法规/常见问答.xls"));
 
 
     private Map<Object, Object> cellKeyMap = new HashMap<>(11);
@@ -98,11 +98,33 @@ public class ReadExcelTest {
         System.out.println("---------------------获取sheet(通过列分组)值↑-----------------------");
     }
     //endregion
-
+    @SneakyThrows
     @Test
     public void LRWorkbookTest() {
-        LRWorkbook lrwb = new LRWorkbook(wb);
+        Map<Object, Map<Object, Object>> map = new LRWorkbook(wb).sheet(0).getValue();
+        map.remove(0);
+        map.remove(2);
+        map.forEach((k,v) -> {
+            v.forEach((k1,v1) -> {
 
+            });
+        });
+        // 适用范围
+        // 信息公开
+        // 创建人
+        // 标题
+        // 资料简码
+        // 所属类别
+        // 发文日期
+        // 更新日期
+        // 发文单位
+        // 是否有效
+        // 状态
+        // 关键字
+        // 文号
+        // 失效日期
+        // 生效日期
+        // 资料内容
         System.out.println();
     }
 }

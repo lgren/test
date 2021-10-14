@@ -506,8 +506,13 @@ public class LgrenUtil {
     }
 
     // 检查特征 待检测数需要满足所有特征才会返回true
-    public static boolean hasFeature(int waitCheck, int... features) {
+    public static boolean allFeature(int waitCheck, int... features) {
         return features.length == 0 || Arrays.stream(features).allMatch(f -> (waitCheck & f) != 0);
+    }
+
+    // 检查特征 待检测数需要满足一个特征就会返回true
+    public static boolean anyFeature(int waitCheck, int... features) {
+        return features.length == 0 || Arrays.stream(features).anyMatch(f -> (waitCheck & f) != 0);
     }
 
 }
