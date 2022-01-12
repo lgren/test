@@ -62,7 +62,7 @@ public class Vk0123 implements Serializable {
      * 更新日期
      */
     @ReadExcelField("更新日期")
-    private String yvk008;
+    private Date yvk008;
 
     /**
      * 发文单位

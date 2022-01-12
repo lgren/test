@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+      .img-wrapper {
+          width: 400px;
+          height: 400px;
+          overflow: hidden;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+      }
+
+      .img-wrapper {
+          display: inline-block;
+          box-sizing: border-box;
+          border: 3px solid #000;
+      }
+
+      .img-wrapper img {
+          height: 400px;
+          -webkit-transition: 0.3s linear;
+          transition: 0.3s linear;
+      }
+
+      .img-wrapper img:hover {
+          transform: scale(1.1);
+      }
+
+      /* ==============
+      * 灰度过滤
+      * ==============*/
+      .grayscale-img {
+          -webkit-filter: grayscale(100%);
+          filter: grayscale(100%);
+      }
+
+      .grayscale-img:hover {
+          -webkit-filter: grayscale(0);
+          filter: grayscale(0);
+      }
+
+      /* ==============
+      * 深褐色过滤
+      * ==============*/
+      .sepia-img {
+          -webkit-filter: sepia(100%);
+          filter: sepia(100%);
+      }
+
+      .sepia-img:hover {
+          -webkit-filter: sepia(0);
+          filter: sepia(0);
+      }
+  </style>
+</head>
+<body>
+<!--放大特效-->
+<div class="img-wrapper">
+  <img src="https://img-blog.csdnimg.cn/2020032122230564.png"/>
+</div>
+<!-- 灰度过滤 -->
+<div class="img-wrapper">
+  <img
+      class="grayscale-img"
+      src="https://img-blog.csdnimg.cn/2020032211021728.png"
+  />
+</div>
+
+<!-- 深褐色过滤 -->
+<div class="img-wrapper">
+  <img
+      class="sepia-img"
+      src="https://img-blog.csdnimg.cn/2020032122230564.png"
+  />
+</div>
+</body>
+</html>
+<!--
+其实实现这个特效是非常简单的。首先我们需要一个div包裹这img标签，这个包裹层是用来遮挡住图片，当图片放大时不会出现图片超出我们规定的宽高以外。
+首先我们来讲讲div包裹的属性，我们需要给它一个固定的width宽和height高。然后我们必须给予这个元素overflow: hidden属性。让图片放大的时候不会超出这个div元素的宽高。有了这个包裹层，我们就可以编写img的各种效果了。
+我的例子里面用了transform: scale(1,1)作为悬停时的图片特效，这个transform是用于改变任何元素的属性的，然后scale是用于放大（整数就会放大）或者缩小（负数就会缩小）元素的。
+
+如果你们想让图片更加炫酷可以加上图片过滤属性filter，让图片变灰或者变深褐色，然后悬停时候出现更加炫酷的颜色变幻。灰化的属性是filter: grayscale(100%);，然后深褐色化的属性是filter: sepia(100%)。其实图片还有很多过滤属性的，大家有兴趣也可以去尝试一下哦！
+
+知识总结
+
+transform --- 用于改变元素
+scale --- 对元素进行放大和缩小
+filter --- 图片过滤器
+grayscale --- 灰度过滤
+sepia --- 深褐色过滤
+-->

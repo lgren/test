@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+  <meta charset="UTF-8">
+  <!--img403出现403的状态其实是因为http请求的header中有一个referrer用来标识当前请求来自那个网站，这个值是可以省略但是不能修改的。这样服务器可以通过这个值判断是不是本站访问，如果不是就做相应处理。
+解决: a标签添加referrer="no-referrer" 或添加如下-->
+  <meta name="referrer" content="no-referrer" />
+  <title>我的主页</title>
+</head>
+<body>
+<div id="__game">
+</div>
+</body>
+</html>

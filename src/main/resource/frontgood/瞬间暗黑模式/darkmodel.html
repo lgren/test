@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+      html {
+          background: #fff;
+      }
+
+      body {
+          background: #fff;
+          filter: invert(1) hue-rotate(270deg);
+      }
+  </style>
+</head>
+<body>
+
+</body>
+</html>
+<!--
+其实有一个很快的方式，我们可以使用invert和hue-rotate两个CSS3过滤器来实现。
+filter: invert() — 是从0到1的刻度，1是从白变黑。
+filter: hue-rotate() — 用于改变你元素的颜色，同时或多或少保持原本相同的色系。这个属性的值可以从0deg到360deg。
+在我们页面的body标签上添加这两个属性，我们就可以快速尝试把我们的网站变成"黑暗模式"。这里需要注意的是，如果body和html上没有设置background背景颜色，这个过滤就会不起效了哦。
+
+这里我们会发现图片的颜色会受影响，并不是很美观，使用css过滤器是无法完美切换黑暗模式的。不过使用JavaScript辅助就可以完美的切换黑暗模式。
+
+最近出了一个JavaScript辅助插件叫Darkmode.js。
+-->

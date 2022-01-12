@@ -3,7 +3,6 @@ package com.lgren.poi.poi3_17.new_read;
 import cn.hutool.core.date.format.FastDateFormat;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
-import com.google.common.base.Objects;
 import com.lgren.util.反射.LReflectionUtil;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.ArrayUtils;
@@ -16,10 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
@@ -35,6 +31,9 @@ public class LRowCommon {
             .put("yyyy-MM-dd", FastDateFormat.getInstance("yyyy-MM-dd"))
             .put("HH:mm:ss", FastDateFormat.getInstance("HH:mm:ss"))
             .build();
+    public static final String USE_UUID = "uuid";
+
+
     @SneakyThrows
     public static Date yMdHmsParse(String formatStr, String str) {
         return FORMAT_MAP.computeIfAbsent(formatStr, FastDateFormat::getInstance).parse(str);
@@ -63,55 +62,64 @@ public class LRowCommon {
                 ReadExcelField readAnno = field.getAnnotation(ReadExcelField.class);
                 if (readAnno != null) {
                     String excelFieldName = StringUtils.isNotBlank(readAnno.value()) ? readAnno.value() : field.getName();
-                    Object data = rowV.get(excelFieldName);
-                    if (data != null) {
+                    if (StrUtil.isNotBlank(excelFieldName)) {
                         Method method = ReflectionUtils.findMethod(rClass, "set" + StringUtils.capitalize(field.getName()), field.getType());
-                        if (method != null) {
-                            if (data instanceof String) {
+                        if (Objects.equals(excelFieldName, USE_UUID)) {
+                            method.invoke(result, UUID.randomUUID().toString());
+                        } else {
+                            Object data = rowV.get(excelFieldName);
+                            if (data != null) {
+                                if (method != null) {
+                                    if (data instanceof String) {
 
-                                // 第一步裁剪
-                                int[] substring = readAnno.substring1();
-                                if (substring.length > 1) {
-                                    data = ((String) data).substring(substring[0], Math.min(((String) data).length(), substring[1]));
-                                }
+                                        // 第一步裁剪
+                                        int[] substring = readAnno.substring1();
+                                        if (substring.length > 1) {
+                                            data = ((String) data).substring(substring[0], Math.min(((String) data).length(), substring[1]));
+                                        }
 
-                                // 第二步分割
-                                String split = readAnno.split2();
-                                if (StrUtil.isNotBlank(split)) {
-                                    data = ((String) data).split(split);
-                                }
+                                        // 第二步分割
+                                        String split = readAnno.split2();
+                                        if (StrUtil.isNotBlank(split)) {
+                                            data = ((String) data).split(split);
+                                        }
 
-                                // 第三步格式化
-                                String strFormat = readAnno.strFormat3();
-                                if (StrUtil.isNotBlank(strFormat)) {
-                                    data = MessageFormat.format(strFormat, data);
-                                }
+                                        // 第三步格式化
+                                        String strFormat = readAnno.strFormat3();
+                                        if (StrUtil.isNotBlank(strFormat)) {
+                                            data = MessageFormat.format(strFormat, data);
+                                        }
 
-                                // 第四步映射
-                                String mapping = readAnno.mapping4();
-                                if (StrUtil.isNotBlank(mapping)) {
-                                    String[] mappingArr = mapping.split(",");
-                                    for (String m : mappingArr) {
-                                        String[] mArr = m.trim().split("-");
-                                        if (Objects.equal(mArr[1], data)) {
-                                            data = mArr[0];
+                                        // 第四步映射
+                                        String mapping = readAnno.mapping4();
+                                        if (StrUtil.isNotBlank(mapping)) {
+                                            String[] mappingArr = mapping.split(",");
+                                            for (String m : mappingArr) {
+                                                String[] mArr = m.trim().split("-");
+                                                if (Objects.equals(mArr[1], data)) {
+                                                    data = mArr[0];
+                                                }
+                                            }
+
+                                        }
+
+                                        // 最后一步判断是否是日期, 是的话日期格式化
+                                        String dateFormat = readAnno.dateFormat99();
+                                        if (field.getType() == Date.class) {// TODO
+                                            data = Optional.ofNullable(((String) data))
+                                                    .filter(StrUtil::isNotBlank)
+                                                    .map(s -> yMdHmsParse(dateFormat, s))
+                                                    .orElse(null);
                                         }
                                     }
-
-                                }
-
-                                // 最后一步判断是否是日期, 是的话日期格式化
-                                String dateFormat = readAnno.dateFormat99();
-                                if (field.getType() == Date.class) {// TODO
-                                    data = Optional.ofNullable(((String) data))
-                                            .filter(StrUtil::isNotBlank)
-                                            .map(s -> yMdHmsParse(dateFormat, s))
-                                            .orElse(null);
+                                    method.invoke(result, data);
                                 }
                             }
-                            method.invoke(result, data);
                         }
+
+
                     }
+
                 }
             }
         }

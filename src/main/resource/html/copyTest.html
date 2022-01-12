@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<input id="aa" value="你好呀">
+<button id="btn">dfhdddddd</button>
+<script>
+  var btn = document.getElementById('btn')
+  function selectText(selectorsOrNode) {
+    const node = typeof selectorsOrNode === 'string' ? document.querySelector(selectorsOrNode) : selectorsOrNode;
+    if (document.body.createTextRange) {
+      //createTextRange是用在IE中的
+      const range = document.body.createTextRange();
+      range.moveToElementText(node);
+      range.select();
+    } else if (window.getSelection) {
+      let str;
+      if (node.select) {
+        node.select()
+        str = node.value
+      } else {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        str = node.innerText
+      }
+      console.log(`复制${document.execCommand("Copy") ? '成功' : '失败'}`, str)
+    } else {
+      alert("不存在复制功能");
+    }
+  }
+
+  selectText(document.querySelector('#aa'));
+
+  function toCopy(nodeOrContent) {
+    let node = nodeOrContent;
+    if (typeof nodeOrContent === 'string') {
+      const id = 'forCopyInput'
+      node = document.getElementById(id);
+      if (!node) {
+        const _div = document.createElement('div')
+        _div.innerHTML = `<div id="${id}" style="position: absolute; left: 0; top: 0; width: 0.1px; height: 0.1px; overflow: hidden;"></div>`
+        node = _div.firstElementChild
+        document.body.after(node)
+      }
+      node.innerHTML = nodeOrContent
+    }
+    if (document.body.createTextRange) {
+      //createTextRange是用在IE中的
+      const range = document.body.createTextRange();
+      range.moveToElementText(node);
+      range.select();
+    } else if (window.getSelection) {
+      let str;
+      if (node.select) {
+        node.select()
+        str = node.value
+      } else {
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        str = node.innerText
+      }
+      console.log(`复制${document.execCommand("Copy") ? '成功' : '失败'}`, str)
+    } else {
+      alert("不存在复制功能");
+    }
+  }
+
+  function handlePage(curr, lastPage, firstPage = 0, currLeftNum = 4, currRightNum = 5) {
+    const showPageList = []
+    const first = {page: firstPage, curr: curr === firstPage }
+    const last = {page: lastPage, curr: curr === lastPage }
+    // 总展示页数(currLeftNum + currRightNum + 1)小等于总数(lastPage) => 总展示页数(currLeftNum + currRightNum)小于总数(lastPage)
+    if (currLeftNum + currRightNum >= lastPage) {
+      for (let i = firstPage; i <= lastPage; i++) {
+        showPageList.push({page: i, curr: curr === i})
+      }
+    } else {
+      let pageMin = curr - currLeftNum;// pageMin可能小于 firstPage
+      const overFirst = Math.max(firstPage - pageMin, 0);// 比首页小多少
+      let pageMax = curr + currRightNum + overFirst;// pageMin可能大于 lastPage
+      const overLst = Math.max(pageMax - lastPage, 0);// 比首页小多少
+      pageMin = pageMin + overFirst - overLst
+      pageMax = pageMax - overLst
+      for (let i = pageMin; i <= pageMax; i++) {
+        showPageList.push({page: i, curr: curr === i})
+      }
+    }
+    return {showPageList, first, last,};
+  }
+
+  //这样在刚打开页面的时候就可以看到已经选中的文字了
+</script>
+</body>
+</html>

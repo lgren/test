@@ -1,9 +1,11 @@
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ReflectUtil;
 import com.google.common.collect.Lists;
 import com.lgren.util.LgrenUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 
@@ -225,6 +228,19 @@ public class CommonTest {
     @Test
     public void name12() {
         System.out.println(UUID.randomUUID().toString());
+    }
+
+    @Test
+    public void name13() {
+        // Method addMethod = ReflectUtil.getMethodByName(CommonTest.class, "add");
+        // // ReflectUtil.getMethodByName(CommonTest.class, "add").getReturnType() == void.class
+        // System.out.println(addMethod);
+        Function<Integer, Integer> func = i -> i;
+        System.out.println(func);
+    }
+
+    public Integer add(int a, Integer b) {
+        return a + b;
     }
 }
 // i++

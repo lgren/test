@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+      * {
+          margin: 0;
+      }
+
+      #document {
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+          background: #202020;
+          font-family: microsoft yahei,wenquanyi micro hei,sans-serif !important;
+      }
+
+      nav, footer {
+          background: #494949;
+          display: flex;
+          justify-content: center;
+      }
+
+      main {
+          color: #bdbdbd;
+          flex: auto;
+      }
+
+      footer {
+          flex-shrink: 0;
+      }
+
+
+      h1, p {
+          padding: 15px;
+      }
+
+      nav,footer > h1 {
+          color: #82FCFD;
+          text-shadow: 1px 1px 4px #00000080;
+      }
+  </style>
+</head>
+<body>
+<div id="document">
+  <nav>
+    <h1>头部内容</h1>
+  </nav>
+  <main>
+    <p>可以添加更多内容看看底部的变化哦！</p>
+    <p>可以添加更多内容看看底部的变化哦！</p>
+    <p>可以添加更多内容看看底部的变化哦！</p>
+    <p>可以添加更多内容看看底部的变化哦！</p>
+    <p>可以添加更多内容看看底部的变化哦！</p>
+    <p>可以添加更多内容看看底部的变化哦！</p>
+    <p>可以添加更多内容看看底部的变化哦！</p>
+    <p>可以添加更多内容看看底部的变化哦！</p>
+    <p>可以添加更多内容看看底部的变化哦！</p>
+    <p>可以添加更多内容看看底部的变化哦！</p>
+  </main>
+  <footer>
+    <h1>底部内容</h1>
+  </footer>
+</div>
+</body>
+</html>
+<!--浏览器窗口高度是会根据不同用户打开浏览器的情况，屏幕大小的差异和浏览器的缩放比例而变。我们需要借助JavaScript来实时获取浏览器高度进行运算才能实现。虽然说标题是说“固定”底部，但是我们想要的效果不是position: fixed。使用固定定位，在内容高于窗口高度时，就会挡住我们的内容。
+随着CSS3的来临，最完美的实现方式是使用Flexbox。实现的关键就是使用不太被关注的flex-grow属性，可以在我们的内容标签元素（比如div）中使用。在我们下面的例子里使用了main标签。
+
+作者：三钻
+链接：https://juejin.cn/post/6844904119992320014
+来源：稀土掘金
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。-->

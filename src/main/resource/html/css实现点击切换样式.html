@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style>
+      #toggle {
+          display: none;
+      }
+
+      #container {
+          border: 1px solid #000;
+          display: flex;
+          flex-wrap: wrap;
+          max-height: 50px;
+          overflow: hidden;
+          transition: max-height .5s;
+          width: 400px;
+      }
+
+      #toggle:checked + #container {
+          max-height: 300px /* 实际高度大概是 150px 到 200px */
+      }
+
+      .item {
+          background-color: pink;
+          height: 50px;
+          margin-right: 10px;
+          margin-bottom: 10px;
+          width: 50px;
+      }
+  </style>
+</head>
+<body>
+  <label for="toggle">切换</label>
+  <input id="toggle" type="checkbox">
+  <div id="container">
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+    <div class="item">box</div>
+  </div>
+</body>
+</html>

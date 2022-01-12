@@ -162,7 +162,8 @@ $(function () {
         const _div = $(`<div style=""></div>`)
         $(`body`).prepend(_div)
         _div.append(`<button class="logic">登陆</button>`)
-        _div.append(`<button class="configDeploy">部署</button>`)
+        _div.append(`<button class="configDeploy">部署-界面上传包</button>`)
+        _div.append(`<button class="configDeployLater">部署-界面上传包后继续</button>`)
         _div.append(`<button class="configDatasource">配置数据源</button>`)
       }
 
@@ -182,6 +183,9 @@ $(function () {
           // 部署
           .on(`click`, `.configDeploy`, e => {
             t.configDeploy.begin()
+          })
+          .on(`click`, `.configDeployLater`, e => {
+            t.configDeployLater.begin()
           })
           // 配置数据源
           .on(`click`, `.configDatasource`, e => {
@@ -263,7 +267,7 @@ $(function () {
       )
       //endregion
 
-      //region 部署
+      //region 部署-界面上传包
       base.recordStep(t, 'configDeploy', 0,
         base.lockAndEdit,
         p => window.open($('a#linkAppDeploymentsControlPage').attr('href'), '_self'),
@@ -274,9 +278,20 @@ $(function () {
         },
         p => nextAction("/com/bea/console/actions/app/install/selectUploadApp"),
         p => {
-          console.log(1232132)
           setTimeout(() => {$('#AppApplicationInstallPortletuploadAppPath').click();}, 1000)
         },
+      )
+      base.recordStep(t, 'configDeployLater', 0,
+        p => base.nextAction("/com/bea/console/actions/app/install/uploadApp"),
+        p => base.nextAction("/com/bea/console/actions/app/install/appSelected"),
+        p => base.nextAction("/com/bea/console/actions/app/install/targetStyleSelected"),
+        p => {
+          base.setCheckbox('[name="AppApplicationInstallPortlettargetBean.chosenStandaloneServers"]', '8017')
+          base.nextAction("/com/bea/console/actions/app/install/applicationTargetsSelected")
+        },
+        p => base.nextAction("/com/bea/console/actions/app/install/saveIdentity"),
+        p => base.nextAction("/com/bea/console/actions/app/install/finish"),
+        base.lockAndEdit,
       )
       //endregion
 
