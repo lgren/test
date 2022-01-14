@@ -10,8 +10,8 @@
 // @connect      image.fenxianglu.cn
 // @connect      pic.netbian.com
 
-// @require      https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js
-// @require      https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.all.min.js
+// @require      file:///Users/lgren/Project/Java/0My/test/src/main/resource/youhou/js/vue.min.js
+// @require      file:///Users/lgren/Project/Java/0My/test/src/main/resource/youhou/js/sweetalert2.all.min.js
 // @require      file:///Users/lgren/Project/Java/0My/test/src/main/resource/youhou/demoPlus/util.js
 
 // @resource     myPage file:///Users/lgren/Project/Java/0My/test/src/main/resource/youhou/demoPlus/component/myPage.vue
@@ -33,18 +33,16 @@
 // ==/UserScript==
 
 /*
+// @require      https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js
+// @require      https://cdn.jsdelivr.net/npm/sweetalert2@10.16.6/dist/sweetalert2.all.min.js
 说明:
 1. 跨域网站: @connect <url>
-  例如
-    @connect      m.jiaoyimao.com
+  例如 @connect      m.jiaoyimao.com
 2. js资源: @require <url>
-  例如 联网
-    @require      https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js
-  例如 本机
-    @require      file:///Users/lgren/Project/Java/0My/test/src/main/resource/youhou/demoPlus/util.js
+  例如 联网 @require      https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js
+  例如 本机 @require      file:///Users/lgren/Project/Java/0My/test/src/main/resource/youhou/demoPlus/util.js
 3. 其他文件资源 @resource <name> <url>
-  例如 vue文件
-    @resource     myPage file:///Users/lgren/Project/Java/0My/test/src/main/resource/youhou/demoPlus/component/myPage.vue
+  例如 vue文件 @resource     myPage file:///Users/lgren/Project/Java/0My/test/src/main/resource/youhou/demoPlus/component/myPage.vue
 */
 const isDebug_mode = false;
 Vue.config.debug = isDebug_mode;
