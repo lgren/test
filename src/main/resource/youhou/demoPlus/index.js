@@ -55,6 +55,7 @@ if (thisUrl.indexOf('blog.csdn.net') > -1) {
   console.log(`油猴`, `csdn code不可选中`)
   setInterval(() => {
     document.querySelectorAll('code').forEach(n => n.style.userSelect='text')
+    document.querySelectorAll('pre').forEach(n => n.style.userSelect='text')
   }, 5000)
 }
 

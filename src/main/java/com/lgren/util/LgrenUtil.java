@@ -515,4 +515,11 @@ public class LgrenUtil {
         return features.length == 0 || Arrays.stream(features).anyMatch(f -> (waitCheck & f) != 0);
     }
 
+    public static void timer(Consumer<Double> func, String... desc) {
+        double begin = System.currentTimeMillis();// (System.currentTimeMillis() - begin) / 1000
+        System.out.printf("开始[%s] => ", String.join(" ", desc));
+        func.accept(begin);
+        System.out.printf("用时: %s秒\n", (System.currentTimeMillis() - begin) / 1000);
+    }
+
 }
